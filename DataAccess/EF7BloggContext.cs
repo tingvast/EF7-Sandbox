@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Entity.Metadata;
-using ConsoleApplication3;
+using Core;
 
 namespace DataAccess
 {
@@ -19,7 +19,8 @@ namespace DataAccess
             base.OnConfiguring(options);
 
             //options.UseSqlServer("Server=(localdb)\\EF7;Database=EF7;User Id=Tobias;Password=Tobias;MultipleActiveResultSets=True").MaxBatchSize(20);
-            options.UseSqlServer("Server=(localdb)\\ProjectsV12;Database=EF7;Trusted_Connection=true;MultipleActiveResultSets=True").MaxBatchSize(20);
+            options.UseSqlServer("Server=(localdb)\\ProjectsV12;Database=EF7;Trusted_Connection=true;MultipleActiveResultSets=True").
+                MaxBatchSize(20);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

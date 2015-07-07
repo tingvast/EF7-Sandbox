@@ -1,0 +1,25 @@
+Create a CRUD based interface to the database, in order to restrict/guide the use of database
+
+
+
+Create
+
+To persist whole objects, including all available properies
+What about navigation properties, should it be possible to persis whole object graphs. Maybe restrict the number of levels in the graph.
+
+What about persisting an abject graph with already persisted objects, for example persisting a meeting with a preregistration where the preregistatuib is already persisted
+No need to persist, should this be detected by repository the responsibility of the repository is to know if an objects is already persisted, in that case HOW should repository know
+- using DTO, 
+- key not null
+- query the database?
+
+Retrieve and selected navigation properties
+
+
+Update and navigation properties
+
+
+General 
+How to we integrate with already existing database design and tables
+How to assert, using microORM dapper maybe, or SqlHelper
+

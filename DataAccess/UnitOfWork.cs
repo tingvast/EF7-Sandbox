@@ -1,4 +1,4 @@
-﻿using ConsoleApplication3;
+﻿using Core;
 using DataAccess.Interaces;
 using EF7;
 using Microsoft.Data.Entity;
@@ -16,6 +16,7 @@ namespace DataAccess
         public UnitOfWork()
         {
             this.context = new EF7BloggContext();
+            this.context.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
         public IRepository Create()
@@ -26,6 +27,7 @@ namespace DataAccess
         public void Commit()
         {
             context.SaveChanges();
+            context.Dispose();
         }
 
         public void Dispose()

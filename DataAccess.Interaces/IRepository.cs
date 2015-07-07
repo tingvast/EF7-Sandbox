@@ -1,4 +1,4 @@
-﻿using ConsoleApplication3;
+﻿using Core;
 using EF7;
 using System;
 using System.Collections.Generic;

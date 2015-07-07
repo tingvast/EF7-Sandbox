@@ -1,90 +1,22 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ConsoleApplication3;
+﻿using Core;
 using DataAccess.Interaces;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 
 namespace EF7Tests
 {
     [TestClass]
     public class InitialTests
     {
-
         public void SetUp()
         {
-            
         }
 
-        [TestMethod]
-        public void CanCreate0()
-        {
-            PreRegistration prereg;
-            using (var uow = UoWFactory.Create())
-            {
-                var rep = uow.Create();
-                prereg = new PreRegistration();
-                prereg.Text = "First pre registration";
-                prereg.Text1 = "Additional text";
-
-                var k = rep.Create<PreRegistration>(prereg);
 
 
-
-                uow.Commit();
-
-
-                var retrieved = rep.Retrieve<PreRegistration, dynamic>(k.Id, p => new { p.Text });
-            }
+ 
 
 
-        }
-
-        [TestMethod]
-        public void CanCreate1()
-        {
-            PreRegistration prereg;
-            using (var uow = UoWFactory.Create())
-            {
-                var rep = uow.Create();
-                prereg = new PreRegistration();
-                prereg.Text = "First pre registration";
-                prereg.Text1 = "Additional text";
-
-                var k = rep.Create<PreRegistration>(prereg);
-
-                uow.Commit();
-
-
-                var retrieved = rep.Retrieve<PreRegistration, dynamic>(k.Id, p => new { p.Text });
-
-                retrieved.Text1 = "lkaljla";
-
-                uow.Commit();
-            }
-
-
-        }
-
-        [TestMethod]
-        public void CanCreate2()
-        {
-            PreRegistration prereg;
-            using (var uow = UoWFactory.Create())
-            {
-                var rep = uow.Create();
-                var meeting = new Meeting
-                {
-                    Location = "My Location",
-                };
-
-                var k = rep.Create<Meeting>(meeting);
-
-                uow.Commit();              
-            }
-
-
-        }
 
         [TestMethod]
         public void CanCreateGraph()
@@ -97,7 +29,6 @@ namespace EF7Tests
                 {
                     Location = "My Location",
                 };
-                
 
                 prereg = new PreRegistration();
                 prereg.Text = "First pre registration";
@@ -110,15 +41,13 @@ namespace EF7Tests
 
                 uow.Commit();
 
-
+                var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
+                    createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
                 //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //    createdMeeting.ID, p => new { p.Location, p.PreRegistrations });
+                //    createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
 
-                var r = rep.Retrieve(1, createdMeeting.Id);
-                
+                //var r = rep.Retrieve(1, createdMeeting.Id);
             }
-
-
         }
 
         [TestMethod]
@@ -132,7 +61,6 @@ namespace EF7Tests
                 {
                     Location = "My Location",
                 };
-
 
                 prereg = new PreRegistration();
                 prereg.Text = "First pre registration";
@@ -148,11 +76,7 @@ namespace EF7Tests
                 var r = rep.Retrieve(1, createdMeeting.Id);
                 //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
                 //    createdMeeting.Id, p => new { p.PreRegistrations });
-                
-
             }
-
-
         }
 
         [TestMethod]
@@ -167,8 +91,6 @@ namespace EF7Tests
                 prereg.Text1 = "Additional text";
 
                 var k = rep.Create<PreRegistration>(prereg);
-
-
 
                 uow.Commit();
             }
@@ -186,7 +108,6 @@ namespace EF7Tests
 
             using (var uow = UoWFactory.Create())
             {
-
                 var repository = uow.Create();
 
                 var updatedMeeting = repository.UpdateGraph(meeting);
@@ -209,11 +130,11 @@ namespace EF7Tests
 
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedMeeting = repository.CreateGraph(meeting);
                 uow.Commit();
             }
-
         }
+
         [TestMethod]
         public void CanCreate5()
         {
@@ -240,7 +161,6 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-
             meeting.PreRegistrations.Add(preReg);
 
             using (var uow = UoWFactory.Create())
@@ -251,7 +171,6 @@ namespace EF7Tests
 
                 uow.Commit();
             }
-
         }
 
         [TestMethod]
@@ -270,7 +189,6 @@ namespace EF7Tests
 
             var preReg = new PreRegistration();
             preReg.Text = "lkajlkaj";
-            
 
             using (var uow = UoWFactory.Create())
             {
@@ -280,7 +198,6 @@ namespace EF7Tests
 
                 uow.Commit();
             }
-
 
             var newPreReg = new PreRegistration();
             newPreReg.Text = "kjlhkjhkjhkjhk";
@@ -294,9 +211,7 @@ namespace EF7Tests
 
                 uow.Commit();
             }
-
         }
-
 
         [TestMethod]
         public void CanCreate7()
@@ -324,7 +239,6 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-
             var newPreReg = new PreRegistration();
             newPreReg.Text = "kjlhkjhkjhkjhk";
             meeting.PreRegistrations.AddRange(new List<PreRegistration>() { newPreReg, preReg });
@@ -337,11 +251,9 @@ namespace EF7Tests
 
                 uow.Commit();
             }
-
         }
 
-
-        [TestMethod]       
+        [TestMethod]
         public void CanCreate8()
         {
             var meeting = new Meeting();
@@ -367,7 +279,6 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-
             var newPreReg = new PreRegistration();
             newPreReg.Text = "kjlhkjhkjhkjhk";
             meeting.PreRegistrations.AddRange(new List<PreRegistration>() { newPreReg, preReg });
@@ -389,13 +300,13 @@ namespace EF7Tests
 
                 uow.Commit();
             }
-
         }
 
         [TestMethod]
         public void CanUpdateSelectedProperties()
         {
             #region Arrange
+
             var meeting = new Meeting();
             meeting.Location = "kljljk";
             using (var uow = UoWFactory.Create())
@@ -407,9 +318,10 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            #endregion
+            #endregion Arrange
 
             #region Act
+
             meeting.Location = "new Location";
 
             using (var uow1 = UoWFactory.Create())
@@ -421,7 +333,7 @@ namespace EF7Tests
                 uow1.Commit();
             }
 
-            #endregion
+            #endregion Act
 
             #region Assert
 
@@ -429,13 +341,7 @@ namespace EF7Tests
             var uow2 = UoWFactory.Create();
             var r = uow2.Create();
 
-            
-
-
-
-            #endregion
-
-
+            #endregion Assert
         }
     }
 }

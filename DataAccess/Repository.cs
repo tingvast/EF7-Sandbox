@@ -1,5 +1,5 @@
 ﻿
-using ConsoleApplication3;
+using Core;
 using EF7;
 using System;
 using System.Collections.Generic;
@@ -120,34 +120,36 @@ namespace DataAccess
 
         public T Update<T>(T entity) where T : class, IEntity
         {
+            context.ChangeTracker.AutoDetectChangesEnabled = true;
             context.Set<T>().Update(entity);
 
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
             return entity;
         }
 
         public T Update<T, TResult>(T entity, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity
         {
-
+            context.ChangeTracker.AutoDetectChangesEnabled = true;
             context.Entry(entity).State = EntityState.Modified;
             string prop = ResolvePropertyName(selectedProperties);
 
-            var properties = context.Entry(entity).Metadata.GetProperties().ToList();
-            var toRenove = properties.Find(p => p.Name == prop);
-            properties.Remove(toRenove);
+            var allProperties = context.Entry(entity).Metadata.GetProperties().ToList();
+            var toRenove = allProperties.Find(p => p.Name == prop);
+            allProperties.Remove(toRenove);
 
 
             var entity1 = context.Entry(entity);
-            properties.ForEach(p =>
+            allProperties.ForEach(p =>
             {
                 entity1.Property(p.Name).IsModified = false;
                 int i = 0;
             });
 
-
+                 
             context.Entry(entity).Property(prop).IsModified = true;
 
-            
 
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
             return entity;
         }
 
