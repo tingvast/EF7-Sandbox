@@ -137,6 +137,18 @@
     <Compile Include="Migrations\20150630124633_myfirst.designer.cs">
       <DependentUpon>20150630124633_myfirst.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20150711093246_vv.cs" />
+    <Compile Include="Migrations\20150711093246_vv.designer.cs">
+      <DependentUpon>20150711093246_vv.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20150711093404_vv1.cs" />
+    <Compile Include="Migrations\20150711093404_vv1.designer.cs">
+      <DependentUpon>20150711093404_vv1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20150711093432_vv3.cs" />
+    <Compile Include="Migrations\20150711093432_vv3.designer.cs">
+      <DependentUpon>20150711093432_vv3.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\EF7BloggContextModelSnapshot.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

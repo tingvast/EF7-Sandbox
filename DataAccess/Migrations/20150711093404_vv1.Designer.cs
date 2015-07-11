@@ -8,9 +8,19 @@ using DataAccess;
 namespace DataAccess.Migrations
 {
     [ContextType(typeof(EF7BloggContext))]
-    partial class EF7BloggContextModelSnapshot : ModelSnapshot
+    partial class vv1
     {
-        public override IModel Model
+        public override string Id
+        {
+            get { return "20150711093404_vv1"; }
+        }
+        
+        public override string ProductVersion
+        {
+            get { return "7.0.0-beta4-12943"; }
+        }
+        
+        public override IModel Target
         {
             get
             {
