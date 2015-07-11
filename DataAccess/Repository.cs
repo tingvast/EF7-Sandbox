@@ -86,7 +86,13 @@ namespace DataAccess
 
         public Meeting Retrieve(int j, int id)
         {
-            var entiry = context.Set<Meeting>().Include(m => m.PreRegistrations).Where(m => m.Id == id).Select(m => m.Location1).Single();
+            var entiry = context.Set<Meeting>().
+                //Include(m => m.PreRegistrations).
+                Where(m => m.Id == id).
+                Select(m => new { Meeting = m.Location, Pre = m.PreRegistrations.Where(p => p.MeetingId == id) }).
+                Single();
+
+            var retEntity = Mapper.DynamicMap<Meeting>(entiry);
             //var entiry = context.Set<Meeting>().
             //    //Include(m => m.PreRegistrations).
             //    Where(m => m.ID == id).
@@ -106,7 +112,7 @@ namespace DataAccess
             //var preregistrations = context.Preregistrations.Where(p => p.MeetingID == id);
 
             //var retEntity = Mapper.Map<Meeting>(entiry);
-            return null; ;
+            return retEntity;
 
 
         }

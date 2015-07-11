@@ -27,7 +27,7 @@ namespace DataAccess
         public void Commit()
         {
             context.SaveChanges();
-            context.Dispose();
+            //context.Dispose();
         }
 
         public void Dispose()

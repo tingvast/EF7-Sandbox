@@ -1,16 +1,16 @@
 using System.Collections.Generic;
-using Microsoft.Data.Entity.Relational.Migrations;
-using Microsoft.Data.Entity.Relational.Migrations.Builders;
-using Microsoft.Data.Entity.Relational.Migrations.Operations;
+using Microsoft.Data.Entity.Migrations;
+using Microsoft.Data.Entity.Migrations.Builders;
+using Microsoft.Data.Entity.Migrations.Operations;
 
-namespace DataAccess.Migrations
+namespace DataAccessMigrations
 {
     public partial class vv3 : Migration
     {
         public override void Up(MigrationBuilder migration)
         {
         }
-        
+
         public override void Down(MigrationBuilder migration)
         {
         }

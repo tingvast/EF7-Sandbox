@@ -1,6 +1,7 @@
 ﻿using Core;
 using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Ploeh.AutoFixture;
 using System.Collections.Generic;
 
 namespace EF7Tests
@@ -8,18 +9,20 @@ namespace EF7Tests
     [TestClass]
     public class InitialTests
     {
+        private Fixture _fixture;
+
+
+        public InitialTests()
+        {
+            _fixture = new Fixture();
+        }
         public void SetUp()
         {
+            
         }
 
-
-
- 
-
-
-
         [TestMethod]
-        public void CanCreateGraph()
+        public void CanCreateAnotherBusinessObject11()
         {
             PreRegistration prereg;
             using (var uow = UoWFactory.Create())
@@ -27,26 +30,61 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var meeting = new Meeting
                 {
-                    Location = "My Location",
+                    Location = _fixture.Create<string>()
+                };
+
+                var k = rep.Create<Meeting>(meeting);
+
+
+
+                uow.Commit();
+
+
+                var kk = rep.Retrieve<Meeting>(k.Id);
+            }
+        }
+
+        [TestMethod]
+        public void CanCreateGraph()
+        {
+            PreRegistration prereg;
+            Meeting createdMeeting;
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+                var meeting = new Meeting
+                {
+                    Location = _fixture.Create<string>()
                 };
 
                 prereg = new PreRegistration();
-                prereg.Text = "First pre registration";
-                prereg.Text1 = "Additional text";
+                prereg.Text = _fixture.Create<string>();
+                prereg.Text1 = _fixture.Create<string>();
                 prereg.Meeting = meeting;
 
                 meeting.PreRegistrations.Add(prereg);
 
-                var createdMeeting = rep.CreateGraph(meeting);
+                createdMeeting = rep.CreateGraph(meeting);
 
                 uow.Commit();
 
-                var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                    createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
+                
+
+
+
                 //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
                 //    createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
 
                 //var r = rep.Retrieve(1, createdMeeting.Id);
+            }
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
+                //    createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
+                var retrievedMeetingWithPrereg = rep.Retrieve(0, createdMeeting.Id);
             }
         }
 

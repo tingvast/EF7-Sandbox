@@ -7,9 +7,19 @@ using DataAccess;
 namespace DataAccessMigrations
 {
     [ContextType(typeof(EF7BloggContext))]
-    partial class EF7BloggContextModelSnapshot : ModelSnapshot
+    partial class vv3
     {
-        public override void BuildModel(ModelBuilder builder)
+        public override string Id
+        {
+            get { return "20150711101059_vv3"; }
+        }
+
+        public override string ProductVersion
+        {
+            get { return "7.0.0-beta6-13735"; }
+        }
+
+        public override void BuildTargetModel(ModelBuilder builder)
         {
             builder
                 .Annotation("ProductVersion", "7.0.0-vsbuild")

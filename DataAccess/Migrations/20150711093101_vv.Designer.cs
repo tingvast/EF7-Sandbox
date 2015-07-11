@@ -8,11 +8,11 @@ using DataAccess;
 namespace DataAccess.Migrations
 {
     [ContextType(typeof(EF7BloggContext))]
-    partial class vv3
+    partial class vv
     {
         public override string Id
         {
-            get { return "20150711093432_vv3"; }
+            get { return "20150711093101_vv"; }
         }
         
         public override string ProductVersion
