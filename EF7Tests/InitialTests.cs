@@ -64,6 +64,13 @@ namespace EF7Tests
 
                 meeting.PreRegistrations.Add(prereg);
 
+                prereg = new PreRegistration();
+                prereg.Text = _fixture.Create<string>();
+                prereg.Text1 = _fixture.Create<string>();
+                prereg.Meeting = meeting;
+
+                meeting.PreRegistrations.Add(prereg);
+
                 createdMeeting = rep.CreateGraph(meeting);
 
                 uow.Commit();

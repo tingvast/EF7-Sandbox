@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Entity.Metadata;
 using Core;
+using Microsoft.Data.Entity.Infrastructure;
+using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.Logging;
 
 namespace DataAccess
 {
@@ -13,6 +16,28 @@ namespace DataAccess
     {
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<PreRegistration> Preregistrations {get; set;}
+
+        public EF7BloggContext()
+        {
+            
+        }
+
+        public EF7BloggContext(IServiceProvider provider)
+            : base(provider)
+        {
+            //var serviceProvider = new ServiceCollection()
+            //    .AddEntityFramework()
+            //    .AddSqlServer()
+            //    .GetService()
+            //    .BuildServiceProvider();
+
+
+
+            //var f = serviceProvider.GetService<ILoggerFactory>();
+
+
+
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
@@ -38,6 +63,9 @@ namespace DataAccess
                 Collection(b => b.PreRegistrations).
                 InverseReference(b => b.Meeting).
                 ForeignKey(k => k.MeetingId);
+
+
+            
            
         }
         //protected override void OnModelCreating(DbModelBuilder modelBuilder)

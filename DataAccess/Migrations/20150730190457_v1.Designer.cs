@@ -7,22 +7,22 @@ using DataAccess;
 namespace DataAccessMigrations
 {
     [ContextType(typeof(EF7BloggContext))]
-    partial class vv4
+    partial class v1
     {
         public override string Id
         {
-            get { return "20150711102145_vv4"; }
+            get { return "20150730190457_v1"; }
         }
 
         public override string ProductVersion
         {
-            get { return "7.0.0-beta6-13735"; }
+            get { return "7.0.0-beta6-13815"; }
         }
 
         public override void BuildTargetModel(ModelBuilder builder)
         {
             builder
-                .Annotation("ProductVersion", "7.0.0-vsbuild")
+                .Annotation("ProductVersion", "7.0.0-beta6-13815")
                 .Annotation("SqlServer:ValueGenerationStrategy", "IdentityColumn");
 
             builder.Entity("Core.Meeting", b =>

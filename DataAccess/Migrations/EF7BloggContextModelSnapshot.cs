@@ -12,7 +12,7 @@ namespace DataAccessMigrations
         public override void BuildModel(ModelBuilder builder)
         {
             builder
-                .Annotation("ProductVersion", "7.0.0-vsbuild")
+                .Annotation("ProductVersion", "7.0.0-beta6-13815")
                 .Annotation("SqlServer:ValueGenerationStrategy", "IdentityColumn");
 
             builder.Entity("Core.Meeting", b =>

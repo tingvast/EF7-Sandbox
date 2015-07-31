@@ -5,7 +5,7 @@ using Microsoft.Data.Entity.Migrations.Operations;
 
 namespace DataAccessMigrations
 {
-    public partial class vv1 : Migration
+    public partial class v1 : Migration
     {
         public override void Up(MigrationBuilder migration)
         {

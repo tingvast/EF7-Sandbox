@@ -3,6 +3,7 @@ using Core;
 using EF7;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,10 @@ using DataAccess.Interaces;
 using System.Linq.Expressions;
 using AutoMapper;
 using System.Reflection;
+using Microsoft.Data.Entity.Infrastructure;
+using Microsoft.Data.Entity.Internal;
+using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.Logging;
 
 namespace DataAccess
 {
@@ -21,6 +26,7 @@ namespace DataAccess
         public Repository(EF7BloggContext context)
         {
             this.context = context;
+            
         }
 
         public T Create<T>(T entity) where T : class, IEntity
@@ -86,10 +92,18 @@ namespace DataAccess
 
         public Meeting Retrieve(int j, int id)
         {
+
+            //var m11 = (from e in context.Set<Meeting>()
+            //    join p in context.Set<PreRegistration>() on e.Id equals p.MeetingId
+            //    where e.Id == id
+            //    select new {e.Location, p.Text});
+
+
+
             var entiry = context.Set<Meeting>().
-                //Include(m => m.PreRegistrations).
+                Include(m => m.PreRegistrations).
                 Where(m => m.Id == id).
-                Select(m => new { Meeting = m.Location, Pre = m.PreRegistrations.Where(p => p.MeetingId == id) }).
+                Select(m => new {m, m.PreRegistrations.Count }).
                 Single();
 
             var retEntity = Mapper.DynamicMap<Meeting>(entiry);
