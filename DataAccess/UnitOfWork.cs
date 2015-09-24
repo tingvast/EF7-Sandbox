@@ -31,9 +31,7 @@ namespace DataAccess
                    .BuildServiceProvider();
 
             this.context = new EF7BloggContext(serviceProvider);
-
-            this.context.Database.EnsureDeleted();
-            this.context.Database.EnsureCreated();
+            
             this.context.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 

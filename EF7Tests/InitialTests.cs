@@ -3,6 +3,7 @@ using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EF7Tests
 {
@@ -18,7 +19,8 @@ namespace EF7Tests
         }
         public void SetUp()
         {
-            
+            //this.context.Database.EnsureDeleted();
+            //this.context.Database.EnsureCreated();
         }
 
         [TestMethod]
@@ -90,8 +92,17 @@ namespace EF7Tests
                 var rep = uow.Create();
 
                 //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //    createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
-                var retrievedMeetingWithPrereg = rep.Retrieve(0, createdMeeting.Id);
+                //  createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
+                //var retrievedMeetingWithPrereg = rep.Retrieve(0, createdMeeting.Id);
+
+                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
+                //  createdMeeting.Id, p => new { ff = p.Location, fff = (from ggg in p.PreRegistrations where ggg.Id == createdMeeting.Id select new { ggg.Text }).ToList() });
+
+                var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
+                      createdMeeting.Id, p => new { ff = p.Location, ffff = p.Location1, fff = p.PreRegistrations.Select(pp => pp.Text) });
+
+                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
+                //          createdMeeting.Id, p => new { ff = p.Location });
             }
         }
 

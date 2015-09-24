@@ -38,4 +38,7 @@ Blogg ------------* Posts
 - ID				- ID
 - Summary			- Text
 
-Retrive<Blog>(ID, p1 => new { p1.Summary, p2 => new p1.Posts.Text }) // To retrieve the blog in
+Alt1: (Too verbose)
+Retrive<Blog>(ID, p1 => new { p1.Summary, p2 => new {p2.Posts.Text }}) // To retrieve the blog in
+Alt2: (Shorter)
+Retrive<Blog>(ID, p1 => new { p1.Summary, p1.Posts.Text }}) // To retrieve the blog in
