@@ -1,4 +1,5 @@
 ﻿using Core;
+using DataAccess;
 using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
@@ -103,6 +104,55 @@ namespace EF7Tests
 
                 //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
                 //          createdMeeting.Id, p => new { ff = p.Location });
+            }
+        }
+
+        [TestMethod]
+        public void CanCreateGraph2()
+        {
+            PreRegistration prereg;
+            Meeting createdMeeting;
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+                var meeting = new Meeting
+                {
+                    Location = _fixture.Create<string>()
+                };
+
+                prereg = new PreRegistration();
+                prereg.Text = _fixture.Create<string>();
+                prereg.Text1 = _fixture.Create<string>();
+                prereg.Meeting = meeting;
+
+                meeting.PreRegistrations.Add(prereg);
+
+                prereg = new PreRegistration();
+                prereg.Text = _fixture.Create<string>();
+                prereg.Text1 = _fixture.Create<string>();
+                prereg.Meeting = meeting;
+
+                meeting.PreRegistrations.Add(prereg);
+
+                createdMeeting = rep.CreateGraph(meeting);
+
+                uow.Commit();
+
+            }
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
+                //     createdMeeting.Id, p => new { ff = p.Location, ffff = p.Location1, fff = p.PreRegistrations.Select(pp => pp.Text) });
+
+                var projector = PropertyProjectorFactory<Meeting>.Create();
+                var projection = projector
+                    .Select(m => m.Location, m => m.Location1)
+                    .Include<PreRegistration>(pre => pre.Text);
+
+                rep.RetrieveById(createdMeeting.Id, projection);
             }
         }
 

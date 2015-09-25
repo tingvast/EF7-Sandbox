@@ -9,6 +9,40 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Interaces
 {
+
+    public interface IPropertyProjector<TEntity>
+    {
+        List<Expression<Func<TEntity, dynamic>>> Projections
+        {
+            get;
+        }
+
+        IPropertyProjector<TEntity> SelectSimple(Expression<Func<TEntity, dynamic>> f);
+
+        IPropertyProjector<TProperty> SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p);
+
+        IPropertyProjector<TEntity> SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p, Expression<Func<TProperty, dynamic>> q);
+
+        IPropertyProjector<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
+
+        IPropertyProjector<TEntity> Where(params Expression<Func<TEntity, dynamic>>[] p1);
+
+        IPropertyProjector<TEntity> Select<TProperty>(IPropertyProjector<TProperty> propertySelector, params Expression<Func<TEntity, dynamic>>[] p1);
+
+        IPropertyProjector<TEntity> Include<TProperty>(IPropertyProjector<TProperty> propertySelector);
+
+        IIncludePropertySelector<TEntity> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p);
+    }
+
+
+
+
+    public interface IIncludePropertySelector<TEntity> : IPropertyProjector<TEntity>
+    {
+        IIncludePropertySelector<TEntity> ThenInclude<TProperty>(params Expression<Func<TProperty, dynamic>>[] p);
+
+    }
+
     public interface IRepository
     {
 
@@ -32,6 +66,7 @@ namespace DataAccess.Interaces
 
         void Delete<T>(T entity) where T : class, IEntity;
 
+        T RetrieveById<T>(int id, IPropertyProjector<T> selector) where T : class, IEntity;
 
     }
 }
