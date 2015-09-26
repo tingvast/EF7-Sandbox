@@ -92,7 +92,6 @@ namespace DataAccess
             //var arguments = selectedProperties.P.Body.
             var body = (NewExpression)selectedProperties.Body;
 
-
             List<KeyValuePair<string, Type>> projs = new List<KeyValuePair<string, Type>>();
             List<Expression> exprs = new List<Expression>();
 
@@ -244,7 +243,6 @@ namespace DataAccess
             //    Where(e => e.Id == id).
             //    Select(selectedProperties).
             //    Single();
-            
 
             var retEntity = Mapper.DynamicMap<T>(entiry22);
             retEntity.Id = id;
@@ -476,135 +474,119 @@ namespace DataAccess
             object navigationProppertyQueryWithProjection1 = null;
             ParameterExpression pe = Expression.Parameter(typeof(T), "p");
             Type typeOfSubProj = null;
-            foreach (var arg in selector.Projections)
+            foreach (var arg in selector.TheData.TheExpression.Take(2))
             {
-                var arg1 = arg.Body;
-                if (arg1.NodeType == ExpressionType.MemberAccess)
-                {
-                    var body1 = arg1 as MemberExpression;
+                var body1 = arg as LambdaExpression;
 
-                    var propertyInfo = (PropertyInfo)body1.Member;
-                    var nameOfTheProperty = propertyInfo.Name;
-                    var typeOfTheProperty = propertyInfo.PropertyType;
+                var ajha = body1.Body as MemberExpression;
 
-                    var memberAccess1 = Expression.Property(pe, nameOfTheProperty);
-                    exprs.Add(memberAccess1);
+                var propertyInfo = (PropertyInfo)ajha.Member;
+                var nameOfTheProperty = propertyInfo.Name;
+                var typeOfTheProperty = propertyInfo.PropertyType;
 
-                    projs.Add(new KeyValuePair<string, Type>(nameOfTheProperty, typeOfTheProperty));
-                }
+                var memberAccess1 = Expression.Property(pe, nameOfTheProperty);
+                exprs.Add(memberAccess1);
 
-                //if (arg.NodeType == ExpressionType.Call)
-                //{
-                //    // Navigation property found
-                //    MethodCallExpression navProp = arg as MethodCallExpression;
-
-                //    var navigationProperty = navProp.Arguments[0] as MemberExpression;
-
-                //    var propertyInfo = (PropertyInfo)navigationProperty.Member;
-
-                //    var propertyType = propertyInfo.PropertyType;
-                //    var propertyName = propertyInfo.Name;
-
-                //    var navPropType = propertyType.GetGenericArguments()[0];
-
-                //    var generic = typeof(Queryable).GetMethods().Where(m => m.Name == "AsQueryable").ToList()[0];
-                //    var genericMetgid = generic.MakeGenericMethod(navPropType);
-
-                //    ParameterExpression pe1 = Expression.Parameter(navPropType, "pre");
-
-                //    Expression left = Expression.PropertyOrField(pe1, "MeetingId"); // TODO, get the reference based on information from  model
-                //    Expression right = Expression.Constant(id, typeof(int?));
-                //    Expression e1 = Expression.Equal(left, right);
-
-                //    var constructorinfo = typeof(EntityQueryable<>).MakeGenericType(navPropType).GetConstructors()[0];
-
-                //    var newstsy = constructorinfo.Invoke(new[] { context.GetService<IEntityQueryProvider>() });
-                //    Type func11 = typeof(EntityQueryable<>);
-                //    Type generic23233 = func11.MakeGenericType(navPropType);
-                //    var nwtwDynamically = Expression.Constant(newstsy, generic23233);
-
-                //    Type func1111 = typeof(IQueryable<>);
-                //    Type generic2323311 = func1111.MakeGenericType(navPropType);
-
-                //    Type func11111 = typeof(Func<,>);
-                //    Type generic232331123 = func11111.MakeGenericType(navPropType, typeof(bool));
-                //    Type funxs = typeof(Expression<>);
-                //    Type skljslk = funxs.MakeGenericType(generic232331123);
-
-                //    var m1 = GetGenericMethod(typeof(Queryable), "Where", new[] { navPropType }, generic2323311, skljslk);
-
-                //    MethodCallExpression whereCallExpression = Expression.Call(
-                //            m1,
-                //             nwtwDynamically,//nwtw
-                //           Expression.Lambda(e1, new ParameterExpression[] { pe1 }));
-
-                //    //////////////////////////////////////////////////////////
-
-                //    var jan11 = new List<KeyValuePair<string, Type>>();
-                //    ParameterExpression peeee = Expression.Parameter(navPropType, "p1");
-                //    List<MemberExpression> exprs1 = new List<MemberExpression>();
-                //    foreach (var hhhhh in navProp.Arguments.Skip(1))
-                //    {
-                //        var navigationPropertyProjection = hhhhh as LambdaExpression;
-
-                //        var body1111 = navigationPropertyProjection.Body as MemberExpression;
-
-                //        var propertyInfo11111 = (PropertyInfo)body1111.Member;
-                //        var nameOfTheProperty11 = propertyInfo11111.Name;
-                //        var typeOfTheProperty11 = propertyInfo11111.PropertyType;
-
-                //        var memberAccess1 = Expression.Property(peeee, nameOfTheProperty11);
-                //        exprs1.Add(memberAccess1);
-
-                //        var jan = new KeyValuePair<string, Type>(nameOfTheProperty11, typeOfTheProperty11);
-                //        jan11.Add(jan);
-                //    }
-
-                //    var annnontype11 = AnonymousTypeUtils.CreateType(jan11);
-
-                //    var constructor11 = annnontype11.GetConstructor(jan11.Select(kv => kv.Value).ToArray());
-                //    typeOfSubProj = constructor11.ReflectedType;
-                //    var genericSelectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
-                //    var selectMetgid = genericSelectMethod.MakeGenericMethod(navPropType, typeOfSubProj);
-
-                //    var kkkkk1 = Expression.New(constructor11, exprs1);
-
-                //    var lambd11a = Expression.Lambda(kkkkk1, peeee);
-
-                //    MethodCallExpression selctCallExpression = Expression.Call(
-                //          selectMetgid,
-                //          whereCallExpression,
-                //           lambd11a);
-
-                //    var provider = ((IQueryable)context.Set<PreRegistration>()).Provider;
-                //    var theMethods = typeof(IQueryProvider).GetMethods();
-                //    var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
-                //    var speciifMethod = createQMethd.MakeGenericMethod(constructor11.ReflectedType);
-
-                //    Type func = typeof(IEnumerable<>);
-                //    Type generic2323 = func.MakeGenericType(typeOfSubProj);
-
-                //    projs.Add(new KeyValuePair<string, Type>(propertyName, generic2323));
-
-                //    navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] { selctCallExpression });
-                //}
+                projs.Add(new KeyValuePair<string, Type>(nameOfTheProperty, typeOfTheProperty));
             }
+
+            // TODO: Create the navigation property logic here
+
+            var navPropType = selector.TheData.Subproperty;
+
+            var generic = typeof(Queryable).GetMethods().Where(m => m.Name == "AsQueryable").ToList()[0];
+            var genericMetgid = generic.MakeGenericMethod(navPropType);
+
+            ParameterExpression pe1 = Expression.Parameter(navPropType, "pre");
+
+            Expression left = Expression.PropertyOrField(pe1, "MeetingId"); // TODO, get the reference based on information from  model
+            Expression right = Expression.Constant(id, typeof(int?));
+            Expression e1 = Expression.Equal(left, right);
+
+            var constructorinfo = typeof(EntityQueryable<>).MakeGenericType(navPropType).GetConstructors()[0];
+
+            var newstsy = constructorinfo.Invoke(new[] { context.GetService<IEntityQueryProvider>() });
+            Type func11 = typeof(EntityQueryable<>);
+            Type generic23233 = func11.MakeGenericType(navPropType);
+            var nwtwDynamically = Expression.Constant(newstsy, generic23233);
+
+            Type func1111 = typeof(IQueryable<>);
+            Type generic2323311 = func1111.MakeGenericType(navPropType);
+
+            Type func11111 = typeof(Func<,>);
+            Type generic232331123 = func11111.MakeGenericType(navPropType, typeof(bool));
+            Type funxs = typeof(Expression<>);
+            Type skljslk = funxs.MakeGenericType(generic232331123);
+
+            var m1 = GetGenericMethod(typeof(Queryable), "Where", new[] { navPropType }, generic2323311, skljslk);
+
+            MethodCallExpression whereCallExpression = Expression.Call(
+                        m1,
+                        nwtwDynamically,//nwtw
+                        Expression.Lambda(e1, new ParameterExpression[] { pe1 }));
+
+            var jan11 = new List<KeyValuePair<string, Type>>();
+            ParameterExpression peeee = Expression.Parameter(navPropType, "p1");
+            List<MemberExpression> exprs1 = new List<MemberExpression>();
+            foreach (var arg in selector.TheData.TheExpression.Skip(2))
+            {
+                var navigationPropertyProjection = arg as LambdaExpression;
+
+                var body1111 = navigationPropertyProjection.Body as MemberExpression;
+
+                var propertyInfo11111 = (PropertyInfo)body1111.Member;
+                var nameOfTheProperty11 = propertyInfo11111.Name;
+                var typeOfTheProperty11 = propertyInfo11111.PropertyType;
+
+                var memberAccess1 = Expression.Property(peeee, nameOfTheProperty11);
+                exprs1.Add(memberAccess1);
+
+                var jan = new KeyValuePair<string, Type>(nameOfTheProperty11, typeOfTheProperty11);
+                jan11.Add(jan);
+            }
+
+            var annnontype11 = AnonymousTypeUtils.CreateType(jan11);
+
+            var constructor11 = annnontype11.GetConstructor(jan11.Select(kv => kv.Value).ToArray());
+            typeOfSubProj = constructor11.ReflectedType;
+            var genericSelectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
+            var selectMetgid = genericSelectMethod.MakeGenericMethod(navPropType, typeOfSubProj);
+
+            var kkkkk1 = Expression.New(constructor11, exprs1);
+
+            var lambd11a = Expression.Lambda(kkkkk1, peeee);
+
+            MethodCallExpression selctCallExpression = Expression.Call(
+                  selectMetgid,
+                  whereCallExpression,
+                   lambd11a);
+
+            var provider = ((IQueryable)context.Set<PreRegistration>()).Provider;
+            var theMethods = typeof(IQueryProvider).GetMethods();
+            var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
+            var speciifMethod = createQMethd.MakeGenericMethod(constructor11.ReflectedType);
+
+            Type func = typeof(IEnumerable<>);
+            Type generic2323 = func.MakeGenericType(typeOfSubProj);
+
+            projs.Add(new KeyValuePair<string, Type>(selector.TheData.SubpropertyName, generic2323));
+
+            navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] { selctCallExpression });
 
             var annnontype = AnonymousTypeUtils.CreateType(projs);
 
             var constructor = annnontype.GetConstructor(projs.Select(kv => kv.Value).ToArray());
 
-            //var tt = typeof(Enumerable).GetMethods();
-            //var m133 = tt.Where(m => m.Name == "ToList").ToList()[0];
+            var tt = typeof(Enumerable).GetMethods();
+            var m133 = tt.Where(m => m.Name == "ToList").ToList()[0];
 
+            var genericMetgid2222 = m133.MakeGenericMethod(typeOfSubProj);
 
-            //var genericMetgid2222 = m133.MakeGenericMethod(typeOfSubProj);
+            MethodCallExpression toListExpression11 = Expression.Call(
+                            genericMetgid2222,
+                             Expression.Constant(navigationProppertyQueryWithProjection1));
 
-            //MethodCallExpression toListExpression11 = Expression.Call(
-            //                genericMetgid2222,
-            //                 Expression.Constant(navigationProppertyQueryWithProjection1));
-
-            //exprs.Add(toListExpression11);
+            exprs.Add(toListExpression11);
 
             var kkkkk = Expression.New(constructor, exprs);
 
@@ -624,7 +606,6 @@ namespace DataAccess
             //    Where(e => e.Id == id).
             //    Select(selectedProperties).
             //    Single();
-
 
             //var retEntity = Mapper.DynamicMap<T>(entiry22);
             //retEntity.Id = id;

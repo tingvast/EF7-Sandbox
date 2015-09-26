@@ -10,36 +10,42 @@ using System.Threading.Tasks;
 namespace DataAccess.Interaces
 {
 
-    public interface IPropertyProjector<TEntity>
+    public interface IThedata
     {
-        List<Expression<Func<TEntity, dynamic>>> Projections
-        {
-            get;
-        }
+        List<Expression> TheExpression { get; set; }
 
-        IPropertyProjector<TEntity> SelectSimple(Expression<Func<TEntity, dynamic>> f);
+        Type Subproperty { get; set; }
+        string SubpropertyName { get; set; }
+    }
 
-        IPropertyProjector<TProperty> SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p);
+    public interface IPropertyProjector<TEntity> where TEntity : class, IEntity
+    {
+        
+        IThedata TheData { get; }
 
-        IPropertyProjector<TEntity> SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p, Expression<Func<TProperty, dynamic>> q);
+        //IPropertyProjector<TEntity> SelectSimple(Expression<Func<TEntity, dynamic>> f);
+
+        //IPropertyProjector<TProperty> SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p);
+
+        //IPropertyProjector SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p, Expression<Func<TProperty, dynamic>> q);
 
         IPropertyProjector<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
 
-        IPropertyProjector<TEntity> Where(params Expression<Func<TEntity, dynamic>>[] p1);
+        //IPropertyProjector<TEntity> Where(params Expression<Func<TEntity, dynamic>>[] p1);
 
-        IPropertyProjector<TEntity> Select<TProperty>(IPropertyProjector<TProperty> propertySelector, params Expression<Func<TEntity, dynamic>>[] p1);
+        //IPropertyProjector<TEntity> Select<TProperty>(IPropertyProjector<TProperty> propertySelector, params Expression<Func<TEntity, dynamic>>[] p1);
 
-        IPropertyProjector<TEntity> Include<TProperty>(IPropertyProjector<TProperty> propertySelector);
+        // IPropertyProjector<TEntity> Include<TProperty>(IPropertyProjector<TProperty> propertySelector);
 
-        IIncludePropertySelector<TEntity> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p);
+        IIncludePropertySelector<TEntity> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity;
     }
 
 
 
 
-    public interface IIncludePropertySelector<TEntity> : IPropertyProjector<TEntity>
+    public interface IIncludePropertySelector<TEntity> : IPropertyProjector<TEntity> where TEntity : class, IEntity
     {
-        IIncludePropertySelector<TEntity> ThenInclude<TProperty>(params Expression<Func<TProperty, dynamic>>[] p);
+        //IIncludePropertySelector<TEntity> ThenInclude<TProperty>(params Expression<Func<TProperty, dynamic>>[] p);
 
     }
 

@@ -150,7 +150,7 @@ namespace EF7Tests
                 var projector = PropertyProjectorFactory<Meeting>.Create();
                 var projection = projector
                     .Select(m => m.Location, m => m.Location1)
-                    .Include<PreRegistration>(pre => pre.Text);
+                    .Include<PreRegistration>(p => p.Text, p => p.Text1);
 
                 rep.RetrieveById(createdMeeting.Id, projection);
             }
