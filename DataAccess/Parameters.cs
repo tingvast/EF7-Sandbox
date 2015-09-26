@@ -10,24 +10,38 @@ using System.Threading.Tasks;
 
 namespace DataAccess
 {
+    public class NavigationProperty : INavigationProperty
+    {
+        public NavigationProperty()
+        {
+            Projections = new List<Expression>();
+        }
 
-    public class TheDate : IThedata
+        public NavigationProperty(string name, Type type)
+            :this()
+        {
+            Name = name;
+            Type = type;
+        }
+
+        
+        public string Name { get; set; }
+        public Type Type { get; set; }
+
+        public List<Expression> Projections { get; set; }
+    }
+
+    public class TheDate : IProjections
     {
         public TheDate()
         {
-            TheExpression = new List<Expression>();
-        }
-        public Type Subproperty
-        {
-            get; set;           
+            Projection = new List<Expression>();
+            NavigationPropertiesProjections = new List<INavigationProperty>();
         }
 
-        public string SubpropertyName { get; set; }
+        public List<INavigationProperty> NavigationPropertiesProjections { get; set; }
 
-        public List<Expression> TheExpression
-        {
-            get; set;
-        }
+        public List<Expression> Projection { get; set; }
     }
 
     public static class PropertyProjectorFactory<T> where T : class, IEntity
@@ -44,11 +58,11 @@ namespace DataAccess
 
         public PropertyProjector()
         {
-            TheData = new TheDate();
+            AllProjections = new TheDate();
 
         }
 
-        public IThedata TheData
+        public IProjections AllProjections
         {
             get; private set;
         }
@@ -56,38 +70,14 @@ namespace DataAccess
 
         public IIncludePropertySelector<T> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity
         {
-            var type = typeof(TProperty);
-            TheData.SubpropertyName = type.Name;
+            var navigationProperty = new NavigationProperty(
+                    typeof(TProperty).Name,
+                    typeof(TProperty));
 
-            TheData.Subproperty = type;
+            navigationProperty.Projections.AddRange(p);
 
-            //ParameterExpression peeee = Expression.Parameter(type, "p");
-            //foreach (var hah in p)
-            //{
-
-            //    var body1111 = hah.Body as MemberExpression;
-            //    var propertyInfo11111 = (PropertyInfo)body1111.Member;
-            //    var nameOfTheProperty11 = propertyInfo11111.Name;
-            //    var typeOfTheProperty11 = propertyInfo11111.PropertyType;
-
-            //    var memberAccess1 = Expression.Property(peeee, nameOfTheProperty11);
-
-            //    var genericSelectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
-            //    //var selectMetgid = genericSelectMethod.MakeGenericMethod(type, typeOfSubProj);
-
-            //    Type func1111 = typeof(List<>);
-            //    Type generic2323311 = func1111.MakeGenericType(type);
-            //    var newNavigat = Expression.New(generic2323311);
-
-            //    var kalle = genericSelectMethod.Invoke(newNavigat, new object[] { });
-
-
-            //    // p => new { ff = p.Location, ffff = p.Location1, fff = p.PreRegistrations.Select(pp => pp.Text) }
-            //}
-
-
-
-            TheData.TheExpression.AddRange(p);
+            AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
+            
             return this;
         }
 
@@ -98,7 +88,7 @@ namespace DataAccess
 
         public IPropertyProjector<T> Select(params Expression<Func<T, dynamic>>[] p1)
         {
-            TheData.TheExpression.AddRange(p1);
+            AllProjections.Projection.AddRange(p1);
 
             return this;
         }

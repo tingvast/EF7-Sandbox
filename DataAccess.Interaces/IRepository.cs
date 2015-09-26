@@ -9,19 +9,27 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Interaces
 {
-
-    public interface IThedata
+    public interface INavigationProperty
     {
-        List<Expression> TheExpression { get; set; }
+        string Name { get; set; }
+        Type Type { get; set; }
 
-        Type Subproperty { get; set; }
-        string SubpropertyName { get; set; }
+        List<Expression> Projections { get; set; }
+    }
+
+
+
+    public interface IProjections
+    {
+        List<Expression> Projection { get; set; }
+
+        List<INavigationProperty> NavigationPropertiesProjections { get; set; }
     }
 
     public interface IPropertyProjector<TEntity> where TEntity : class, IEntity
     {
         
-        IThedata TheData { get; }
+        IProjections AllProjections { get; }
 
         //IPropertyProjector<TEntity> SelectSimple(Expression<Func<TEntity, dynamic>> f);
 

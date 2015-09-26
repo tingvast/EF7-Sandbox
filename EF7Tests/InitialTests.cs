@@ -144,9 +144,6 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //     createdMeeting.Id, p => new { ff = p.Location, ffff = p.Location1, fff = p.PreRegistrations.Select(pp => pp.Text) });
-
                 var projector = PropertyProjectorFactory<Meeting>.Create();
                 var projection = projector
                     .Select(m => m.Location, m => m.Location1)
