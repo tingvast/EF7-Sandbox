@@ -31,19 +31,9 @@ namespace DataAccess.Interaces
         
         IProjections AllProjections { get; }
 
-        //IPropertyProjector<TEntity> SelectSimple(Expression<Func<TEntity, dynamic>> f);
-
-        //IPropertyProjector<TProperty> SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p);
-
-        //IPropertyProjector SelectNavigation<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> p, Expression<Func<TProperty, dynamic>> q);
-
         IPropertyProjector<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
 
         //IPropertyProjector<TEntity> Where(params Expression<Func<TEntity, dynamic>>[] p1);
-
-        //IPropertyProjector<TEntity> Select<TProperty>(IPropertyProjector<TProperty> propertySelector, params Expression<Func<TEntity, dynamic>>[] p1);
-
-        // IPropertyProjector<TEntity> Include<TProperty>(IPropertyProjector<TProperty> propertySelector);
 
         IIncludePropertySelector<TEntity> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity;
     }

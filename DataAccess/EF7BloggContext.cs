@@ -63,6 +63,7 @@ namespace DataAccess
                 .Collection(b => b.Posts)
                 .InverseReference(b => b.Blog)
                 .ForeignKey(k => k.BlogId);
+                
 
 
             

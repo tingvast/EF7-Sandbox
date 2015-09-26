@@ -27,120 +27,100 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreateAnotherBusinessObject11()
         {
-            Post prereg;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Blog
+                var blog = new Blog
                 {
                     Author = _fixture.Create<string>()
                 };
 
-                var k = rep.Create<Blog>(meeting);
+                var createdBlog = rep.Create<Blog>(blog);
 
 
 
                 uow.Commit();
 
 
-                var kk = rep.Retrieve<Blog>(k.Id);
+                var retrievedBlog = rep.Retrieve<Blog>(createdBlog.Id);
             }
         }
 
         [TestMethod]
         public void CanCreateGraph()
         {
-            Post prereg;
-            Blog createdMeeting;
+            Post post;
+            Blog createdBlog;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Blog
+                var blog = new Blog
                 {
                     Author = _fixture.Create<string>()
                 };
 
-                prereg = new Post();
-                prereg.Text = _fixture.Create<string>();
-                prereg.Date = _fixture.Create<string>();
-                prereg.Blog = meeting;
+                post = new Post();
+                post.Text = _fixture.Create<string>();
+                post.Date = _fixture.Create<string>();
+                post.Blog = blog;
 
-                meeting.Posts.Add(prereg);
+                blog.Posts.Add(post);
 
-                prereg = new Post();
-                prereg.Text = _fixture.Create<string>();
-                prereg.Date = _fixture.Create<string>();
-                prereg.Blog = meeting;
+                post = new Post();
+                post.Text = _fixture.Create<string>();
+                post.Date = _fixture.Create<string>();
+                post.Blog = blog;
 
-                meeting.Posts.Add(prereg);
+                blog.Posts.Add(post);
 
-                createdMeeting = rep.CreateGraph(meeting);
+                createdBlog = rep.CreateGraph(blog);
 
                 uow.Commit();
-
-                
-
-
-
-                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //    createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
-
-                //var r = rep.Retrieve(1, createdMeeting.Id);
             }
 
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
 
-                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //  createdMeeting.Id, p => new { p.Location, p.PreRegistrations });
-                //var retrievedMeetingWithPrereg = rep.Retrieve(0, createdMeeting.Id);
-
-                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //  createdMeeting.Id, p => new { ff = p.Location, fff = (from ggg in p.PreRegistrations where ggg.Id == createdMeeting.Id select new { ggg.Text }).ToList() });
-
-                var retrievedMeetingWithPrereg = rep.Retrieve<Blog, dynamic>(
-                      createdMeeting.Id, p => new { ff = p.Author, ffff = p.Location, fff = p.Posts.Select(pp => pp.Text) });
-
-                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //          createdMeeting.Id, p => new { ff = p.Location });
+                var retrievedBlogWithPosts = rep.Retrieve<Blog, dynamic>(
+                      createdBlog.Id, p => new { ff = p.Author, ffff = p.Location, fff = p.Posts.Select(pp => pp.Text) });
             }
         }
 
         [TestMethod]
         public void CanCreateGraph2()
         {
-            Post prereg;
-            Blog createdMeeting;
+            Post post;
+            Blog createdBlog;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Blog
+                var blog = new Blog
                 {
                     Author = _fixture.Create<string>(),
                     Location = _fixture.Create<string>()
                 };
 
-                prereg = new Post();
-                prereg.Text = _fixture.Create<string>();
-                prereg.Date = _fixture.Create<string>();
-                prereg.Blog = meeting;
+                post = new Post();
+                post.Text = _fixture.Create<string>();
+                post.Date = _fixture.Create<string>();
+                post.Blog = blog;
 
                 var prereg2 = new Follower();
                 prereg2.Name = _fixture.Create<string>();
-                prereg2.Blog = meeting;
+                prereg2.Blog = blog;
 
-                meeting.Posts.Add(prereg);
-                meeting.Followers.Add(prereg2);
+                blog.Posts.Add(post);
+                blog.Followers.Add(prereg2);
 
-                prereg = new Post();
-                prereg.Text = _fixture.Create<string>();
-                prereg.Date = _fixture.Create<string>();
-                prereg.Blog = meeting;
+                post = new Post();
+                post.Text = _fixture.Create<string>();
+                post.Date = _fixture.Create<string>();
+                post.Blog = blog;
 
-                meeting.Posts.Add(prereg);
+                blog.Posts.Add(post);
 
-                createdMeeting = rep.CreateGraph(meeting);
+                createdBlog = rep.CreateGraph(blog);
 
                 uow.Commit();
 
@@ -156,71 +136,69 @@ namespace EF7Tests
                     .Include<Post>(p => p.Text, p => p.Date)
                     .Include<Follower>(p => p.Name);
 
-                rep.RetrieveById(createdMeeting.Id, projection);
+                rep.RetrieveById(createdBlog.Id, projection);
             }
         }
 
         [TestMethod]
         public void CanRetrieveGraph()
         {
-            Post prereg;
+            Post post;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Blog
+                var blog = new Blog
                 {
-                    Author = "My Location",
+                    Author = _fixture.Create<string>()
                 };
 
-                prereg = new Post();
-                prereg.Text = "First pre registration";
-                prereg.Date = "Additional text";
-                prereg.Blog = meeting;
+                post = new Post();
+                post.Text = _fixture.Create<string>();
+                post.Date = _fixture.Create<string>();
+                post.Blog = blog;
 
-                meeting.Posts.Add(prereg);
+                blog.Posts.Add(post);
 
-                var createdMeeting = rep.CreateGraph(meeting);
+                var createdBlog = rep.CreateGraph(blog);
 
                 uow.Commit();
 
-                var r = rep.Retrieve(1, createdMeeting.Id);
-                //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                //    createdMeeting.Id, p => new { p.PreRegistrations });
+                var r = rep.Retrieve(1, createdBlog.Id);
             }
         }
 
         [TestMethod]
         public void CanCreate3()
         {
-            Post prereg;
+            Post post;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                prereg = new Post();
-                prereg.Text = "First pre registration";
-                prereg.Date = "Additional text";
+                post = new Post();
+                post.Text = _fixture.Create<string>();
+                post.Date = _fixture.Create<string>();
 
-                var k = rep.Create<Post>(prereg);
+                var k = rep.Create<Post>(post);
 
                 uow.Commit();
             }
 
-            var meeting = new Blog();
-            meeting.Author = "Location 1";
-            prereg.Text = "Update preregistratioon text";
-            prereg.Blog = meeting;
-            meeting.Posts.Add(prereg);
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();
+            post.Text = _fixture.Create<string>();
+            post.Blog = blog;
+            blog.Posts.Add(post);
 
-            var prereg1 = new Post();
-            prereg1.Text = "New pre registratoob";
-            prereg1.Blog = meeting;
-            meeting.Posts.Add(prereg1);
+            post = new Post();
+            post.Text = _fixture.Create<string>();
+            post.Blog = blog;
+            blog.Posts.Add(post);
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
                 uow.Commit();
             }
         }
@@ -230,17 +208,16 @@ namespace EF7Tests
         {
             using (var uow = UoWFactory.Create())
             {
-                var meeting = new Blog();
-                meeting.Author = "MyLocation1";
+                var blog = new Blog();
+                blog.Author = _fixture.Create<string>();
 
-                var preReg = new Post();
-                preReg.Text = "MyPre reg";
-                //preReg.Meeting = meeting;
-                meeting.Posts.Add(preReg);
+                var post = new Post();
+                post.Text = _fixture.Create<string>();
+                blog.Posts.Add(post);
 
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.CreateGraph(meeting);
+                var updatedBlog = repository.CreateGraph(blog);
                 uow.Commit();
             }
         }
@@ -248,36 +225,36 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate5()
         {
-            var meeting = new Blog();
-            meeting.Author = "kljljk";
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
 
                 uow.Commit();
             }
 
-            var preReg = new Post();
-            preReg.Text = "lkajlkaj";
+            var post = new Post();
+            post.Text = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(preReg);
+                var updatedBlog = repository.UpdateGraph(post);
 
                 uow.Commit();
             }
 
-            meeting.Posts.Add(preReg);
+            blog.Posts.Add(post);
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
 
                 uow.Commit();
             }
@@ -286,38 +263,38 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate6()
         {
-            var meeting = new Blog();
-            meeting.Author = "kljljk";
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.Create(meeting);
+                var persistedBlog = repository.Create(blog);
 
                 uow.Commit();
             }
 
-            var preReg = new Post();
-            preReg.Text = "lkajlkaj";
+            var post = new Post();
+            post.Text = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.Create(preReg);
+                var persistedPost = repository.Create(post);
 
                 uow.Commit();
             }
 
-            var newPreReg = new Post();
-            newPreReg.Text = "kjlhkjhkjhkjhk";
-            meeting.Posts.AddRange(new List<Post>() { preReg, newPreReg });
+            var post1 = new Post();
+            post1.Text = _fixture.Create<string>();
+            blog.Posts.AddRange(new List<Post>() { post, post1 });
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
 
                 uow.Commit();
             }
@@ -326,38 +303,38 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate7()
         {
-            var meeting = new Blog();
-            meeting.Author = "kljljk";
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
 
                 uow.Commit();
             }
 
-            var preReg = new Post();
-            preReg.Text = "lkajlkaj";
+            var post = new Post();
+            post.Text = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(preReg);
+                var updatedBlog = repository.UpdateGraph(post);
 
                 uow.Commit();
             }
 
-            var newPreReg = new Post();
-            newPreReg.Text = "kjlhkjhkjhkjhk";
-            meeting.Posts.AddRange(new List<Post>() { newPreReg, preReg });
+            var newPost = new Post();
+            newPost.Text = _fixture.Create<string>();
+            blog.Posts.AddRange(new List<Post>() { newPost, post });
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
 
                 uow.Commit();
             }
@@ -366,50 +343,108 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate8()
         {
-            var meeting = new Blog();
-            meeting.Author = "kljljk";
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.Create(meeting);
+                var updatedBlog = repository.Create(blog);
 
                 uow.Commit();
             }
 
-            var preReg = new Post();
-            preReg.Text = "lkajlkaj";
-
-            using (var uow = UoWFactory.Create())
-            {
-                var repository = uow.Create();
-
-                var updatedMeeting = repository.Create(preReg);
-
-                uow.Commit();
-            }
-
-            var newPreReg = new Post();
-            newPreReg.Text = "kjlhkjhkjhkjhk";
-            meeting.Posts.AddRange(new List<Post>() { newPreReg, preReg });
+            var post = new Post();
+            post.Text = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.Create(post);
 
                 uow.Commit();
             }
+
+            var newPost = new Post();
+            newPost.Text = _fixture.Create<string>();
+            blog.Posts.AddRange(new List<Post>() { newPost, post });
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                repository.Delete(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
 
                 uow.Commit();
             }
+
+            var projector = PropertyProjectorFactory<Blog>.Create();
+            projector.Select(p => p.Author)
+                .Include<Post>(p => p.Text);
+
+            using (var uow = UoWFactory.Create())
+            {
+                var repository = uow.Create();
+
+                var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, projector);
+
+            }
+
+        }
+    
+
+        [TestMethod]
+        public void CanUpdate34()
+        {
+            #region Arrange
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();            
+            var post = new Post();
+            post.Text = _fixture.Create<string>();
+
+            blog.Posts.AddRange(new List<Post>() { post });
+
+            using (var uow = UoWFactory.Create())
+            {
+                var repository = uow.Create();
+
+                var updatedBlog = repository.Create(post);
+
+                uow.Commit();
+            }
+
+            #endregion
+
+            #region Act
+            var newPost = new Post();
+            newPost.Text = _fixture.Create<string>();
+            blog.Posts.AddRange(new List<Post>() { newPost, post });
+
+            using (var uow = UoWFactory.Create())
+            {
+                var repository = uow.Create();
+
+                var updatedBlog = repository.UpdateGraph(blog);
+
+                uow.Commit();
+            }
+
+            #endregion
+
+            #region Assert
+            var projector = PropertyProjectorFactory<Blog>.Create();
+            projector.Select(p => p.Author)
+                .Include<Post>(p => p.Text);
+
+            using (var uow = UoWFactory.Create())
+            {
+                var repository = uow.Create();
+
+                var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, projector);
+
+            }
+            #endregion
         }
 
         [TestMethod]
@@ -417,13 +452,13 @@ namespace EF7Tests
         {
             #region Arrange
 
-            var meeting = new Blog();
-            meeting.Author = "kljljk";
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var updatedMeeting = repository.UpdateGraph(meeting);
+                var updatedBlog = repository.UpdateGraph(blog);
 
                 uow.Commit();
             }
@@ -432,13 +467,13 @@ namespace EF7Tests
 
             #region Act
 
-            meeting.Author = "new Location";
+            blog.Author = _fixture.Create<string>();
 
             using (var uow1 = UoWFactory.Create())
             {
                 var repository = uow1.Create();
 
-                var updatedMeeting = repository.Update(meeting, p => p.Author);
+                var updatedBlog = repository.Update(blog, p => p.Author);
 
                 uow1.Commit();
             }
@@ -447,7 +482,6 @@ namespace EF7Tests
 
             #region Assert
 
-            // Only Location should have been generated
             var uow2 = UoWFactory.Create();
             var r = uow2.Create();
 

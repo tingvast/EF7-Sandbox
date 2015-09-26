@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 using Core;
 using DataAccess.Interaces;
+using DataAccess;
 
 namespace EF7Tests
 {
@@ -26,20 +27,25 @@ namespace EF7Tests
         {
             #region Arrange
 
-            Post retrieved = null;
+            Post retrievedPost = null;
             using (var uow = UoWFactory.Create())
             {
-                Post prereg;
+                Post post;
                 var rep = uow.Create();
-                prereg = new Post();
-                prereg.Text = _fixture.Create<string>();
-                prereg.Date = _fixture.Create<string>();
+                post = new Post();
+                post.Text = _fixture.Create<string>();
+                post.Date = _fixture.Create<string>();
 
-                var k = rep.Create<Post>(prereg);
+                var persistedPost = rep.Create<Post>(post);
 
                 uow.Commit();
 
-                retrieved = rep.Retrieve<Post, dynamic>(k.Id, p => new { p.Text });
+
+                var projector = PropertyProjectorFactory<Post>.Create();
+                projector
+                    .Select(p => p.Text, p => p.Date);
+                    
+                retrievedPost = rep.RetrieveById(persistedPost.Id, projector);
             }
 
             #endregion Arrange
@@ -48,9 +54,9 @@ namespace EF7Tests
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                retrieved.Text = _fixture.Create<string>();
+                retrievedPost.Text = _fixture.Create<string>();
 
-                rep.Update(retrieved, p => p.Text);
+                rep.Update(retrievedPost, p => p.Text);
 
                 uow.Commit();
             }

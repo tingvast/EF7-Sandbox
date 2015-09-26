@@ -570,33 +570,29 @@ namespace DataAccess
                 .Select(lambd11a1)
                 .Single();
 
-            System.Diagnostics.Debugger.Break();
 
+            if(selector.AllProjections.NavigationPropertiesProjections.Count() > 0)
+            {
+                // TODO : Fix the Mapping back to entity when enity has navigation properties
 
+                return default(T);
+            }
 
+            //System.Diagnostics.Debugger.Break();
 
+            
 
-            //var rrr = entiry444.
-            //    Select(selectors[0]).
-            //    Single();
+            var retEntity = Mapper.DynamicMap<T>(projectedEntity);
+            retEntity.Id = id;
+            var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
 
-            //var entiry = context.Set<T>().AsNoTracking().
-            //    //Include(selectedProperties).
-            //    Where(e => e.Id == id).
-            //    Select(selectedProperties).
-            //    Single();
-
-            //var retEntity = Mapper.DynamicMap<T>(entiry22);
-            //retEntity.Id = id;
-            //var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
-
-            //if (alreadytrackedentity != null)
-            //{
-            //    // Remove it from tracking
-            //    alreadytrackedentity.State = EntityState.Detached;
-            //}
-            //context.Attach(retEntity);
-            return default(T);
+            if (alreadytrackedentity != null)
+            {
+                // Remove it from tracking
+                alreadytrackedentity.State = EntityState.Detached;
+            }
+            context.Attach(retEntity);
+            return retEntity;
         }
 
         private MethodCallExpression CreateWhereCall<T>(int id, Type navigationProperyType) where T : class, IEntity
