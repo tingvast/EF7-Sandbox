@@ -125,7 +125,12 @@ namespace EF7Tests
                 prereg.Text1 = _fixture.Create<string>();
                 prereg.Meeting = meeting;
 
+                var prereg2 = new PreRegistration2();
+                prereg2.Value = _fixture.Create<string>();
+                prereg2.Meeting = meeting;
+
                 meeting.PreRegistrations.Add(prereg);
+                meeting.PreRegistrations2.Add(prereg2);
 
                 prereg = new PreRegistration();
                 prereg.Text = _fixture.Create<string>();
@@ -147,7 +152,8 @@ namespace EF7Tests
                 var projector = PropertyProjectorFactory<Meeting>.Create();
                 var projection = projector
                     .Select(m => m.Location, m => m.Location1)
-                    .Include<PreRegistration>(p => p.Text, p => p.Text1);
+                    .Include<PreRegistration>(p => p.Text, p => p.Text1)
+                    .Include<PreRegistration2>(p => p.Value);
 
                 rep.RetrieveById(createdMeeting.Id, projection);
             }
