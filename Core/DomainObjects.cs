@@ -15,9 +15,12 @@ namespace Core
         public string Location1 { get; set; }
         public List<PreRegistration> PreRegistrations { get; set; }
 
+        public List<PreRegistration2> PreRegistrations2 { get; set; }
+
         public Meeting()
         {
             PreRegistrations = new List<PreRegistration>();
+            PreRegistrations2 = new List<PreRegistration2>();
         }
     }
 
@@ -29,6 +32,16 @@ namespace Core
         public string Text1 { get; set; }
 
         public Meeting Meeting{ get; set; }
+        public int? MeetingId { get; set; }
+    }
+
+    public class PreRegistration2 : IEntity
+    {
+        public int Id { get; set; }
+
+        public string  Value { get; set; }
+
+        public Meeting Meeting { get; set; }
         public int? MeetingId { get; set; }
     }
 }
