@@ -7,41 +7,41 @@ using System.Threading.Tasks;
 
 namespace Core
 {
-    public class Meeting : IEntity
+    public class Blog : IEntity
     {
         public int Id { get; set; }
+        public string Author { get; set; }
+
         public string Location { get; set; }
+        public List<Post> Posts { get; set; }
 
-        public string Location1 { get; set; }
-        public List<PreRegistration> PreRegistrations { get; set; }
+        public List<Follower> Followers { get; set; }
 
-        public List<PreRegistration2> PreRegistrations2 { get; set; }
-
-        public Meeting()
+        public Blog()
         {
-            PreRegistrations = new List<PreRegistration>();
-            PreRegistrations2 = new List<PreRegistration2>();
+            Posts = new List<Post>();
+            Followers = new List<Follower>();
         }
     }
 
-    public class PreRegistration : IEntity
+    public class Post : IEntity
     {
         public int Id { get; set; }
         public string Text { get; set; }
 
-        public string Text1 { get; set; }
+        public string Date { get; set; }
 
-        public Meeting Meeting{ get; set; }
-        public int? MeetingId { get; set; }
+        public Blog Blog { get; set; }
+        public int? BlogId { get; set; }
     }
 
-    public class PreRegistration2 : IEntity
+    public class Follower : IEntity
     {
         public int Id { get; set; }
 
-        public string  Value { get; set; }
+        public string  Name { get; set; }
 
-        public Meeting Meeting { get; set; }
-        public int? MeetingId { get; set; }
+        public Blog Blog { get; set; }
+        public int? BlogId { get; set; }
     }
 }

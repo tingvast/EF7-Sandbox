@@ -14,8 +14,8 @@ namespace DataAccess
 {
     public class EF7BloggContext : DbContext
     {
-        public DbSet<Meeting> Meetings { get; set; }
-        public DbSet<PreRegistration> Preregistrations {get; set;}
+        public DbSet<Blog> Meetings { get; set; }
+        public DbSet<Post> Preregistrations {get; set;}
 
         public EF7BloggContext()
         {
@@ -59,10 +59,10 @@ namespace DataAccess
             //modelBuilder.Model.GetEntityType(typeof(Meeting)).GetProperty("ID").GenerateValueOnAdd = true;
             //modelBuilder.Entity<Meeting>().Key(p => p.ID);
             //modelBuilder.Entity<Meeting>().Property(p => p.ID).GenerateValueOnAdd();
-            modelBuilder.Entity<Meeting>()
-                .Collection(b => b.PreRegistrations)
-                .InverseReference(b => b.Meeting)
-                .ForeignKey(k => k.MeetingId);
+            modelBuilder.Entity<Blog>()
+                .Collection(b => b.Posts)
+                .InverseReference(b => b.Blog)
+                .ForeignKey(k => k.BlogId);
 
 
             

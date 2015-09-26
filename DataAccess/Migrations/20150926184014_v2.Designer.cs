@@ -9,9 +9,14 @@ using Microsoft.Data.Entity.SqlServer.Metadata;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(EF7BloggContext))]
-    partial class EF7BloggContextModelSnapshot : ModelSnapshot
+    partial class v2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        public override string Id
+        {
+            get { return "20150926184014_v2"; }
+        }
+
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .Annotation("ProductVersion", "7.0.0-beta7-15540")

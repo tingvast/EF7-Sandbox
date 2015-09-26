@@ -22,21 +22,21 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreateBusinessObject()
         {
-            PreRegistration prereg;
+            Post prereg;
             using (var uow = UoWFactory.Create())
             {
                 #region Arrange
 
                 var rep = uow.Create();
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = _fixture.Create<string>();
-                prereg.Text1 = _fixture.Create<string>();
+                prereg.Date = _fixture.Create<string>();
 
                 #endregion Arrange
 
                 #region Act
 
-                var persitedPreRegistration = rep.Create<PreRegistration>(prereg);
+                var persitedPreRegistration = rep.Create<Post>(prereg);
 
                 uow.Commit();
 
@@ -46,29 +46,29 @@ namespace EF7Tests
 
                 #region Assert
 
-                PreRegistration retrievedPreRegistration = null;
-                SqlConnection connection = new SqlConnection("Server = (localdb)\\ProjectsV12; Database = EF7; Trusted_Connection = true; MultipleActiveResultSets = True");
-                SqlCommand command = new SqlCommand(
-          string.Format("SELECT Id, MeetingId, Text, Text1 FROM PreRegistration WHERE Id = {0};", persitedPreRegistration.Id),
-          connection);
-                connection.Open();
+          //      Post retrievedPreRegistration = null;
+          //      SqlConnection connection = new SqlConnection("Server = (localdb)\\ProjectsV12; Database = EF7; Trusted_Connection = true; MultipleActiveResultSets = True");
+          //      SqlCommand command = new SqlCommand(
+          //string.Format("SELECT Id, MeetingId, Text, Text1 FROM PreRegistration WHERE Id = {0};", persitedPreRegistration.Id),
+          //connection);
+          //      connection.Open();
 
-                SqlDataReader reader = command.ExecuteReader();
+          //      SqlDataReader reader = command.ExecuteReader();
 
-                if (reader.HasRows)
-                {
-                    retrievedPreRegistration = new PreRegistration();
-                    while (reader.Read())
-                    {
-                        retrievedPreRegistration.Id = reader.GetInt32(0);
-                        retrievedPreRegistration.MeetingId = reader.IsDBNull(1) ? -1 : reader.GetInt32(1);
-                        retrievedPreRegistration.Text = reader.IsDBNull(2) ? "null" : reader.GetString(2);
-                        retrievedPreRegistration.Text1 = reader.IsDBNull(3) ? "null" : reader.GetString(3);
-                    }
-                }
+          //      if (reader.HasRows)
+          //      {
+          //          retrievedPreRegistration = new Post();
+          //          while (reader.Read())
+          //          {
+          //              retrievedPreRegistration.Id = reader.GetInt32(0);
+          //              retrievedPreRegistration.BlogId = reader.IsDBNull(1) ? -1 : reader.GetInt32(1);
+          //              retrievedPreRegistration.Text = reader.IsDBNull(2) ? "null" : reader.GetString(2);
+          //              retrievedPreRegistration.Date = reader.IsDBNull(3) ? "null" : reader.GetString(3);
+          //          }
+          //      }
 
-                Assert.IsNotNull(retrievedPreRegistration);
-                Assert.AreEqual(persitedPreRegistration.Id, retrievedPreRegistration.Id);
+          //      Assert.IsNotNull(retrievedPreRegistration);
+          //      Assert.AreEqual(persitedPreRegistration.Id, retrievedPreRegistration.Id);
 
                 #endregion Assert
             }
@@ -77,16 +77,16 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreateAnotherBusinessObject()
         {
-            PreRegistration prereg;
+            Post prereg;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Meeting
+                var meeting = new Blog
                 {
-                    Location = _fixture.Create<string>()
+                    Author = _fixture.Create<string>()
                 };
 
-                var k = rep.Create<Meeting>(meeting);
+                var k = rep.Create<Blog>(meeting);
 
                 uow.Commit();
             }

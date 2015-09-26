@@ -197,7 +197,7 @@ namespace DataAccess
                           whereCallExpression,
                            lambd11a);
 
-                    var provider = ((IQueryable)context.Set<PreRegistration>()).Provider;
+                    var provider = ((IQueryable)context.Set<Post>()).Provider;
                     var theMethods = typeof(IQueryProvider).GetMethods();
                     var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
                     var speciifMethod = createQMethd.MakeGenericMethod(constructor11.ReflectedType);
@@ -308,28 +308,28 @@ namespace DataAccess
 
         //    //return Expression.Lambda<Func<T, bool>>()
         //}
-        public Meeting Retrieve(int j, int id)
+        public Blog Retrieve(int j, int id)
         {
             //var m11 = (from e in context.Set<Meeting>()
             //    join p in context.Set<PreRegistration>() on e.Id equals p.MeetingId
             //    where e.Id == id
             //    select new {e.Location, p.Text});
 
-            var entiry = context.Set<Meeting>().
-                Include(m => m.PreRegistrations).
+            var entiry = context.Set<Blog>().
+                Include(m => m.Posts).
                 Where(m => m.Id == id).
-                Select(m => new { l = m.Location, p = m.PreRegistrations.Count }).
+                Select(m => new { l = m.Author, p = m.Posts.Count }).
                 Single();
 
-            var ddd = (from pp in context.Set<PreRegistration>() where pp.MeetingId == id select new { pp.Text });
-            var entiry44 = context.Set<Meeting>().
+            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { pp.Text });
+            var entiry44 = context.Set<Blog>().
                 //Include(m => m.PreRegistrations).
                 Where(m => m.Id == id).
-                Select(m => new { m.Location, yy = ddd.ToList() }).
+                Select(m => new { m.Author, yy = ddd.ToList() }).
                 Single();
 
-            var entiry11 = context.Set<Meeting>().
-                Include(m => m.PreRegistrations).
+            var entiry11 = context.Set<Blog>().
+                Include(m => m.Posts).
                 Where(m => m.Id == id).
                 //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
                 Single();
@@ -340,7 +340,7 @@ namespace DataAccess
             //    //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
             //    Single();
 
-            var retEntity = Mapper.DynamicMap<Meeting>(entiry);
+            var retEntity = Mapper.DynamicMap<Blog>(entiry);
             //var entiry = context.Set<Meeting>().
             //    //Include(m => m.PreRegistrations).
             //    Where(m => m.ID == id).
@@ -517,22 +517,23 @@ namespace DataAccess
 
                 var anonymousTypeOfNavigationPropertyProjection = AnonymousTypeUtils.CreateType(navigationPropertyAnoymousTypeProperties);
 
-                var anonymousTypeOfNavigationPropertyProjectionConstructor = anonymousTypeOfNavigationPropertyProjection.GetConstructor(navigationPropertyAnoymousTypeProperties.Select(kv => kv.Value).ToArray());
+                var anonymousTypeOfNavigationPropertyProjectionConstructor = anonymousTypeOfNavigationPropertyProjection
+                    .GetConstructor(navigationPropertyAnoymousTypeProperties.Select(kv => kv.Value).ToArray());
                 var typeOfSubProj = anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType;
 
                 var selectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
-                var genericSelectMethgod = selectMethod.MakeGenericMethod(navigationProperyType, typeOfSubProj);
+                var genericSelectMethod = selectMethod.MakeGenericMethod(navigationProperyType, typeOfSubProj);
 
                 var newInstanceOfTheGenericType = Expression.New(anonymousTypeOfNavigationPropertyProjectionConstructor, navigationPropertyAnoymousTypePropertiesValues);
 
                 var projectionLamdba = Expression.Lambda(newInstanceOfTheGenericType, p1);
 
                 MethodCallExpression selctCallExpression = Expression.Call(
-                      genericSelectMethgod,
+                      genericSelectMethod,
                       whereCallExpression,
                       projectionLamdba);
 
-                var provider = ((IQueryable)context.Set<PreRegistration>()).Provider;
+                var provider = ((IQueryable)context.Set<Post>()).Provider;
                 var theMethods = typeof(IQueryProvider).GetMethods();
                 var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
                 var speciifMethod = createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
@@ -568,6 +569,8 @@ namespace DataAccess
                 .Where(e => e.Id == id)
                 .Select(lambd11a1)
                 .Single();
+
+            System.Diagnostics.Debugger.Break();
 
 
 

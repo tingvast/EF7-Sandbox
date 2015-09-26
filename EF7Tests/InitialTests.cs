@@ -27,52 +27,52 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreateAnotherBusinessObject11()
         {
-            PreRegistration prereg;
+            Post prereg;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Meeting
+                var meeting = new Blog
                 {
-                    Location = _fixture.Create<string>()
+                    Author = _fixture.Create<string>()
                 };
 
-                var k = rep.Create<Meeting>(meeting);
+                var k = rep.Create<Blog>(meeting);
 
 
 
                 uow.Commit();
 
 
-                var kk = rep.Retrieve<Meeting>(k.Id);
+                var kk = rep.Retrieve<Blog>(k.Id);
             }
         }
 
         [TestMethod]
         public void CanCreateGraph()
         {
-            PreRegistration prereg;
-            Meeting createdMeeting;
+            Post prereg;
+            Blog createdMeeting;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Meeting
+                var meeting = new Blog
                 {
-                    Location = _fixture.Create<string>()
+                    Author = _fixture.Create<string>()
                 };
 
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = _fixture.Create<string>();
-                prereg.Text1 = _fixture.Create<string>();
-                prereg.Meeting = meeting;
+                prereg.Date = _fixture.Create<string>();
+                prereg.Blog = meeting;
 
-                meeting.PreRegistrations.Add(prereg);
+                meeting.Posts.Add(prereg);
 
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = _fixture.Create<string>();
-                prereg.Text1 = _fixture.Create<string>();
-                prereg.Meeting = meeting;
+                prereg.Date = _fixture.Create<string>();
+                prereg.Blog = meeting;
 
-                meeting.PreRegistrations.Add(prereg);
+                meeting.Posts.Add(prereg);
 
                 createdMeeting = rep.CreateGraph(meeting);
 
@@ -99,8 +99,8 @@ namespace EF7Tests
                 //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
                 //  createdMeeting.Id, p => new { ff = p.Location, fff = (from ggg in p.PreRegistrations where ggg.Id == createdMeeting.Id select new { ggg.Text }).ToList() });
 
-                var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
-                      createdMeeting.Id, p => new { ff = p.Location, ffff = p.Location1, fff = p.PreRegistrations.Select(pp => pp.Text) });
+                var retrievedMeetingWithPrereg = rep.Retrieve<Blog, dynamic>(
+                      createdMeeting.Id, p => new { ff = p.Author, ffff = p.Location, fff = p.Posts.Select(pp => pp.Text) });
 
                 //var retrievedMeetingWithPrereg = rep.Retrieve<Meeting, dynamic>(
                 //          createdMeeting.Id, p => new { ff = p.Location });
@@ -110,34 +110,35 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreateGraph2()
         {
-            PreRegistration prereg;
-            Meeting createdMeeting;
+            Post prereg;
+            Blog createdMeeting;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Meeting
+                var meeting = new Blog
                 {
+                    Author = _fixture.Create<string>(),
                     Location = _fixture.Create<string>()
                 };
 
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = _fixture.Create<string>();
-                prereg.Text1 = _fixture.Create<string>();
-                prereg.Meeting = meeting;
+                prereg.Date = _fixture.Create<string>();
+                prereg.Blog = meeting;
 
-                var prereg2 = new PreRegistration2();
-                prereg2.Value = _fixture.Create<string>();
-                prereg2.Meeting = meeting;
+                var prereg2 = new Follower();
+                prereg2.Name = _fixture.Create<string>();
+                prereg2.Blog = meeting;
 
-                meeting.PreRegistrations.Add(prereg);
-                meeting.PreRegistrations2.Add(prereg2);
+                meeting.Posts.Add(prereg);
+                meeting.Followers.Add(prereg2);
 
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = _fixture.Create<string>();
-                prereg.Text1 = _fixture.Create<string>();
-                prereg.Meeting = meeting;
+                prereg.Date = _fixture.Create<string>();
+                prereg.Blog = meeting;
 
-                meeting.PreRegistrations.Add(prereg);
+                meeting.Posts.Add(prereg);
 
                 createdMeeting = rep.CreateGraph(meeting);
 
@@ -149,11 +150,11 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                var projector = PropertyProjectorFactory<Meeting>.Create();
+                var projector = PropertyProjectorFactory<Blog>.Create();
                 var projection = projector
-                    .Select(m => m.Location, m => m.Location1)
-                    .Include<PreRegistration>(p => p.Text, p => p.Text1)
-                    .Include<PreRegistration2>(p => p.Value);
+                    .Select(m => m.Author, m => m.Location)
+                    .Include<Post>(p => p.Text, p => p.Date)
+                    .Include<Follower>(p => p.Name);
 
                 rep.RetrieveById(createdMeeting.Id, projection);
             }
@@ -162,21 +163,21 @@ namespace EF7Tests
         [TestMethod]
         public void CanRetrieveGraph()
         {
-            PreRegistration prereg;
+            Post prereg;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Meeting
+                var meeting = new Blog
                 {
-                    Location = "My Location",
+                    Author = "My Location",
                 };
 
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = "First pre registration";
-                prereg.Text1 = "Additional text";
-                prereg.Meeting = meeting;
+                prereg.Date = "Additional text";
+                prereg.Blog = meeting;
 
-                meeting.PreRegistrations.Add(prereg);
+                meeting.Posts.Add(prereg);
 
                 var createdMeeting = rep.CreateGraph(meeting);
 
@@ -191,29 +192,29 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate3()
         {
-            PreRegistration prereg;
+            Post prereg;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = "First pre registration";
-                prereg.Text1 = "Additional text";
+                prereg.Date = "Additional text";
 
-                var k = rep.Create<PreRegistration>(prereg);
+                var k = rep.Create<Post>(prereg);
 
                 uow.Commit();
             }
 
-            var meeting = new Meeting();
-            meeting.Location = "Location 1";
+            var meeting = new Blog();
+            meeting.Author = "Location 1";
             prereg.Text = "Update preregistratioon text";
-            prereg.Meeting = meeting;
-            meeting.PreRegistrations.Add(prereg);
+            prereg.Blog = meeting;
+            meeting.Posts.Add(prereg);
 
-            var prereg1 = new PreRegistration();
+            var prereg1 = new Post();
             prereg1.Text = "New pre registratoob";
-            prereg1.Meeting = meeting;
-            meeting.PreRegistrations.Add(prereg1);
+            prereg1.Blog = meeting;
+            meeting.Posts.Add(prereg1);
 
             using (var uow = UoWFactory.Create())
             {
@@ -229,13 +230,13 @@ namespace EF7Tests
         {
             using (var uow = UoWFactory.Create())
             {
-                var meeting = new Meeting();
-                meeting.Location = "MyLocation1";
+                var meeting = new Blog();
+                meeting.Author = "MyLocation1";
 
-                var preReg = new PreRegistration();
+                var preReg = new Post();
                 preReg.Text = "MyPre reg";
                 //preReg.Meeting = meeting;
-                meeting.PreRegistrations.Add(preReg);
+                meeting.Posts.Add(preReg);
 
                 var repository = uow.Create();
 
@@ -247,8 +248,8 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate5()
         {
-            var meeting = new Meeting();
-            meeting.Location = "kljljk";
+            var meeting = new Blog();
+            meeting.Author = "kljljk";
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -258,7 +259,7 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            var preReg = new PreRegistration();
+            var preReg = new Post();
             preReg.Text = "lkajlkaj";
 
             using (var uow = UoWFactory.Create())
@@ -270,7 +271,7 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            meeting.PreRegistrations.Add(preReg);
+            meeting.Posts.Add(preReg);
 
             using (var uow = UoWFactory.Create())
             {
@@ -285,8 +286,8 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate6()
         {
-            var meeting = new Meeting();
-            meeting.Location = "kljljk";
+            var meeting = new Blog();
+            meeting.Author = "kljljk";
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -296,7 +297,7 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            var preReg = new PreRegistration();
+            var preReg = new Post();
             preReg.Text = "lkajlkaj";
 
             using (var uow = UoWFactory.Create())
@@ -308,9 +309,9 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            var newPreReg = new PreRegistration();
+            var newPreReg = new Post();
             newPreReg.Text = "kjlhkjhkjhkjhk";
-            meeting.PreRegistrations.AddRange(new List<PreRegistration>() { preReg, newPreReg });
+            meeting.Posts.AddRange(new List<Post>() { preReg, newPreReg });
 
             using (var uow = UoWFactory.Create())
             {
@@ -325,8 +326,8 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate7()
         {
-            var meeting = new Meeting();
-            meeting.Location = "kljljk";
+            var meeting = new Blog();
+            meeting.Author = "kljljk";
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -336,7 +337,7 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            var preReg = new PreRegistration();
+            var preReg = new Post();
             preReg.Text = "lkajlkaj";
 
             using (var uow = UoWFactory.Create())
@@ -348,9 +349,9 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            var newPreReg = new PreRegistration();
+            var newPreReg = new Post();
             newPreReg.Text = "kjlhkjhkjhkjhk";
-            meeting.PreRegistrations.AddRange(new List<PreRegistration>() { newPreReg, preReg });
+            meeting.Posts.AddRange(new List<Post>() { newPreReg, preReg });
 
             using (var uow = UoWFactory.Create())
             {
@@ -365,8 +366,8 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreate8()
         {
-            var meeting = new Meeting();
-            meeting.Location = "kljljk";
+            var meeting = new Blog();
+            meeting.Author = "kljljk";
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -376,7 +377,7 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            var preReg = new PreRegistration();
+            var preReg = new Post();
             preReg.Text = "lkajlkaj";
 
             using (var uow = UoWFactory.Create())
@@ -388,9 +389,9 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            var newPreReg = new PreRegistration();
+            var newPreReg = new Post();
             newPreReg.Text = "kjlhkjhkjhkjhk";
-            meeting.PreRegistrations.AddRange(new List<PreRegistration>() { newPreReg, preReg });
+            meeting.Posts.AddRange(new List<Post>() { newPreReg, preReg });
 
             using (var uow = UoWFactory.Create())
             {
@@ -416,8 +417,8 @@ namespace EF7Tests
         {
             #region Arrange
 
-            var meeting = new Meeting();
-            meeting.Location = "kljljk";
+            var meeting = new Blog();
+            meeting.Author = "kljljk";
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -431,13 +432,13 @@ namespace EF7Tests
 
             #region Act
 
-            meeting.Location = "new Location";
+            meeting.Author = "new Location";
 
             using (var uow1 = UoWFactory.Create())
             {
                 var repository = uow1.Create();
 
-                var updatedMeeting = repository.Update(meeting, p => p.Location);
+                var updatedMeeting = repository.Update(meeting, p => p.Author);
 
                 uow1.Commit();
             }

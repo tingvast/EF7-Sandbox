@@ -68,7 +68,7 @@ namespace DataAccess.Interaces
 
         T Retrieve<T, TResult>(int id, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity;
 
-        Meeting Retrieve(int j, int id);
+        Blog Retrieve(int j, int id);
 
         T RetrieveReadonly<T, TResult>(int id, Func<T, TResult> selectedProperties) where T : class, IEntity;
 

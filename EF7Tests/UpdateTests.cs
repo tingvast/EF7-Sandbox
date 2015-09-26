@@ -26,20 +26,20 @@ namespace EF7Tests
         {
             #region Arrange
 
-            PreRegistration retrieved = null;
+            Post retrieved = null;
             using (var uow = UoWFactory.Create())
             {
-                PreRegistration prereg;
+                Post prereg;
                 var rep = uow.Create();
-                prereg = new PreRegistration();
+                prereg = new Post();
                 prereg.Text = _fixture.Create<string>();
-                prereg.Text1 = _fixture.Create<string>();
+                prereg.Date = _fixture.Create<string>();
 
-                var k = rep.Create<PreRegistration>(prereg);
+                var k = rep.Create<Post>(prereg);
 
                 uow.Commit();
 
-                retrieved = rep.Retrieve<PreRegistration, dynamic>(k.Id, p => new { p.Text });
+                retrieved = rep.Retrieve<Post, dynamic>(k.Id, p => new { p.Text });
             }
 
             #endregion Arrange
