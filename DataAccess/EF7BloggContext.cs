@@ -59,10 +59,10 @@ namespace DataAccess
             //modelBuilder.Model.GetEntityType(typeof(Meeting)).GetProperty("ID").GenerateValueOnAdd = true;
             //modelBuilder.Entity<Meeting>().Key(p => p.ID);
             //modelBuilder.Entity<Meeting>().Property(p => p.ID).GenerateValueOnAdd();
-            modelBuilder.Entity<Meeting>().
-                Collection(b => b.PreRegistrations).
-                InverseReference(b => b.Meeting).
-                ForeignKey(k => k.MeetingId);
+            modelBuilder.Entity<Meeting>()
+                .Collection(b => b.PreRegistrations)
+                .InverseReference(b => b.Meeting)
+                .ForeignKey(k => k.MeetingId);
 
 
             

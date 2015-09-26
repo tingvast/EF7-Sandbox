@@ -408,7 +408,7 @@ namespace DataAccess
 
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) =>
             {
-                if (e.State == EntityState.Detached)
+                if (((EntityState)e.State) == EntityState.Detached)
                 {
                     if (e.IsKeySet)
                     {

@@ -22,12 +22,12 @@ namespace DataAccess
             
 
 
-            var loggingFactory = new TestSqlLoggerFactory();
+            //var loggingFactory = new TestSqlLoggerFactory();
             var serviceProvider = new ServiceCollection()
                    .AddEntityFramework()
                    .AddSqlServer()
                    .GetService()
-                   .AddInstance<ILoggerFactory>(loggingFactory)
+                   //.AddInstance<ILoggerFactory>(loggingFactory)
                    .BuildServiceProvider();
 
             this.context = new EF7BloggContext(serviceProvider);
