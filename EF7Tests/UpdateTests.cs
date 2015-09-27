@@ -1,11 +1,8 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using Core;
+using DataAccess;
+using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
-using Core;
-using DataAccess.Interaces;
-using DataAccess;
 
 namespace EF7Tests
 {
@@ -40,17 +37,17 @@ namespace EF7Tests
 
                 uow.Commit();
 
-
                 var projector = PropertyProjectorFactory<Post>.Create();
                 projector
                     .Select(p => p.Text, p => p.Date);
-                    
+
                 retrievedPost = rep.RetrieveById(persistedPost.Id, projector);
             }
 
             #endregion Arrange
 
             #region Act
+
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();

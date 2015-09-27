@@ -1,10 +1,8 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using Core;
+using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
-using Core;
-using DataAccess.Interaces;
+using System.Collections.Generic;
 
 namespace EF7Tests
 {
@@ -95,7 +93,6 @@ namespace EF7Tests
             }
         }
 
-
         [TestMethod]
         public void CanCreate6()
         {
@@ -135,8 +132,6 @@ namespace EF7Tests
                 uow.Commit();
             }
         }
-
-
 
         [TestMethod]
         public void CanCreate7()

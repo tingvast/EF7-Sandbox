@@ -4,15 +4,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DataAccess
 {
     public static class Class1
     {
-
         public static IQueryable SelectDynamic(this IQueryable source, IEnumerable<string> fieldNames)
         {
             Dictionary<string, PropertyInfo> sourceProperties = fieldNames.ToDictionary(name => name, name => source.ElementType.GetProperty(name));
@@ -28,12 +25,11 @@ namespace DataAccess
                          Expression.Constant(source), selector));
         }
 
-
-
         public static class LinqRuntimeTypeBuilder
         {
             //private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
             private static AssemblyName assemblyName = new AssemblyName() { Name = "DynamicLinqTypes" };
+
             private static ModuleBuilder moduleBuilder = null;
             private static Dictionary<string, Type> builtTypes = new Dictionary<string, Type>();
 
@@ -87,7 +83,6 @@ namespace DataAccess
 
                 return null;
             }
-
 
             private static string GetTypeKey(IEnumerable<PropertyInfo> fields)
             {

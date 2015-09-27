@@ -1,25 +1,16 @@
-﻿using Microsoft.Data.Entity;
+﻿using Core;
+using Microsoft.Data.Entity;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.Entity.Metadata;
-using Core;
-using Microsoft.Data.Entity.Infrastructure;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Logging;
 
 namespace DataAccess
 {
     public class EF7BloggContext : DbContext
     {
         public DbSet<Blog> Meetings { get; set; }
-        public DbSet<Post> Preregistrations {get; set;}
+        public DbSet<Post> Preregistrations { get; set; }
 
         public EF7BloggContext()
         {
-            
         }
 
         public EF7BloggContext(IServiceProvider provider)
@@ -31,12 +22,7 @@ namespace DataAccess
             //    .GetService()
             //    .BuildServiceProvider();
 
-
-
             //var f = serviceProvider.GetService<ILoggerFactory>();
-
-
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -52,7 +38,6 @@ namespace DataAccess
         {
             base.OnModelCreating(modelBuilder);
 
-
             //modelBuilder.Entity<PreRegistration>().Property(p => p.ID).GenerateValueOnAdd();
             //modelBuilder.Entity<PreRegistration>().Key(p => p.ID);
             ////modelBuilder.Entity<Blogg>().Property(p => p.Id).GenerateValueOnAdd();
@@ -63,12 +48,8 @@ namespace DataAccess
                 .Collection(b => b.Posts)
                 .InverseReference(b => b.Blog)
                 .ForeignKey(k => k.BlogId);
-                
-
-
-            
-           
         }
+
         //protected override void OnModelCreating(DbModelBuilder modelBuilder)
         //{
         //    base.OnModelCreating(modelBuilder);

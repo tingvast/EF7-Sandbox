@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -53,7 +51,7 @@ namespace LatticeUtils
         /// Creates an anonymous object for the specified name/value pairs with the specified anonymous type.
         /// </summary>
         /// <remarks>
-        /// This version of the <c>CreateObject</c> method can be used when it's necessary to have more control 
+        /// This version of the <c>CreateObject</c> method can be used when it's necessary to have more control
         /// over how the anonymous type is generated.
         /// </remarks>
         /// <param name="valueDictionary">mappings of property names to values</param>
@@ -138,14 +136,14 @@ namespace LatticeUtils
             // * Use a hash of the property names instead of the counter (the "0" in the above example)
 
             // That counter in a real anonymous type is zero for the first anonymous type, one for the second, two for the third, etc.
-            // We could store a global counter to do the same thing, but then using the same set of property names 
+            // We could store a global counter to do the same thing, but then using the same set of property names
             // could generate a different type name depending on how many types you've already generated.
-            // But it makes things easier if we have a deterministic name generation strategy,  
+            // But it makes things easier if we have a deterministic name generation strategy,
             // so we're going to use a hash of the property names instead of a global counter.
             string propertyNameHashHexString;
             using (var hasher = new SHA1Managed())
             {
-                // Doesn't really matter how we join these property names together, as long as we'll never 
+                // Doesn't really matter how we join these property names together, as long as we'll never
                 // have two types with different property names that generate the same hash value.
                 // So we'll use a comma delimiter and escape any commas in the property names with two commas.
                 var propertyNameDelimitedString = string.Join(",", propertyNames.Select(n => n.Replace(",", ",,")));
@@ -159,7 +157,7 @@ namespace LatticeUtils
                 propertyNames.Count
             );
 
-            // We need to check for the type and define/create it as one atomic operation, 
+            // We need to check for the type and define/create it as one atomic operation,
             // otherwise we could get a TypeBuilder back instead of a full Type.
             Type genericTypeDefinition;
             lock (syncRoot)
@@ -257,12 +255,15 @@ namespace LatticeUtils
                     case 0:
                         constructorIlGenerator.Emit(OpCodes.Ldarg_1);
                         break;
+
                     case 1:
                         constructorIlGenerator.Emit(OpCodes.Ldarg_2);
                         break;
+
                     case 2:
                         constructorIlGenerator.Emit(OpCodes.Ldarg_3);
                         break;
+
                     default:
                         constructorIlGenerator.Emit(OpCodes.Ldarg_S, index + 1);
                         break;

@@ -1,22 +1,18 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading;
 using log4net;
 using log4net.Config;
 using Microsoft.Framework.Logging;
-
+using System;
+using System.Runtime.Remoting.Messaging;
+using System.Threading;
 
 namespace MyNameSpace
 {
     public class TestSqlLoggerFactory : ILoggerFactory
     {
         private const string ContextName = "__SQL";
-
 
         public LogLevel MinimumLevel { get; set; }
 
@@ -25,7 +21,7 @@ namespace MyNameSpace
             //Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
             //var kk = System.Configuration.ConfigurationManager.GetSection("system.xml/xmlReader");
 
-            var l =  Logger;
+            var l = Logger;
 
             return l;
         }
@@ -49,8 +45,6 @@ namespace MyNameSpace
         {
             get
             {
-
-                
                 var logger = new SqlLogger();// CallContext.LogicalGetData(ContextName);
 
                 //var evidence = AppDomain.CurrentDomain.Evidence;
@@ -67,7 +61,6 @@ namespace MyNameSpace
 
         public static void Reset()
         {
-
             CallContext.LogicalSetData(ContextName, null);
         }
 
@@ -79,13 +72,13 @@ namespace MyNameSpace
         //[Serializable]
         private class SqlLogger : ILogger
         {
-            
             private static readonly ILog log = LogManager.GetLogger(typeof(SqlLogger));
 
             public SqlLogger()
             {
                 BasicConfigurator.Configure();
             }
+
             //public readonly StringBuilder _log = new StringBuilder();
             public void Log(
                 LogLevel logLevel,
@@ -101,8 +94,7 @@ namespace MyNameSpace
                 }
 
                 var format = formatter(state, exception)?.Trim();
-               log.Info(state);
-               
+                log.Info(state);
             }
 
             public bool IsEnabled(LogLevel logLevel)
@@ -117,9 +109,9 @@ namespace MyNameSpace
 
             // ReSharper disable InconsistentNaming
 
-
             //public ITestOutputHelper _testOutputHelper;
             public CancellationTokenSource _cancellationTokenSource;
+
             // ReSharper restore InconsistentNaming
         }
     }

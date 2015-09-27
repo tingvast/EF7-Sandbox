@@ -2,11 +2,7 @@
 using EF7;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess
 {
@@ -18,13 +14,12 @@ namespace DataAccess
         }
 
         public NavigationProperty(string name, Type type)
-            :this()
+            : this()
         {
             Name = name;
             Type = type;
         }
 
-        
         public string Name { get; set; }
         public Type Type { get; set; }
 
@@ -52,21 +47,17 @@ namespace DataAccess
         }
     }
 
-
-    public class PropertyProjector<T> : IPropertyProjector<T> , IIncludePropertySelector<T> where T : class, IEntity
+    public class PropertyProjector<T> : IPropertyProjector<T>, IIncludePropertySelector<T> where T : class, IEntity
     {
-
         public PropertyProjector()
         {
             AllProjections = new TheDate();
-
         }
 
         public IProjections AllProjections
         {
             get; private set;
         }
-
 
         public IIncludePropertySelector<T> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity
         {
@@ -77,7 +68,7 @@ namespace DataAccess
             navigationProperty.Projections.AddRange(p);
 
             AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
-            
+
             return this;
         }
 

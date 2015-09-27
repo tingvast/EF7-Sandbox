@@ -2,7 +2,6 @@
 using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
-using System.Data.SqlClient;
 
 namespace EF7Tests
 {
@@ -18,8 +17,6 @@ namespace EF7Tests
         {
             _fixture = new Fixture();
         }
-
-
 
         [TestMethod]
         public void CanCreateBusinessObject()
@@ -42,35 +39,33 @@ namespace EF7Tests
 
                 uow.Commit();
 
-
-
                 #endregion Act
 
                 #region Assert
 
-          //      Post retrievedPreRegistration = null;
-          //      SqlConnection connection = new SqlConnection("Server = (localdb)\\ProjectsV12; Database = EF7; Trusted_Connection = true; MultipleActiveResultSets = True");
-          //      SqlCommand command = new SqlCommand(
-          //string.Format("SELECT Id, MeetingId, Text, Text1 FROM PreRegistration WHERE Id = {0};", persitedPreRegistration.Id),
-          //connection);
-          //      connection.Open();
+                //      Post retrievedPreRegistration = null;
+                //      SqlConnection connection = new SqlConnection("Server = (localdb)\\ProjectsV12; Database = EF7; Trusted_Connection = true; MultipleActiveResultSets = True");
+                //      SqlCommand command = new SqlCommand(
+                //string.Format("SELECT Id, MeetingId, Text, Text1 FROM PreRegistration WHERE Id = {0};", persitedPreRegistration.Id),
+                //connection);
+                //      connection.Open();
 
-          //      SqlDataReader reader = command.ExecuteReader();
+                //      SqlDataReader reader = command.ExecuteReader();
 
-          //      if (reader.HasRows)
-          //      {
-          //          retrievedPreRegistration = new Post();
-          //          while (reader.Read())
-          //          {
-          //              retrievedPreRegistration.Id = reader.GetInt32(0);
-          //              retrievedPreRegistration.BlogId = reader.IsDBNull(1) ? -1 : reader.GetInt32(1);
-          //              retrievedPreRegistration.Text = reader.IsDBNull(2) ? "null" : reader.GetString(2);
-          //              retrievedPreRegistration.Date = reader.IsDBNull(3) ? "null" : reader.GetString(3);
-          //          }
-          //      }
+                //      if (reader.HasRows)
+                //      {
+                //          retrievedPreRegistration = new Post();
+                //          while (reader.Read())
+                //          {
+                //              retrievedPreRegistration.Id = reader.GetInt32(0);
+                //              retrievedPreRegistration.BlogId = reader.IsDBNull(1) ? -1 : reader.GetInt32(1);
+                //              retrievedPreRegistration.Text = reader.IsDBNull(2) ? "null" : reader.GetString(2);
+                //              retrievedPreRegistration.Date = reader.IsDBNull(3) ? "null" : reader.GetString(3);
+                //          }
+                //      }
 
-          //      Assert.IsNotNull(retrievedPreRegistration);
-          //      Assert.AreEqual(persitedPreRegistration.Id, retrievedPreRegistration.Id);
+                //      Assert.IsNotNull(retrievedPreRegistration);
+                //      Assert.AreEqual(persitedPreRegistration.Id, retrievedPreRegistration.Id);
 
                 #endregion Assert
             }
@@ -106,15 +101,10 @@ namespace EF7Tests
 
                 var createdBlog = rep.Create<Blog>(blog);
 
-
-
                 uow.Commit();
-
 
                 var retrievedBlog = rep.Retrieve<Blog>(createdBlog.Id);
             }
         }
-
-
     }
 }

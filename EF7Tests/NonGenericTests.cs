@@ -1,10 +1,7 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using Core;
+using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
-using Core;
-using DataAccess.Interaces;
 
 namespace EF7Tests
 {
@@ -16,7 +13,6 @@ namespace EF7Tests
     {
         private Fixture _fixture;
 
-
         public NonGenericTests()
         {
             _fixture = new Fixture();
@@ -25,8 +21,8 @@ namespace EF7Tests
         [TestMethod]
         public void CanRetrieveBlogNonGeneric()
         {
-
             #region Arrange
+
             Blog createdBlog;
             Post post;
             using (var uow = UoWFactory.Create())
@@ -49,9 +45,10 @@ namespace EF7Tests
                 uow.Commit();
             }
 
-            #endregion
+            #endregion Arrange
 
             #region Act
+
             Blog retrievedBlog = null;
             using (var uow = UoWFactory.Create())
             {
@@ -59,15 +56,13 @@ namespace EF7Tests
                 retrievedBlog = rep.RetrieveBlogNonGeneric(createdBlog.Id);
             }
 
-            #endregion
+            #endregion Act
 
             #region Assert
 
             Assert.IsNotNull(retrievedBlog);
 
-            #endregion
-
-
+            #endregion Assert
         }
     }
 }

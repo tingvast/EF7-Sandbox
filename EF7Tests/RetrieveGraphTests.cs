@@ -1,35 +1,24 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.Generic;
 
 namespace EF7Tests
 {
-    using System;
+    using Core;
+    using DataAccess;
+    using DataAccess.Interaces;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
-    using Core;
-    using DataAccess.Interaces;
-    using DataAccess;
 
     namespace EF7Tests
     {
-
-
-
         [TestClass]
         public class RetrieveGraphTests
         {
-
             private Fixture _fixture;
-
 
             public RetrieveGraphTests()
             {
                 _fixture = new Fixture();
             }
-
-
 
             [TestMethod]
             public void CanCreate8()
@@ -79,16 +68,14 @@ namespace EF7Tests
                     var repository = uow.Create();
 
                     var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, projector);
-
                 }
-
             }
-
 
             [TestMethod]
             public void CanUpdate34()
             {
                 #region Arrange
+
                 var blog = new Blog();
                 blog.Author = _fixture.Create<string>();
                 var post = new Post();
@@ -105,9 +92,10 @@ namespace EF7Tests
                     uow.Commit();
                 }
 
-                #endregion
+                #endregion Arrange
 
                 #region Act
+
                 var newPost = new Post();
                 newPost.Text = _fixture.Create<string>();
                 blog.Posts.AddRange(new List<Post>() { newPost, post });
@@ -121,9 +109,10 @@ namespace EF7Tests
                     uow.Commit();
                 }
 
-                #endregion
+                #endregion Act
 
                 #region Assert
+
                 var projector = PropertyProjectorFactory<Blog>.Create();
                 projector.Select(p => p.Author)
                     .Include<Post>(p => p.Text);
@@ -133,13 +122,10 @@ namespace EF7Tests
                     var repository = uow.Create();
 
                     var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, projector);
-
                 }
-                #endregion
+
+                #endregion Assert
             }
-
-
-
         }
     }
 }

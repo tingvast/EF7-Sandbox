@@ -308,60 +308,6 @@ namespace DataAccess
 
         //    //return Expression.Lambda<Func<T, bool>>()
         //}
-        public Blog RetrieveBlogNonGeneric(int id)
-        {
-            //var m11 = (from e in context.Set<Meeting>()
-            //    join p in context.Set<PreRegistration>() on e.Id equals p.MeetingId
-            //    where e.Id == id
-            //    select new {e.Location, p.Text});
-
-            var entiry = context.Set<Blog>().
-                Include(m => m.Posts).
-                Where(m => m.Id == id).
-                Select(m => new { l = m.Author, p = m.Posts.Count }).
-                Single();
-
-            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { pp.Text });
-            var entiry44 = context.Set<Blog>().
-                //Include(m => m.PreRegistrations).
-                Where(m => m.Id == id).
-                Select(m => new { m.Author, yy = ddd.ToList() }).
-                Single();
-
-            var entiry11 = context.Set<Blog>().
-                Include(m => m.Posts).
-                Where(m => m.Id == id).
-                //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
-                Single();
-
-            //var entiry12 = context.Set<Meeting>().
-            //    Include(m => m.PreRegistrations.Select(p => new { p.Text })).
-            //    Where(m => m.Id == id).
-            //    //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
-            //    Single();
-
-            var retEntity = Mapper.DynamicMap<Blog>(entiry);
-            //var entiry = context.Set<Meeting>().
-            //    //Include(m => m.PreRegistrations).
-            //    Where(m => m.ID == id).
-            //    Select(m => new { m = m.Location }).//, k = m.PreRegistrations.Select(p => new { p.Text }) }).
-            //    //Select(m => new { Meeting = new { m.Location }, PreRegs = m.PreRegistrations }).
-            //    Single();
-            //var kk = from m in context.Set<Meeting>()
-            //         where m.ID == id
-            //         select new { kalle = m.PreRegistrations.Select(p => p.Text)};
-
-            //var ff = kk.ToList();
-            //var retEntity = Mapper.DynamicMap<Meeting>(entiry);
-            //context.ChangeTracker.Entries<Meeting>().First().StateEntry.
-            //var navprop = context.Model.GetEntityType(typeof(Meeting))..Navigations.First();
-            //var nav = navprop.EntityType.TryGetNavigation("kkj");
-            //var en = nav.EntityType;
-            //var preregistrations = context.Preregistrations.Where(p => p.MeetingID == id);
-
-            //var retEntity = Mapper.Map<Meeting>(entiry);
-            return retEntity;
-        }
 
         public T RetrieveReadonly<T, TResult>(int id, Func<T, TResult> selectedProperties) where T : class, IEntity
         {
@@ -570,8 +516,7 @@ namespace DataAccess
                 .Select(lambd11a1)
                 .Single();
 
-
-            if(selector.AllProjections.NavigationPropertiesProjections.Count() > 0)
+            if (selector.AllProjections.NavigationPropertiesProjections.Count() > 0)
             {
                 // TODO : Fix the Mapping back to entity when enity has navigation properties
 
@@ -579,8 +524,6 @@ namespace DataAccess
             }
 
             //System.Diagnostics.Debugger.Break();
-
-            
 
             var retEntity = Mapper.DynamicMap<T>(projectedEntity);
             retEntity.Id = id;
@@ -629,6 +572,61 @@ namespace DataAccess
                         nwtwDynamically,//nwtw
                         Expression.Lambda(e1, new ParameterExpression[] { pe }));
             return whereCallExpression;
+        }
+
+        public Blog RetrieveBlogNonGeneric(int id)
+        {
+            //var m11 = (from e in context.Set<Meeting>()
+            //    join p in context.Set<PreRegistration>() on e.Id equals p.MeetingId
+            //    where e.Id == id
+            //    select new {e.Location, p.Text});
+
+            var entiry = context.Set<Blog>().
+                Include(m => m.Posts).
+                Where(m => m.Id == id).
+                Select(m => new { l = m.Author, p = m.Posts.Count }).
+                Single();
+
+            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { pp.Text });
+            var entiry44 = context.Set<Blog>().
+                //Include(m => m.PreRegistrations).
+                Where(m => m.Id == id).
+                Select(m => new { m.Author, yy = ddd.ToList() }).
+                Single();
+
+            var entiry11 = context.Set<Blog>().
+                Include(m => m.Posts).
+                Where(m => m.Id == id).
+                //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
+                Single();
+
+            //var entiry12 = context.Set<Meeting>().
+            //    Include(m => m.PreRegistrations.Select(p => new { p.Text })).
+            //    Where(m => m.Id == id).
+            //    //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
+            //    Single();
+
+            var retEntity = Mapper.DynamicMap<Blog>(entiry);
+            //var entiry = context.Set<Meeting>().
+            //    //Include(m => m.PreRegistrations).
+            //    Where(m => m.ID == id).
+            //    Select(m => new { m = m.Location }).//, k = m.PreRegistrations.Select(p => new { p.Text }) }).
+            //    //Select(m => new { Meeting = new { m.Location }, PreRegs = m.PreRegistrations }).
+            //    Single();
+            //var kk = from m in context.Set<Meeting>()
+            //         where m.ID == id
+            //         select new { kalle = m.PreRegistrations.Select(p => p.Text)};
+
+            //var ff = kk.ToList();
+            //var retEntity = Mapper.DynamicMap<Meeting>(entiry);
+            //context.ChangeTracker.Entries<Meeting>().First().StateEntry.
+            //var navprop = context.Model.GetEntityType(typeof(Meeting))..Navigations.First();
+            //var nav = navprop.EntityType.TryGetNavigation("kkj");
+            //var en = nav.EntityType;
+            //var preregistrations = context.Preregistrations.Where(p => p.MeetingID == id);
+
+            //var retEntity = Mapper.Map<Meeting>(entiry);
+            return retEntity;
         }
     }
 }

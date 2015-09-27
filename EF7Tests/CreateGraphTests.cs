@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Core;
+using DataAccess;
+using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
-using Core;
-using DataAccess.Interaces;
-using DataAccess;
 using System.Linq;
 
 namespace EF7Tests
@@ -12,7 +11,6 @@ namespace EF7Tests
     public class CreateGraphTests
     {
         private Fixture _fixture;
-
 
         public CreateGraphTests()
         {
@@ -97,7 +95,6 @@ namespace EF7Tests
                 createdBlog = rep.CreateGraph(blog);
 
                 uow.Commit();
-
             }
 
             using (var uow = UoWFactory.Create())
