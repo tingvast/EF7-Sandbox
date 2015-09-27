@@ -63,5 +63,46 @@ namespace EF7Tests
 
             #endregion Act
         }
+
+        [TestMethod]
+        public void CanUpdateSelectedProperties()
+        {
+            #region Arrange
+
+            var blog = new Blog();
+            blog.Author = _fixture.Create<string>();
+            using (var uow = UoWFactory.Create())
+            {
+                var repository = uow.Create();
+
+                var updatedBlog = repository.UpdateGraph(blog);
+
+                uow.Commit();
+            }
+
+            #endregion Arrange
+
+            #region Act
+
+            blog.Author = _fixture.Create<string>();
+
+            using (var uow1 = UoWFactory.Create())
+            {
+                var repository = uow1.Create();
+
+                var updatedBlog = repository.Update(blog, p => p.Author);
+
+                uow1.Commit();
+            }
+
+            #endregion Act
+
+            #region Assert
+
+            var uow2 = UoWFactory.Create();
+            var r = uow2.Create();
+
+            #endregion Assert
+        }
     }
 }

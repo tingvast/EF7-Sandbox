@@ -308,7 +308,7 @@ namespace DataAccess
 
         //    //return Expression.Lambda<Func<T, bool>>()
         //}
-        public Blog Retrieve(int j, int id)
+        public Blog RetrieveBlogNonGeneric(int id)
         {
             //var m11 = (from e in context.Set<Meeting>()
             //    join p in context.Set<PreRegistration>() on e.Id equals p.MeetingId

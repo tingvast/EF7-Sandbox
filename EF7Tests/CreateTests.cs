@@ -19,6 +19,8 @@ namespace EF7Tests
             _fixture = new Fixture();
         }
 
+
+
         [TestMethod]
         public void CanCreateBusinessObject()
         {
@@ -77,7 +79,6 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreateAnotherBusinessObject()
         {
-            Post prereg;
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
@@ -92,6 +93,28 @@ namespace EF7Tests
             }
         }
 
-       
+        [TestMethod]
+        public void CanCreateAnotherBusinessObject11()
+        {
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+                var blog = new Blog
+                {
+                    Author = _fixture.Create<string>()
+                };
+
+                var createdBlog = rep.Create<Blog>(blog);
+
+
+
+                uow.Commit();
+
+
+                var retrievedBlog = rep.Retrieve<Blog>(createdBlog.Id);
+            }
+        }
+
+
     }
 }
