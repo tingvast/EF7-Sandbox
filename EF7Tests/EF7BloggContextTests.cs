@@ -93,9 +93,9 @@ namespace EF7Tests
                 var retrievedBlog = db.Set<Blog>()
                     .Include(p => p.Posts)
                     .ToList();
-                    //.Select(p => new { p.Author })
-                    //.ToList();
-                    //.SelectDynamic(new[] { nameof(Blog.Author) });
+                //.Select(p => new { p.Author })
+                //.ToList();
+                //.SelectDynamic(new[] { nameof(Blog.Author) });
 
                 foreach (var blog1 in retrievedBlog)
                 {

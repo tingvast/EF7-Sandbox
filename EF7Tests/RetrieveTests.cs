@@ -52,7 +52,6 @@ namespace EF7Tests
             }
         }
 
-
         [TestMethod]
         public void CanRetrieveByIdSelectedPropertiesFromBusinessObject()
         {
@@ -73,6 +72,7 @@ namespace EF7Tests
                 #endregion Arrange
 
                 #region Act
+
                 var projector = PropertyProjectorFactory<Blog>.Create();
                 projector.Select(p => p.Name)
                     .Include<Post>(p => p.Text);

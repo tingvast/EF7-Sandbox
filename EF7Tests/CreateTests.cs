@@ -54,12 +54,15 @@ namespace EF7Tests
         public void CanCreateManyBusinessObjectWithoutRoundtrips()
         {
             #region Arrange
+
             var blog1 = new Blog() { Name = _fixture.Create<string>() };
             var blog2 = new Blog() { Name = _fixture.Create<string>() };
             var blog3 = new Blog() { Name = _fixture.Create<string>() };
-            #endregion
+
+            #endregion Arrange
 
             #region Act
+
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
@@ -69,12 +72,14 @@ namespace EF7Tests
 
                 uow.Commit();
             }
-            #endregion
+
+            #endregion Act
 
             #region Assert
-            // TODO
-            #endregion
 
+            // TODO
+
+            #endregion Assert
         }
 
         [TestMethod]

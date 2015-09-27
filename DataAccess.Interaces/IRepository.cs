@@ -40,42 +40,47 @@ namespace DataAccess.Interaces
     public interface IRepository
     {
         #region Create
+
         T Create<T>(T entity) where T : class, IEntity;
 
         List<T> CreateMany<T>(params T[] entities) where T : class, IEntity;
 
         T CreateGraph<T>(T entityWithRelations) where T : class, IEntity;
 
-        #endregion
+        #endregion Create
 
         #region Retrieve
+
         T RetrieveById<T>(int id, IPropertyProjector<T> selector) where T : class, IEntity;
 
         T Retrieve<T>(int id) where T : class, IEntity;
-        
+
         T RetrieveReadonly<T, TResult>(int id, Func<T, TResult> selectedProperties) where T : class, IEntity;
 
-        #endregion
+        #endregion Retrieve
 
         #region Update
+
         T Update<T>(T entity) where T : class, IEntity;
 
         T Update<T, TResult>(T entity, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity;
 
         T UpdateGraph<T>(T entityWithRelations) where T : class, IEntity;
 
-        #endregion
+        #endregion Update
 
         #region Delete
+
         void Delete<T>(T entity) where T : class, IEntity;
 
-        #endregion
+        #endregion Delete
 
         #region Obsolete
 
         T RetrieveObsolete<T, TResult>(int id, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity;
+
         Blog RetrieveBlogNonGeneric(int id);
 
-        #endregion
+        #endregion Obsolete
     }
 }

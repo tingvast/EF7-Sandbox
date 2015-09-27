@@ -50,7 +50,6 @@ namespace EF7Tests
             #endregion Assert
         }
 
-
         [TestMethod]
         public void CanCreateGraph2()
         {
