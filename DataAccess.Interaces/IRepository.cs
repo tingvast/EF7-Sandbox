@@ -41,6 +41,8 @@ namespace DataAccess.Interaces
     {
         T Create<T>(T entity) where T : class, IEntity;
 
+        List<T> CreateMany<T>(params T[] entities) where T : class, IEntity;
+
         T CreateGraph<T>(T entityWithRelations) where T : class, IEntity;
 
         T Retrieve<T>(int id) where T : class, IEntity;

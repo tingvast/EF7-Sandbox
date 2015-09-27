@@ -24,7 +24,7 @@ namespace EF7Tests
             public void CanCreate8()
             {
                 var blog = new Blog();
-                blog.Author = _fixture.Create<string>();
+                blog.Name = _fixture.Create<string>();
                 using (var uow = UoWFactory.Create())
                 {
                     var repository = uow.Create();
@@ -60,7 +60,7 @@ namespace EF7Tests
                 }
 
                 var projector = PropertyProjectorFactory<Blog>.Create();
-                projector.Select(p => p.Author)
+                projector.Select(p => p.Name)
                     .Include<Post>(p => p.Text);
 
                 using (var uow = UoWFactory.Create())
@@ -77,7 +77,7 @@ namespace EF7Tests
                 #region Arrange
 
                 var blog = new Blog();
-                blog.Author = _fixture.Create<string>();
+                blog.Name = _fixture.Create<string>();
                 var post = new Post();
                 post.Text = _fixture.Create<string>();
 
@@ -114,7 +114,7 @@ namespace EF7Tests
                 #region Assert
 
                 var projector = PropertyProjectorFactory<Blog>.Create();
-                projector.Select(p => p.Author)
+                projector.Select(p => p.Name)
                     .Include<Post>(p => p.Text);
 
                 using (var uow = UoWFactory.Create())

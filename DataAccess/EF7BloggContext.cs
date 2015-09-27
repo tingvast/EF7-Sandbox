@@ -6,8 +6,8 @@ namespace DataAccess
 {
     public class EF7BloggContext : DbContext
     {
-        public DbSet<Blog> Meetings { get; set; }
-        public DbSet<Post> Preregistrations { get; set; }
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Post> Posts { get; set; }
 
         public EF7BloggContext()
         {

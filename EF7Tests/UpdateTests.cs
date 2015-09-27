@@ -67,7 +67,7 @@ namespace EF7Tests
             #region Arrange
 
             var blog = new Blog();
-            blog.Author = _fixture.Create<string>();
+            blog.Name = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -81,13 +81,13 @@ namespace EF7Tests
 
             #region Act
 
-            blog.Author = _fixture.Create<string>();
+            blog.Name = _fixture.Create<string>();
 
             using (var uow1 = UoWFactory.Create())
             {
                 var repository = uow1.Create();
 
-                var updatedBlog = repository.Update(blog, p => p.Author);
+                var updatedBlog = repository.Update(blog, p => p.Name);
 
                 uow1.Commit();
             }

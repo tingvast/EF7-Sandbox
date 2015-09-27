@@ -32,6 +32,13 @@ namespace DataAccess
             return entity;
         }
 
+        public List<T> CreateMany<T>(params T[] entities) where T : class, IEntity
+        {
+            context.Set<T>().AddRange(entities);
+
+            return entities.ToList();
+        }
+
         public T CreateGraph<T>(T entityWithRelations) where T : class, IEntity
         {
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) => e.State = EntityState.Added);
@@ -584,14 +591,14 @@ namespace DataAccess
             var entiry = context.Set<Blog>().
                 Include(m => m.Posts).
                 Where(m => m.Id == id).
-                Select(m => new { l = m.Author, p = m.Posts.Count }).
+                Select(m => new { l = m.Name, p = m.Posts.Count }).
                 Single();
 
             var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { pp.Text });
             var entiry44 = context.Set<Blog>().
                 //Include(m => m.PreRegistrations).
                 Where(m => m.Id == id).
-                Select(m => new { m.Author, yy = ddd.ToList() }).
+                Select(m => new { m.Name, yy = ddd.ToList() }).
                 Single();
 
             var entiry11 = context.Set<Blog>().

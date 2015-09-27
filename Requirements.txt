@@ -42,3 +42,14 @@ Alt1: (Too verbose)
 Retrive<Blog>(ID, p1 => new { p1.Summary, p2 => new {p2.Posts.Text }}) // To retrieve the blog in
 Alt2: (Shorter)
 Retrive<Blog>(ID, p1 => new { p1.Summary, p1.Posts.Text }}) // To retrieve the blog in
+
+
+
+
+Validate Projector parameter, so that the correct type is used. This should throw!
+ var projector = PropertyProjectorFactory<Blog>.Create();
+                projector.Select(p => p.Author)
+                    .Include<AnyOtherType>(p => p.Text);
+
+                var retrievedBlog = rep.RetrieveById<Blog>(createdBlog.Id, projector);
+

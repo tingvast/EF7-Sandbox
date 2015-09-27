@@ -36,7 +36,7 @@ namespace EF7Tests
             }
 
             var blog = new Blog();
-            blog.Author = _fixture.Create<string>();
+            blog.Name = _fixture.Create<string>();
             post.Text = _fixture.Create<string>();
             post.Blog = blog;
             blog.Posts.Add(post);
@@ -59,7 +59,7 @@ namespace EF7Tests
         public void CanCreate5()
         {
             var blog = new Blog();
-            blog.Author = _fixture.Create<string>();
+            blog.Name = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -97,7 +97,7 @@ namespace EF7Tests
         public void CanCreate6()
         {
             var blog = new Blog();
-            blog.Author = _fixture.Create<string>();
+            blog.Name = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -137,7 +137,7 @@ namespace EF7Tests
         public void CanCreate7()
         {
             var blog = new Blog();
-            blog.Author = _fixture.Create<string>();
+            blog.Name = _fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();

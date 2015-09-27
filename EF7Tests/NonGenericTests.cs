@@ -30,7 +30,7 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var blog = new Blog
                 {
-                    Author = _fixture.Create<string>()
+                    Name = _fixture.Create<string>()
                 };
 
                 post = new Post();

@@ -142,6 +142,10 @@
     <Compile Include="Migrations\20150926184014_v2.designer.cs">
       <DependentUpon>20150926184014_v2.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20150927145053_v3.cs" />
+    <Compile Include="Migrations\20150927145053_v3.designer.cs">
+      <DependentUpon>20150927145053_v3.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\EF7BloggContextModelSnapshot.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="Repository.cs" />

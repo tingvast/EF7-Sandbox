@@ -21,90 +21,170 @@ namespace EF7Tests
         [TestMethod]
         public void CanCreateBusinessObject()
         {
-            Post prereg;
+            #region Arrange
+
+            var blog = new Blog
+            {
+                Name = _fixture.Create<string>()
+            };
+
+            #endregion Arrange
+
+            #region Act
+
             using (var uow = UoWFactory.Create())
             {
-                #region Arrange
-
                 var rep = uow.Create();
-                prereg = new Post();
-                prereg.Text = _fixture.Create<string>();
-                prereg.Date = _fixture.Create<string>();
 
-                #endregion Arrange
-
-                #region Act
-
-                var persitedPreRegistration = rep.Create<Post>(prereg);
+                var persistedBlog = rep.Create<Blog>(blog);
 
                 uow.Commit();
-
-                #endregion Act
-
-                #region Assert
-
-                //      Post retrievedPreRegistration = null;
-                //      SqlConnection connection = new SqlConnection("Server = (localdb)\\ProjectsV12; Database = EF7; Trusted_Connection = true; MultipleActiveResultSets = True");
-                //      SqlCommand command = new SqlCommand(
-                //string.Format("SELECT Id, MeetingId, Text, Text1 FROM PreRegistration WHERE Id = {0};", persitedPreRegistration.Id),
-                //connection);
-                //      connection.Open();
-
-                //      SqlDataReader reader = command.ExecuteReader();
-
-                //      if (reader.HasRows)
-                //      {
-                //          retrievedPreRegistration = new Post();
-                //          while (reader.Read())
-                //          {
-                //              retrievedPreRegistration.Id = reader.GetInt32(0);
-                //              retrievedPreRegistration.BlogId = reader.IsDBNull(1) ? -1 : reader.GetInt32(1);
-                //              retrievedPreRegistration.Text = reader.IsDBNull(2) ? "null" : reader.GetString(2);
-                //              retrievedPreRegistration.Date = reader.IsDBNull(3) ? "null" : reader.GetString(3);
-                //          }
-                //      }
-
-                //      Assert.IsNotNull(retrievedPreRegistration);
-                //      Assert.AreEqual(persitedPreRegistration.Id, retrievedPreRegistration.Id);
-
-                #endregion Assert
             }
+
+            #endregion Act
+
+            #region Assert
+
+            // TODO.
+
+            #endregion Assert
+        }
+
+        [TestMethod]
+        public void CanCreateBusinessObjectWithoutRoundtrips()
+        {
+            #region Arrange
+            var blog1 = new Blog() { Name = _fixture.Create<string>() };
+            var blog2 = new Blog() { Name = _fixture.Create<string>() };
+            var blog3 = new Blog() { Name = _fixture.Create<string>() };
+            #endregion
+
+            #region Act
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                // This will generate one batch sql command to the database (instead of as in previous versions on EF one for each object.)
+                var persistedBlog = rep.CreateMany<Blog>(new[] { blog1, blog2, blog3 });
+
+                uow.Commit();
+            }
+            #endregion
+
+            #region Assert
+            // TODO
+            #endregion
+
         }
 
         [TestMethod]
         public void CanCreateAnotherBusinessObject()
         {
+            #region Arrange
+
+            Post post;
+
+            post = new Post();
+            post.Text = _fixture.Create<string>();
+            post.Date = _fixture.Create<string>();
+
+            #endregion Arrange
+
+            #region Act
+
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var meeting = new Blog
-                {
-                    Author = _fixture.Create<string>()
-                };
-
-                var k = rep.Create<Blog>(meeting);
+                var persitedPost = rep.Create<Post>(post);
 
                 uow.Commit();
             }
+
+            #endregion Act
+
+            #region Assert
+
+            // TODO.
+
+            #endregion Assert
         }
 
         [TestMethod]
-        public void CanCreateAnotherBusinessObject11()
+        [ExpectedException(typeof(Microsoft.Data.Entity.DbUpdateException))]
+        public void CanNotCreateTheSameBusinessObjectExpectedException()
         {
+            #region Arrange
+
+            Post post;
+
+            post = new Post();
+            post.Text = _fixture.Create<string>();
+            post.Date = _fixture.Create<string>();
+
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var blog = new Blog
-                {
-                    Author = _fixture.Create<string>()
-                };
-
-                var createdBlog = rep.Create<Blog>(blog);
+                var persitedPost = rep.Create<Post>(post);
 
                 uow.Commit();
 
-                var retrievedBlog = rep.Retrieve<Blog>(createdBlog.Id);
+                #endregion Arrange
+
+                #region Act
+
+                persitedPost = rep.Create<Post>(post);
+
+                uow.Commit();
+
+                #endregion Act
             }
+
+            #region Assert
+
+            // TODO.
+
+            #endregion Assert
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Microsoft.Data.Entity.DbUpdateException))]
+        public void CanNotCreateTheSameBusinessObjectUsingDisconnectedScenarioExpectedException()
+        {
+            #region Arrange
+
+            Post post;
+
+            post = new Post();
+            post.Text = _fixture.Create<string>();
+            post.Date = _fixture.Create<string>();
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+                var persitedPreRegistration = rep.Create<Post>(post);
+
+                uow.Commit();
+            }
+
+            #endregion Arrange
+
+            #region Act
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+                var persitedPost = rep.Create<Post>(post);
+
+                uow.Commit();
+            }
+
+            #endregion Act
+
+            #region Assert
+
+            // TODO.
+
+            #endregion Assert
         }
     }
 }
