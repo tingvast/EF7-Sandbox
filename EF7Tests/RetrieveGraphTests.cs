@@ -67,7 +67,7 @@ namespace EF7Tests
                 var projector = PropertyProjectorFactory<Blog>.Create();
                 projector
                     .Select(p => p.Name)
-                    .Include<Post>(p => p.Text);
+                    .Include<Post>(m => m.Posts, p => p.Text);
 
                 using (var uow = UoWFactory.Create())
                 {
@@ -122,7 +122,7 @@ namespace EF7Tests
                 var projector = PropertyProjectorFactory<Blog>.Create();
                 projector
                     .Select(p => p.Name)
-                    .Include<Post>(p => p.Text);
+                    .Include<Post>(m => m.Posts, p => p.Date, p => p.Text);
 
                 using (var uow = UoWFactory.Create())
                 {

@@ -23,7 +23,6 @@ namespace DataAccess
         }
 
         public string ReferingPropertyName { get; set; }
-
         public string Name { get; set; }
         public Type Type { get; set; }
 
@@ -61,20 +60,6 @@ namespace DataAccess
         public IProjections AllProjections
         {
             get; private set;
-        }
-
-        public IIncludePropertySelector<T> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity
-        {
-            var navigationProperty = new NavigationProperty(
-                    "Dummy",
-                    typeof(TProperty).Name,
-                    typeof(TProperty));
-
-            navigationProperty.Projections.AddRange(p);
-
-            AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
-
-            return this;
         }
 
         IIncludePropertySelector<T> IPropertyProjector<T>.Include<TProperty>(Expression<Func<T, dynamic>> navigationPropery, params Expression<Func<TProperty, dynamic>>[] properties)

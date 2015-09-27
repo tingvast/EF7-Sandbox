@@ -164,15 +164,16 @@ namespace DataAccess
 
                 foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
                 {
-                    var prop = typeof(T).GetProperty(projection.Name + "s");
-                    var prop1 = projectedEntityAnonymousType.GetProperty(projection.Name);
+                    var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
+                    var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);
 
-                    var mmmm = mm.MakeGenericMethod(projection.Type);
+                    
 
-                    var value = (IEnumerable)prop1.GetValue(projectedEntity);
+                    var value = (IEnumerable)navigationPropertyOnProjectedAnonymousType.GetValue(projectedEntity);
                     Type yayyaya = typeof(List<>);
                     Type kjakja = yayyaya.MakeGenericType(new[] { projection.Type });
 
+                    var mmmm = mm.MakeGenericMethod(projection.Type);
                     IList instance1 = (IList)Activator.CreateInstance(kjakja);
                     foreach (var v in value)
                     {
@@ -181,7 +182,7 @@ namespace DataAccess
                         instance1.Add(kaja);
                     }
 
-                    prop.SetValue(mainEntity, instance1);
+                    navigationPropertyOnMainEntity.SetValue(mainEntity, instance1);
                 }
             }
 

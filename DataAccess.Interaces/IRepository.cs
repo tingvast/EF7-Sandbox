@@ -8,6 +8,7 @@ namespace DataAccess.Interaces
 {
     public interface INavigationProperty
     {
+        string ReferingPropertyName { get; set; }
         string Name { get; set; }
         Type Type { get; set; }
 
@@ -26,10 +27,6 @@ namespace DataAccess.Interaces
         IProjections AllProjections { get; }
 
         IPropertyProjector<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
-
-        //IPropertyProjector<TEntity> Where(params Expression<Func<TEntity, dynamic>>[] p1);
-
-        IIncludePropertySelector<TEntity> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity;
 
         IIncludePropertySelector<TEntity> Include<TProperty>(Expression<Func<TEntity, dynamic>> navigationPropery, params Expression<Func<TProperty, dynamic>>[] properties) where TProperty : class, IEntity;
     }
