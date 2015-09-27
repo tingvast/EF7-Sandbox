@@ -132,7 +132,7 @@
     <Compile Include="RetrieveTests.cs" />
     <Compile Include="RetrieveGraphTests.cs" />
     <Compile Include="CreateGraphTests.cs" />
-    <Compile Include="TableValuedFunctions.cs" />
+    <Compile Include="EF7BloggContextTests.cs" />
     <Compile Include="UpdateGraphTests.cs" />
     <Compile Include="UpdateTests.cs" />
   </ItemGroup>

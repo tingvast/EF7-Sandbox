@@ -51,7 +51,7 @@ namespace EF7Tests
         }
 
         [TestMethod]
-        public void CanCreateBusinessObjectWithoutRoundtrips()
+        public void CanCreateManyBusinessObjectWithoutRoundtrips()
         {
             #region Arrange
             var blog1 = new Blog() { Name = _fixture.Create<string>() };
@@ -64,7 +64,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                // This will generate one batch sql command to the database (instead of as in previous versions on EF one for each object.)
+                // This will generate one batch sql command to the database.
                 var persistedBlog = rep.CreateMany<Blog>(new[] { blog1, blog2, blog3 });
 
                 uow.Commit();

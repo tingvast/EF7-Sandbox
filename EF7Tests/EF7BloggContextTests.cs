@@ -8,11 +8,11 @@ using System.Linq;
 namespace EF7Tests
 {
     [TestClass]
-    public class TableValuedFunctions
+    public class EF7BloggContextTests
     {
         private Fixture _fixture;
 
-        public TableValuedFunctions()
+        public EF7BloggContextTests()
         {
             _fixture = new Fixture();
         }

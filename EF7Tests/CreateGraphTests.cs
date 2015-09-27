@@ -154,7 +154,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                var retrievedBlogWithPosts = rep.Retrieve<Blog, dynamic>(
+                var retrievedBlogWithPosts = rep.RetrieveObsolete<Blog, dynamic>(
                       createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.Text) });
             }
         }
