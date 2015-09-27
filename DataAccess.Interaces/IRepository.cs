@@ -30,6 +30,8 @@ namespace DataAccess.Interaces
         //IPropertyProjector<TEntity> Where(params Expression<Func<TEntity, dynamic>>[] p1);
 
         IIncludePropertySelector<TEntity> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity;
+
+        IIncludePropertySelector<TEntity> Include<TProperty>(Expression<Func<TEntity, dynamic>> navigationPropery, params Expression<Func<TProperty, dynamic>>[] properties) where TProperty : class, IEntity;
     }
 
     public interface IIncludePropertySelector<TEntity> : IPropertyProjector<TEntity> where TEntity : class, IEntity
@@ -51,7 +53,7 @@ namespace DataAccess.Interaces
 
         #region Retrieve
 
-        T RetrieveById<T>(int id, IPropertyProjector<T> selector) where T : class, IEntity;
+        T RetrieveById<T>(int id, IPropertyProjector<T> selectedProperties) where T : class, IEntity;
 
         T Retrieve<T>(int id) where T : class, IEntity;
 

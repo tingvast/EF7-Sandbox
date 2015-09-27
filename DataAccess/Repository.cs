@@ -8,6 +8,7 @@ using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Data.Entity.Query;
 using Microsoft.Framework.DependencyInjection;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -51,27 +52,13 @@ namespace DataAccess
 
         #region Retrieve
 
-        public T Retrieve<T>(int id) where T : class, IEntity
-        {
-            var retrievedEntity = context.Set<T>().SingleOrDefault(e => e.Id == id);
-            return retrievedEntity;
-        }
-
-        public T RetrieveReadonly<T, TResult>(int id, Func<T, TResult> selectedProperties) where T : class, IEntity
-        {
-            var entiry = context.Set<T>().AsNoTracking().Where(e => e.Id == id).Select(selectedProperties).Single();
-            var retEntity = Mapper.DynamicMap<T>(entiry);
-            return retEntity;
-        }
-
-        public T RetrieveById<T>(int id, IPropertyProjector<T> selector) where T : class, IEntity
+        public T RetrieveById<T>(int id, IPropertyProjector<T> selectedProperties) where T : class, IEntity
         {
             // The query will be projected onto an anonymous type.
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
             List<Expression> anonymousTypePropertiesValues = new List<Expression>();
-
             ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
-            foreach (var projection in selector.AllProjections.Projection)
+            foreach (var projection in selectedProperties.AllProjections.Projection)
             {
                 var projectionLambda = projection as LambdaExpression;
 
@@ -87,7 +74,7 @@ namespace DataAccess
                 anonymousTypePropertiesValues.Add(memberAccess);
             }
 
-            foreach (var navigationProperty in selector.AllProjections.NavigationPropertiesProjections)
+            foreach (var navigationProperty in selectedProperties.AllProjections.NavigationPropertiesProjections)
             {
                 var navigationProperyType = navigationProperty.Type;
 
@@ -114,10 +101,10 @@ namespace DataAccess
                 }
 
                 var anonymousTypeOfNavigationPropertyProjection = AnonymousTypeUtils.CreateType(navigationPropertyAnoymousTypeProperties);
-
+                Type typeOfSubProj = null;
                 var anonymousTypeOfNavigationPropertyProjectionConstructor = anonymousTypeOfNavigationPropertyProjection
                     .GetConstructor(navigationPropertyAnoymousTypeProperties.Select(kv => kv.Value).ToArray());
-                var typeOfSubProj = anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType;
+                typeOfSubProj = anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType;
 
                 var selectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
                 var genericSelectMethod = selectMethod.MakeGenericMethod(navigationProperyType, typeOfSubProj);
@@ -131,36 +118,35 @@ namespace DataAccess
                       whereCallExpression,
                       projectionLamdba);
 
-                var provider = ((IQueryable)context.Set<Post>()).Provider;
+                var provider = ((IQueryable)context.Set<Post>()).Provider; // TODO, how come this works for Followers???
                 var theMethods = typeof(IQueryProvider).GetMethods();
                 var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
                 var speciifMethod = createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
-
-                Type func = typeof(IEnumerable<>);
-                Type generic2323 = func.MakeGenericType(typeOfSubProj);
-
                 var navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] { selctCallExpression });
 
-                var tt = typeof(Enumerable).GetMethods();
-                var m133 = tt.Where(m => m.Name == "ToList").ToList()[0];
+                Type genericFunc = typeof(IEnumerable<>);
+                Type funcOfTypeOfSubProj = genericFunc.MakeGenericType(typeOfSubProj);
 
-                var genericMetgid2222 = m133.MakeGenericMethod(typeOfSubProj);
+                var allMethodsOnEnumerableClass = typeof(Enumerable).GetMethods();
+                var genericToListMethod = allMethodsOnEnumerableClass.Where(m => m.Name == "ToList").ToList()[0];
+
+                var toListOfTypeOfSubProj = genericToListMethod.MakeGenericMethod(typeOfSubProj);
 
                 MethodCallExpression toListExpression11 = Expression.Call(
-                    genericMetgid2222,
+                    toListOfTypeOfSubProj,
                     Expression.Constant(navigationProppertyQueryWithProjection1));
 
-                anonymousTypeProperties.Add(new KeyValuePair<string, Type>(navigationProperty.Name, generic2323));
+                anonymousTypeProperties.Add(new KeyValuePair<string, Type>(navigationProperty.Name, funcOfTypeOfSubProj));
                 anonymousTypePropertiesValues.Add(toListExpression11);
             }
 
-            var annnontype = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
+            var projectedEntityAnonymousType = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
 
-            var constructor = annnontype.GetConstructor(anonymousTypeProperties.Select(p => p.Value).ToArray());
+            var constructor = projectedEntityAnonymousType.GetConstructor(anonymousTypeProperties.Select(p => p.Value).ToArray());
 
-            var kkkkk = Expression.New(constructor, anonymousTypePropertiesValues);
+            var anonymousTypeInstance = Expression.New(constructor, anonymousTypePropertiesValues);
 
-            Expression<Func<T, dynamic>> lambd11a1 = Expression.Lambda<Func<T, dynamic>>(kkkkk, lambdaParameter);
+            Expression<Func<T, dynamic>> lambd11a1 = Expression.Lambda<Func<T, dynamic>>(anonymousTypeInstance, lambdaParameter);
 
             var projectedEntity = context.Set<T>()
                 .AsNoTracking()
@@ -168,17 +154,37 @@ namespace DataAccess
                 .Select(lambd11a1)
                 .Single();
 
-            if (selector.AllProjections.NavigationPropertiesProjections.Count() > 0)
-            {
-                // TODO : Fix the Mapping back to entity when enity has navigation properties
+            var mainEntity = Mapper.DynamicMap<T>(projectedEntity);
+            mainEntity.Id = id;
 
-                return default(T);
+            if (selectedProperties.AllProjections.NavigationPropertiesProjections.Count() > 0)
+            {
+                var akja = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public);
+                var mm = akja.Where(m => m.Name == "DynamicMap").ToList()[2];
+
+                foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
+                {
+                    var prop = typeof(T).GetProperty(projection.Name + "s");
+                    var prop1 = projectedEntityAnonymousType.GetProperty(projection.Name);
+
+                    var mmmm = mm.MakeGenericMethod(projection.Type);
+
+                    var value = (IEnumerable)prop1.GetValue(projectedEntity);
+                    Type yayyaya = typeof(List<>);
+                    Type kjakja = yayyaya.MakeGenericType(new[] { projection.Type });
+
+                    IList instance1 = (IList)Activator.CreateInstance(kjakja);
+                    foreach (var v in value)
+                    {
+                        var kaja = mmmm.Invoke(null, new object[] { v });
+
+                        instance1.Add(kaja);
+                    }
+
+                    prop.SetValue(mainEntity, instance1);
+                }
             }
 
-            //System.Diagnostics.Debugger.Break();
-
-            var retEntity = Mapper.DynamicMap<T>(projectedEntity);
-            retEntity.Id = id;
             var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
 
             if (alreadytrackedentity != null)
@@ -186,7 +192,20 @@ namespace DataAccess
                 // Remove it from tracking
                 alreadytrackedentity.State = EntityState.Detached;
             }
-            context.Attach(retEntity);
+            context.Attach(mainEntity);
+            return mainEntity;
+        }
+
+        public T Retrieve<T>(int id) where T : class, IEntity
+        {
+            var retrievedEntity = context.Set<T>().SingleOrDefault(e => e.Id == id);
+            return retrievedEntity;
+        }
+
+        public T RetrieveReadonly<T, TResult>(int id, Func<T, TResult> selectedProperties) where T : class, IEntity
+        {
+            var entiry = context.Set<T>().AsNoTracking().Where(e => e.Id == id).Select(selectedProperties).Single();
+            var retEntity = Mapper.DynamicMap<T>(entiry);
             return retEntity;
         }
 

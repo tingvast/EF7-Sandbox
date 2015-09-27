@@ -3,6 +3,7 @@ using EF7;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace DataAccess
 {
@@ -13,12 +14,15 @@ namespace DataAccess
             Projections = new List<Expression>();
         }
 
-        public NavigationProperty(string name, Type type)
+        public NavigationProperty(string referingPropertName, string name, Type type)
             : this()
         {
+            ReferingPropertyName = referingPropertName;
             Name = name;
             Type = type;
         }
+
+        public string ReferingPropertyName { get; set; }
 
         public string Name { get; set; }
         public Type Type { get; set; }
@@ -62,6 +66,7 @@ namespace DataAccess
         public IIncludePropertySelector<T> Include<TProperty>(params Expression<Func<TProperty, dynamic>>[] p) where TProperty : class, IEntity
         {
             var navigationProperty = new NavigationProperty(
+                    "Dummy",
                     typeof(TProperty).Name,
                     typeof(TProperty));
 
@@ -72,10 +77,27 @@ namespace DataAccess
             return this;
         }
 
-        //public IPropertyProjector<T> Include<TProperty>(IPropertyProjector<TProperty> propertySelector)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        IIncludePropertySelector<T> IPropertyProjector<T>.Include<TProperty>(Expression<Func<T, dynamic>> navigationPropery, params Expression<Func<TProperty, dynamic>>[] properties)
+        {
+            var navigationPropertyProjection = navigationPropery as LambdaExpression;
+
+            var member = navigationPropertyProjection.Body as MemberExpression;
+
+            var propertyInfo = (PropertyInfo)member.Member;
+
+            var propertyName = propertyInfo.Name;
+
+            var navigationProperty = new NavigationProperty(
+                   propertyName,
+                    typeof(TProperty).Name,
+                    typeof(TProperty));
+
+            navigationProperty.Projections.AddRange(properties);
+
+            AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
+
+            return this;
+        }
 
         public IPropertyProjector<T> Select(params Expression<Func<T, dynamic>>[] p1)
         {
@@ -83,40 +105,5 @@ namespace DataAccess
 
             return this;
         }
-
-        //public IPropertyProjector<T> SelectSimple(Expression<Func<T, dynamic>> f)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IPropertyProjector<T> Select<TProperty>(IPropertyProjector<TProperty> propertySelector, params Expression<Func<T, dynamic>>[] p1)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IPropertyProjector<TProperty> SelectNavigation<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> p)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IPropertyProjector<T> SelectNavigation<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> p, Expression<Func<TProperty, dynamic>> q)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IPropertyProjector<T> SelectSimple(Expression<Func<T, dynamic>> f)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IIncludePropertySelector<T> ThenInclude<TProperty>(params Expression<Func<TProperty, dynamic>>[] p)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IPropertyProjector<T> Where(params Expression<Func<T, dynamic>>[] p1)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

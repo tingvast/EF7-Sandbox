@@ -79,6 +79,35 @@ namespace EF7Tests
         }
 
         [TestMethod]
+        public void CanRetrieveAndAllNavigationPropertiesArePopulated()
+        {
+            var blog = new Blog()
+            {
+                Author = _fixture.Create<string>(),
+                Name = _fixture.Create<string>(),
+                Posts = new System.Collections.Generic.List<Post>()
+                {
+                    new Post() { Date = "20150909", Text = _fixture.Create<string>() },
+                    new Post() { Date = "20150909", Text = _fixture.Create<string>() }
+                }
+            };
+
+            using (var db = new EF7BloggContext())
+            {
+                db.ChangeTracker.TrackGraph(blog, c => c.State = EntityState.Added);
+
+                db.SaveChanges();
+            };
+
+            using (var db = new EF7BloggContext())
+            {
+                var retrievedBlog = db
+                    .Blogs.Include(b => b.Posts)
+                    .Single(b => b.Id == blog.Id);
+            };
+        }
+
+        [TestMethod]
         public void CanSelectDynamic()
         {
             using (var db = new EF7BloggContext())

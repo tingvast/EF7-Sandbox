@@ -21,7 +21,12 @@ namespace EF7Tests
             }
 
             [TestMethod]
-            public void CanCreate8()
+            public void CanRetrieve()
+            {
+            }
+
+            [TestMethod]
+            public void CanRetrieveById()
             {
                 var blog = new Blog();
                 blog.Name = _fixture.Create<string>();
@@ -29,7 +34,7 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var updatedBlog = repository.Create(blog);
+                    var createdBlog = repository.Create(blog);
 
                     uow.Commit();
                 }
@@ -60,7 +65,8 @@ namespace EF7Tests
                 }
 
                 var projector = PropertyProjectorFactory<Blog>.Create();
-                projector.Select(p => p.Name)
+                projector
+                    .Select(p => p.Name)
                     .Include<Post>(p => p.Text);
 
                 using (var uow = UoWFactory.Create())
@@ -72,7 +78,7 @@ namespace EF7Tests
             }
 
             [TestMethod]
-            public void CanUpdate34()
+            public void CanRetrieveById1()
             {
                 #region Arrange
 
@@ -87,7 +93,7 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var updatedBlog = repository.Create(post);
+                    var createdPost = repository.Create(post);
 
                     uow.Commit();
                 }
@@ -114,7 +120,8 @@ namespace EF7Tests
                 #region Assert
 
                 var projector = PropertyProjectorFactory<Blog>.Create();
-                projector.Select(p => p.Name)
+                projector
+                    .Select(p => p.Name)
                     .Include<Post>(p => p.Text);
 
                 using (var uow = UoWFactory.Create())

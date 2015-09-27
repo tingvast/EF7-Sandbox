@@ -107,10 +107,10 @@ namespace EF7Tests
                 var projector = PropertyProjectorFactory<Blog>.Create();
                 var projection = projector
                     .Select(m => m.Name, m => m.Description)
-                    .Include<Post>(p => p.Text, p => p.Date)
-                    .Include<Follower>(p => p.Name);
+                    .Include<Post>(m => m.Posts, p => p.Text, p => p.Date)
+                    .Include<Follower>(m => m.Followers, p => p.Name);
 
-                rep.RetrieveById(createdBlog.Id, projection);
+                var retrievedBlog = rep.RetrieveById(createdBlog.Id, projection);
             }
 
             #endregion Assert
