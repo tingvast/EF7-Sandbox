@@ -62,7 +62,7 @@ namespace DataAccess
             {
                 var projectionLambda = projection as LambdaExpression;
 
-                var member = projectionLambda.Body as MemberExpression;
+                MemberExpression member = CreateMemberExpression(projectionLambda);
 
                 var propertyInfo = (PropertyInfo)member.Member;
                 var propertyName = propertyInfo.Name;
@@ -88,7 +88,7 @@ namespace DataAccess
                 {
                     var navigationPropertyProjection = projection as LambdaExpression;
 
-                    var member = navigationPropertyProjection.Body as MemberExpression;
+                    MemberExpression member = CreateMemberExpression(navigationPropertyProjection);
 
                     var propertyInfo = (PropertyInfo)member.Member;
                     var propertyName = propertyInfo.Name;
@@ -118,7 +118,7 @@ namespace DataAccess
                       whereCallExpression,
                       projectionLamdba);
 
-                var provider = ((IQueryable)context.Set<Post>()).Provider; // TODO, how come this works for Followers???
+                var provider = ((IQueryable)context.Set<T>()).Provider; // TODO, Is it ok to assube navigation properties has the same provider?
                 var theMethods = typeof(IQueryProvider).GetMethods();
                 var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
                 var speciifMethod = createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
@@ -159,31 +159,7 @@ namespace DataAccess
 
             if (selectedProperties.AllProjections.NavigationPropertiesProjections.Count() > 0)
             {
-                var akja = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public);
-                var mm = akja.Where(m => m.Name == "DynamicMap").ToList()[2];
-
-                foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
-                {
-                    var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
-                    var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);
-
-                    
-
-                    var value = (IEnumerable)navigationPropertyOnProjectedAnonymousType.GetValue(projectedEntity);
-                    Type yayyaya = typeof(List<>);
-                    Type kjakja = yayyaya.MakeGenericType(new[] { projection.Type });
-
-                    var mmmm = mm.MakeGenericMethod(projection.Type);
-                    IList instance1 = (IList)Activator.CreateInstance(kjakja);
-                    foreach (var v in value)
-                    {
-                        var kaja = mmmm.Invoke(null, new object[] { v });
-
-                        instance1.Add(kaja);
-                    }
-
-                    navigationPropertyOnMainEntity.SetValue(mainEntity, instance1);
-                }
+                MaterializeNavigationProperties<T>(mainEntity, projectedEntity, projectedEntityAnonymousType, selectedProperties);
             }
 
             var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
@@ -197,9 +173,9 @@ namespace DataAccess
             return mainEntity;
         }
 
-        public T Retrieve<T>(int id) where T : class, IEntity
+        public IEnumerable<T> Retrieve<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderBy = null) where T : class, IEntity
         {
-            var retrievedEntity = context.Set<T>().SingleOrDefault(e => e.Id == id);
+            var retrievedEntity = context.Set<T>().Where(predicate).OrderBy(orderBy);
             return retrievedEntity;
         }
 
@@ -283,6 +259,56 @@ namespace DataAccess
         #endregion Delete
 
         #region Private Methods
+
+        private static MemberExpression CreateMemberExpression(LambdaExpression projectionLambda)
+        {
+            MemberExpression member;
+            switch (projectionLambda.Body.NodeType)
+            {
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
+                    var ue = projectionLambda.Body as UnaryExpression;
+                    member = ((ue != null) ? ue.Operand : null) as MemberExpression;
+                    break;
+
+                default:
+                    member = projectionLambda.Body as MemberExpression;
+                    break;
+            }
+
+            return member;
+        }
+
+        private static void MaterializeNavigationProperties<T>(
+        dynamic mainEntity,
+        dynamic projectedEntity,
+        Type projectedEntityAnonymousType,
+        IPropertyProjector<T> selectedProperties) where T : class, IEntity
+        {
+            Type genericListType = typeof(List<>);
+            var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];
+
+            foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
+            {
+                var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
+                var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);
+
+                var propertValues = (IEnumerable)navigationPropertyOnProjectedAnonymousType.GetValue(projectedEntity);
+
+                Type listOfTypeProjectionType = genericListType.MakeGenericType(new[] { projection.Type });
+
+                var mapperOfProjectionType = genericDynamicMapper.MakeGenericMethod(projection.Type);
+                IList navigationPropertyList = (IList)Activator.CreateInstance(listOfTypeProjectionType);
+                foreach (var value in propertValues)
+                {
+                    var valueOfNavigationPropertyProjection = mapperOfProjectionType.Invoke(null, new object[] { value });
+
+                    navigationPropertyList.Add(valueOfNavigationPropertyProjection);
+                }
+
+                navigationPropertyOnMainEntity.SetValue(mainEntity, navigationPropertyList);
+            }
+        }
 
         private static MethodInfo GetGenericMethod(Type declaringType, string methodName, Type[] typeArgs, params Type[] argTypes)
         {

@@ -28,7 +28,9 @@ namespace DataAccess.Interaces
 
         IPropertyProjector<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
 
-        IIncludePropertySelector<TEntity> Include<TProperty>(Expression<Func<TEntity, dynamic>> navigationPropery, params Expression<Func<TProperty, dynamic>>[] properties) where TProperty : class, IEntity;
+        IIncludePropertySelector<TEntity> Include<TProperty>(
+            Expression<Func<TEntity, dynamic>> navigationPropery,
+            params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
     }
 
     public interface IIncludePropertySelector<TEntity> : IPropertyProjector<TEntity> where TEntity : class, IEntity
@@ -52,7 +54,7 @@ namespace DataAccess.Interaces
 
         T RetrieveById<T>(int id, IPropertyProjector<T> selectedProperties) where T : class, IEntity;
 
-        T Retrieve<T>(int id) where T : class, IEntity;
+        IEnumerable<T> Retrieve<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderBy = null) where T : class, IEntity;
 
         T RetrieveReadonly<T, TResult>(int id, Func<T, TResult> selectedProperties) where T : class, IEntity;
 

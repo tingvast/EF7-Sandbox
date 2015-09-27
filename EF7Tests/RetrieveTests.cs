@@ -3,6 +3,8 @@ using DataAccess;
 using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EF7Tests
 {
@@ -40,7 +42,7 @@ namespace EF7Tests
 
                 #region Act
 
-                var retrievedBlog = rep.Retrieve<Blog>(createdBlog.Id);
+                //var retrievedBlog = rep.RetrieveById<Blog>(createdBlog.Id);
 
                 #endregion Act
 
@@ -91,6 +93,50 @@ namespace EF7Tests
         }
 
         [TestMethod]
+        public void CanRetrieveBusinessObjectSelectedIntProperty()
+        {
+            #region Arrange
+
+            Blog createdBlog;
+
+            var blog = new Blog
+            {
+                Name = _fixture.Create<string>(),
+                Description = _fixture.Create<string>()
+            };
+
+            #endregion Arrange
+
+            #region Act
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                createdBlog = rep.Create(blog);
+
+                uow.Commit();
+            }
+
+            #endregion Act
+
+            #region Assert
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                var projector = PropertyProjectorFactory<Blog>.Create();
+                var projection = projector
+                    .Select(m => m.Id);
+
+                var retrievedBlog = rep.RetrieveById(createdBlog.Id, projection);
+            }
+
+            #endregion Assert
+        }
+
+        [TestMethod]
         public void CanRetrieveBusinessObjectDiconnected()
         {
             Blog createdBlog = null;
@@ -117,7 +163,58 @@ namespace EF7Tests
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var retrievedBlog = rep.Retrieve<Blog>(createdBlog.Id);
+                //var retrievedBlog = rep.Retrieve<Blog>(createdBlog.Id);
+            }
+
+            #endregion Act
+        }
+
+        [TestMethod]
+        public void CanRetrieveOrderBy()
+        {
+            #region Arrange
+
+            string name = _fixture.Create<string>();
+            List<Blog> blogs = new List<Blog>()
+            {
+                new Blog()
+                {
+                    Author = "Adam",
+                    Description = _fixture.Create<string>(),
+                    Name = name,
+                },
+                new Blog()
+                {
+                    Author = "Bertil",
+                    Description = _fixture.Create<string>(),
+                    Name = name,
+                },
+                new Blog()
+                {
+                    Author = "Cescar",
+                    Description = _fixture.Create<string>(),
+                    Name = name,
+                }
+            };
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                rep.CreateMany(blogs.ToArray());
+
+                uow.Commit();
+            }
+
+            #endregion Arrange
+
+            #region Act
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                var retrieved = rep.Retrieve<Blog>(predicate => predicate.Name == name, order => order.Author).ToList();
             }
 
             #endregion Act

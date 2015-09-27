@@ -55,8 +55,8 @@ namespace EF7Tests
         {
             #region Arrange
 
-            Post post;
             Blog createdBlog;
+            Post post;
 
             var blog = new Blog
             {
@@ -64,14 +64,18 @@ namespace EF7Tests
                 Description = _fixture.Create<string>()
             };
 
-            post = new Post();
-            post.Text = _fixture.Create<string>();
-            post.Date = _fixture.Create<string>();
-            post.Blog = blog;
+            post = new Post()
+            {
+                Text = _fixture.Create<string>(),
+                Date = _fixture.Create<string>(),
+                Blog = blog,
+            };
 
-            var follower = new Follower();
-            follower.Name = _fixture.Create<string>();
-            follower.Blog = blog;
+            var follower = new Follower()
+            {
+                Name = _fixture.Create<string>(),
+                Blog = blog
+            };
 
             blog.Posts.Add(post);
             blog.Followers.Add(follower);
@@ -106,9 +110,9 @@ namespace EF7Tests
 
                 var projector = PropertyProjectorFactory<Blog>.Create();
                 var projection = projector
-                    .Select(m => m.Name, m => m.Description)
-                    .Include<Post>(m => m.Posts, p => p.Text, p => p.Date)
-                    .Include<Follower>(m => m.Followers, p => p.Name);
+                    .Select(m => m.Id, m => m.Name, m => m.Description)
+                    .Include<Post>(m => m.Posts, p => p.Id, p => p.Date, p => p.Text)
+                    .Include<Follower>(m => m.Followers, p => p.Id, p => p.Name);
 
                 var retrievedBlog = rep.RetrieveById(createdBlog.Id, projection);
             }

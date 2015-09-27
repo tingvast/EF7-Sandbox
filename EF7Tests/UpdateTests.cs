@@ -52,6 +52,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
                 retrievedPost.Text = _fixture.Create<string>();
+                retrievedPost.Date = _fixture.Create<string>();
 
                 rep.Update(retrievedPost, p => p.Text);
 
@@ -82,11 +83,13 @@ namespace EF7Tests
             #region Act
 
             blog.Name = _fixture.Create<string>();
+            blog.Author = _fixture.Create<string>();
 
             using (var uow1 = UoWFactory.Create())
             {
                 var repository = uow1.Create();
 
+                // Only name should be updated
                 var updatedBlog = repository.Update(blog, p => p.Name);
 
                 uow1.Commit();

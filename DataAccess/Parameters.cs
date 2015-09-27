@@ -70,12 +70,12 @@ namespace DataAccess
 
             var propertyInfo = (PropertyInfo)member.Member;
 
-            var propertyName = propertyInfo.Name;
+            var propertyNameOfReferer = propertyInfo.Name;
 
             var navigationProperty = new NavigationProperty(
-                   propertyName,
-                    typeof(TProperty).Name,
-                    typeof(TProperty));
+                   propertyNameOfReferer,
+                   typeof(TProperty).Name,
+                   typeof(TProperty));
 
             navigationProperty.Projections.AddRange(properties);
 
