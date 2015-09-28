@@ -3,10 +3,11 @@
 namespace EF7Tests
 {
     using Core;
-    using DataAccess;
     using DataAccess.Interaces;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
+    using System.Diagnostics;
+    using System.Linq;
 
     namespace EF7Tests
     {
@@ -18,13 +19,51 @@ namespace EF7Tests
             public RetrieveGraphTests()
             {
                 _fixture = new Fixture();
+
+                _fixture.Register(() => TestDataBuilders.BuildAnyBlog(_fixture));
             }
 
             [TestMethod]
             public void CanRetrieve()
             {
-            }
+                using (var uow = UoWFactory.Create())
+                {
+                    var repository = uow.Create();
 
+                    var blog = _fixture.Create<Blog>();
+
+                    repository.CreateGraph(blog);
+
+                    uow.Commit();
+
+                    blog.Name = "New name";
+                    blog.Description = "New Description";
+                    foreach (var p in blog.Posts)
+                    {
+                        p.Text = "New Text";
+                    }
+
+                    repository.UpdateGraph(blog);
+
+                    //repository.Update(blog, p => p.Name, p => p.Description);
+
+                    uow.Commit();
+
+
+                    var pp = repository.CreatePropertyProjectorBuilder(blog)
+                        .Select(p => p.Description, p => p.Name)
+                        .Build();
+
+                    var retrieved = repository.RetrieveById(blog.Id, pp);
+
+
+
+
+                    uow.Commit();
+
+
+                }
+            }
             [TestMethod]
             public void CanRetrieveById()
             {
@@ -64,16 +103,16 @@ namespace EF7Tests
                     uow.Commit();
                 }
 
-                var projector = PropertyProjectorFactory<Blog>.Create();
-                projector
-                    .Select(p => p.Name)
-                    .Include<Post>(m => m.Posts, p => p.Text);
-
                 using (var uow = UoWFactory.Create())
                 {
                     var repository = uow.Create();
 
-                    var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, projector);
+                    var pp = repository.CreatePropertyProjectorBuilder(blog)
+                        .Select(m => m.Name)
+                        .Include<Post>(p => p.Posts, p => p.Text)
+                        .Build();
+
+                    var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, pp);
                 }
             }
 
@@ -119,14 +158,14 @@ namespace EF7Tests
 
                 #region Assert
 
-                var projector = PropertyProjectorFactory<Blog>.Create();
-                projector
-                    .Select(p => p.Name)
-                    .Include<Post>(m => m.Posts, p => p.Date, p => p.Text);
-
                 using (var uow = UoWFactory.Create())
                 {
                     var repository = uow.Create();
+
+                    var projector = repository.CreatePropertyProjectorBuilder(blog)
+                        .Select(p => p.Name)
+                        .Include<Post>(m => m.Posts, p => p.Date, p => p.Text)
+                        .Build();
 
                     var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, projector);
                 }
@@ -134,9 +173,8 @@ namespace EF7Tests
                 #endregion Assert
             }
 
-
             [TestMethod]
-            public void CanRetrieveByIdBuildingQueryCache()
+            public void CanRetrieveByIdUsingTheBuildingQueryCache()
             {
                 #region Arrange
 
@@ -151,7 +189,7 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var createdPost = repository.Create(post);
+                    var createdPost = repository.Create(blog);
 
                     uow.Commit();
                 }
@@ -160,54 +198,50 @@ namespace EF7Tests
 
                 #region Act
 
-                var newPost = new Post();
-                newPost.Text = _fixture.Create<string>();
-                blog.Posts.AddRange(new List<Post>() { newPost, post });
+                long first;
+                long second;
+                using (var uow = UoWFactory.Create())
+                {
+                    var repository = uow.Create();
+
+                    Stopwatch stopwatch = Stopwatch.StartNew();
+                    IPropertyProjectorBuilder<Blog> builder
+                        = repository.CreatePropertyProjectorBuilder<Blog>(blog);
+
+                    var pp = builder
+                        .Select(p => p.Name)
+                        .Include<Post>(m => m.Posts, p => p.Date, p => p.Text)
+                        .Build();
+
+                    stopwatch.Stop();
+                    first = stopwatch.ElapsedMilliseconds;
+
+                    var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, pp);
+                }
 
                 using (var uow = UoWFactory.Create())
                 {
                     var repository = uow.Create();
 
-                    var updatedBlog = repository.UpdateGraph(blog);
+                    Stopwatch stopwatch = Stopwatch.StartNew();
+                    IPropertyProjectorBuilder<Blog> builder = repository
+                        .CreatePropertyProjectorBuilder<Blog>(blog);
 
-                    uow.Commit();
+                    var pp = builder
+                        .Select(p => p.Name)
+                        .Include<Post>(m => m.Posts, p => p.Date, p => p.Text)
+                        .Build();
+
+                    second = stopwatch.ElapsedMilliseconds;
+
+                    var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, pp);
                 }
 
                 #endregion Act
 
                 #region Assert
 
-  
-
-                using (var uow = UoWFactory.Create())
-                {                   
-                    var repository = uow.Create();
-
-                    IPropertyProjectorBuilder<Blog> builder
-                        = repository.CreatePropertyProjectorBuilder<Blog>(blog);
-
-                    var pp = builder
-                        .Select(p => p.Name)
-                        .IncludeNew<Post>(m => m.Posts, p => p.Date, p => p.Text)
-                        .Build();
-
-                    var retrievedBlogWithPosts = repository.RetrieveByIdNew(blog.Id, pp);
-                }
-
-                using (var uow = UoWFactory.Create())
-                {
-                    var repository = uow.Create();
-
-                    IPropertyProjectorBuilder<Blog> builder
-                        = repository.CreatePropertyProjectorBuilder<Blog>(blog);
-
-                    var pp = builder
-                        .Select(p => p.Name)
-                        .IncludeNew<Post>(m => m.Posts, p => p.Date, p => p.Text)
-                        .Build();
-
-                    var retrievedBlogWithPosts = repository.RetrieveByIdNew(blog.Id, pp);
-                }
+                // Assert the latter is faster!
 
                 #endregion Assert
             }

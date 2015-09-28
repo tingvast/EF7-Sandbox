@@ -37,9 +37,9 @@ namespace EF7Tests
 
                 uow.Commit();
 
-                var projector = PropertyProjectorFactory<Post>.Create();
-                projector
-                    .Select(p => p.Text, p => p.Date);
+                var projector = rep.CreatePropertyProjectorBuilder(post)
+                    .Select(p => p.Text, p => p.Date)
+                    .Build();
 
                 retrievedPost = rep.RetrieveById(persistedPost.Id, projector);
             }

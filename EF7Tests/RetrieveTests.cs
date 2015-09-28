@@ -75,10 +75,10 @@ namespace EF7Tests
 
                 #region Act
 
-                var projector = PropertyProjectorFactory<Blog>.Create();
-                projector
+                var projector = rep.CreatePropertyProjectorBuilder(blog)
                     .Select(p => p.Name)
-                    .Include<Post>(m => m.Posts, p => p.Text);
+                    .Include<Post>(m => m.Posts, p => p.Text)
+                    .Build();
 
                 var retrievedBlog = rep.RetrieveById<Blog>(createdBlog.Id, projector);
 
@@ -126,11 +126,11 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                var projector = PropertyProjectorFactory<Blog>.Create();
-                var projection = projector
-                    .Select(m => m.Id);
-
-                var retrievedBlog = rep.RetrieveById(createdBlog.Id, projection);
+                var projector = rep.CreatePropertyProjectorBuilder(blog)
+                    .Select(p => p.Id)    
+                    .Build();
+                
+                var retrievedBlog = rep.RetrieveById(createdBlog.Id, projector);
             }
 
             #endregion Assert

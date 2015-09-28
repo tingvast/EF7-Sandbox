@@ -21,7 +21,7 @@ namespace DataAccess.Interaces
 
         List<INavigationProperty> NavigationPropertiesProjections { get; set; }
 
-        string CreateCacheKey { get; }
+        string CacheKey { get; }
     }
 
     public interface IPropertyProjectorBuilder<TEntity> where TEntity : class, IEntity
@@ -34,12 +34,15 @@ namespace DataAccess.Interaces
             Expression<Func<TEntity, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
 
-
-        IPropertyProjectorBuilder<TEntity> IncludeNew<TProperty>(
-            Expression<Func<TEntity, dynamic>> navigationPropery,
-            params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
-
         IPropertyProjector<TEntity> Build();
+
+        #region Obsolete
+
+        IPropertyProjectorBuilder<TEntity> IncludeOld<TProperty>(
+         Expression<Func<TEntity, dynamic>> navigationPropery,
+         params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
+
+        #endregion Obsolete
     }
 
     public interface IPropertyProjector<T>
@@ -70,9 +73,7 @@ namespace DataAccess.Interaces
 
         #region Retrieve
 
-        T RetrieveById<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity;
-
-        T RetrieveByIdNew<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity;
+        T RetrieveById<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity;
 
         IEnumerable<T> Retrieve<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderBy = null) where T : class, IEntity;
 
@@ -84,7 +85,7 @@ namespace DataAccess.Interaces
 
         T Update<T>(T entity) where T : class, IEntity;
 
-        T Update<T, TResult>(T entity, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity;
+        T Update<T, TResult>(T entity, params Expression<Func<T, TResult>>[] selectedProperties) where T : class, IEntity;
 
         T UpdateGraph<T>(T entityWithRelations) where T : class, IEntity;
 
@@ -101,6 +102,10 @@ namespace DataAccess.Interaces
         T RetrieveObsolete<T, TResult>(int id, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity;
 
         Blog RetrieveBlogNonGeneric(int id);
+
+        Blog UpdateNonGeneric(Blog entity, Expression<Func<Blog, dynamic>> selectedProperties);
+
+        T RetrieveByIdOld<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity;
 
         #endregion Obsolete
     }

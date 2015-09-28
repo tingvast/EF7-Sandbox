@@ -1,18 +1,16 @@
 ﻿using DataAccess.Interaces;
 using EF7;
+using LatticeUtils;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Data.Entity.Infrastructure;
+using Microsoft.Data.Entity.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using LatticeUtils;
-using Microsoft.Data.Entity.Query;
-using System.Linq;
-using System.Text;
-using DataAccess;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Data.Entity.Infrastructure;
 using System.Runtime.Caching;
+using System.Text;
 
 namespace DataAccess
 {
@@ -23,7 +21,10 @@ namespace DataAccess
             Projections = new List<Expression>();
         }
 
-        public NavigationProperty(string referingPropertName, string name, Type type)
+        public NavigationProperty(
+            string referingPropertName,
+            string name,
+            Type type)
             : this()
         {
             ReferingPropertyName = referingPropertName;
@@ -34,13 +35,12 @@ namespace DataAccess
         public string ReferingPropertyName { get; set; }
         public string Name { get; set; }
         public Type Type { get; set; }
-
         public List<Expression> Projections { get; set; }
     }
 
-    public class TheDate : IProjections
+    public class Projections : IProjections
     {
-        public TheDate()
+        public Projections()
         {
             Projection = new List<Expression>();
             NavigationPropertiesProjections = new List<INavigationProperty>();
@@ -48,16 +48,42 @@ namespace DataAccess
 
         public List<INavigationProperty> NavigationPropertiesProjections { get; set; }
 
-        public string CreateCacheKey
+        public string CacheKey
         {
             get
             {
-                string value = "42";
-                return value;
+                return CreateCacheKey();
             }
         }
 
         public List<Expression> Projection { get; set; }
+
+        #region Private
+
+        private string CreateCacheKey()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (LambdaExpression le in Projection)
+            {
+                MemberExpression member = ParameterHelper.GetMemberExpression(le);
+
+                var propertyInfo = (PropertyInfo)member.Member;
+                var propertyName = propertyInfo.Name;
+                var propertyType = propertyInfo.PropertyType;
+
+                sb.Append(propertyName + ":" + propertyType);
+            }
+
+            sb.Append(":");
+            foreach (INavigationProperty np in NavigationPropertiesProjections)
+            {
+                sb.Append(np.Name + ":" + np.Type);
+            }            
+
+            return sb.ToString();
+        }
+
+        #endregion Private
     }
 
     public static class PropertyProjectorFactory<T> where T : class, IEntity
@@ -74,20 +100,18 @@ namespace DataAccess
     {
         public Expression<Func<T, dynamic>> Expression { get; set; }
         public IProjections AllProjections { get; set; }
-        public Type ProjectedEntityAnonymousType { get; set; }       
+        public Type ProjectedEntityAnonymousType { get; set; }
     }
-
 
     public class PropertyProjectorBuilder<T> : IPropertyProjectorBuilder<T>, IIncludePropertySelector<T> where T : class, IEntity
     {
         private int _id;
-        //public Expression<Func<T, dynamic>> _lambd11a1;
-        //private Type _projectedEntityAnonymousType;
+
         private EF7BloggContext _context;
 
         public PropertyProjectorBuilder()
         {
-            AllProjections = new TheDate();
+            AllProjections = new Projections();
         }
 
         public PropertyProjectorBuilder(int id)
@@ -97,7 +121,7 @@ namespace DataAccess
         }
 
         public PropertyProjectorBuilder(int id, EF7BloggContext context)
-            :this()
+            : this()
         {
             this._id = id;
             this._context = context;
@@ -108,39 +132,16 @@ namespace DataAccess
             get; private set;
         }
 
-        IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.Include<TProperty>(
-            Expression<Func<T, dynamic>> navigationPropery, 
-            params Expression<Func<TProperty, dynamic>>[] properties)
-        {
-            var navigationPropertyProjection = navigationPropery as LambdaExpression;
-
-            var member = navigationPropertyProjection.Body as MemberExpression;
-
-            var propertyInfo = (PropertyInfo)member.Member;
-
-            var propertyNameOfReferer = propertyInfo.Name;
-
-            var navigationProperty = new NavigationProperty(
-                   propertyNameOfReferer,
-                   typeof(TProperty).Name,
-                   typeof(TProperty));
-
-            navigationProperty.Projections.AddRange(properties);
-
-            AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
-
-            return this;
-        }
-
-        public IPropertyProjectorBuilder<T> Select(params Expression<Func<T, dynamic>>[] p1)
+        public IPropertyProjectorBuilder<T> Select(
+            params Expression<Func<T, dynamic>>[] p1)
         {
             AllProjections.Projection.AddRange(p1);
 
             return this;
         }
 
-        IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.IncludeNew<TProperty>(
-            Expression<Func<T, dynamic>> navigationPropery, 
+        IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.Include<TProperty>(
+            Expression<Func<T, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties)
         {
             var navigationPropertyProjection11 = navigationPropery as LambdaExpression;
@@ -158,23 +159,22 @@ namespace DataAccess
 
             navigationProperty11.Projections.AddRange(selectedProperties);
 
-            AllProjections.NavigationPropertiesProjections.Add(navigationProperty11);          
+            AllProjections.NavigationPropertiesProjections.Add(navigationProperty11);
             return this;
         }
 
-
         public IPropertyProjector<T> Build()
         {
-            Expression<Func<T, dynamic>> lambd11a1;
-            var cacheKey = AllProjections.CreateCacheKey;
+            Expression<Func<T, dynamic>> fullProjectionLambda;
+            var cacheKey = AllProjections.CacheKey;
             var cacheValue = MemoryCache.Default[cacheKey];
 
             if (cacheValue == null)
-            { 
-                var projectedEntityAnonymousType = CreateLampbda(out lambd11a1);
+            {
+                var projectedEntityAnonymousType = CreateLampbda(out fullProjectionLambda);
                 cacheValue = new PropertyProjector<T>
                 {
-                    Expression = lambd11a1,
+                    Expression = fullProjectionLambda,
                     AllProjections = AllProjections,
                     ProjectedEntityAnonymousType = projectedEntityAnonymousType
                 };
@@ -182,22 +182,24 @@ namespace DataAccess
                 MemoryCache.Default[cacheKey] = cacheValue;
             }
 
-            return (PropertyProjector < T > ) cacheValue;
+            return (PropertyProjector<T>)cacheValue;
         }
+
+        #region Private
 
         private Type CreateLampbda
             (out Expression<Func<T, dynamic>> lambd11a1)
         {
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
             List<Expression> anonymousTypePropertiesValues = new List<Expression>();
-            ParameterExpression lambdaParameter = Expression.Parameter(typeof (T), "p");
+            ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
             foreach (var projection in AllProjections.Projection)
             {
                 var projectionLambda = projection as LambdaExpression;
 
-                MemberExpression member = CreateMemberExpression(projectionLambda);
+                MemberExpression member = ParameterHelper.GetMemberExpression(projectionLambda);
 
-                var propertyInfo = (PropertyInfo) member.Member;
+                var propertyInfo = (PropertyInfo)member.Member;
                 var propertyName = propertyInfo.Name;
                 var propertyType = propertyInfo.PropertyType;
 
@@ -221,9 +223,9 @@ namespace DataAccess
                 {
                     var navigationPropertyProjection = projection as LambdaExpression;
 
-                    MemberExpression member = CreateMemberExpression(navigationPropertyProjection);
+                    MemberExpression member = ParameterHelper.GetMemberExpression(navigationPropertyProjection);
 
-                    var propertyInfo = (PropertyInfo) member.Member;
+                    var propertyInfo = (PropertyInfo)member.Member;
                     var propertyName = propertyInfo.Name;
                     var propertyType = propertyInfo.PropertyType;
 
@@ -240,7 +242,7 @@ namespace DataAccess
                     .GetConstructor(navigationPropertyAnoymousTypeProperties.Select(kv => kv.Value).ToArray());
                 typeOfSubProj = anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType;
 
-                var selectMethod = typeof (Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
+                var selectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
                 var genericSelectMethod = selectMethod.MakeGenericMethod(navigationProperyType, typeOfSubProj);
 
                 var newInstanceOfTheGenericType = Expression.New(anonymousTypeOfNavigationPropertyProjectionConstructor,
@@ -253,18 +255,18 @@ namespace DataAccess
                     whereCallExpression,
                     projectionLamdba);
 
-                var provider = ((IQueryable) _context.Set<T>()).Provider;
-                    // TODO, Is it ok to assube navigation properties has the same provider?
-                var theMethods = typeof (IQueryProvider).GetMethods();
+                var provider = ((IQueryable)_context.Set<T>()).Provider;
+                // TODO, Is it ok to assume navigation properties has the same provider?
+                var theMethods = typeof(IQueryProvider).GetMethods();
                 var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
                 var speciifMethod =
                     createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
-                var navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] {selctCallExpression});
+                var navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] { selctCallExpression });
 
-                Type genericFunc = typeof (IEnumerable<>);
+                Type genericFunc = typeof(IEnumerable<>);
                 Type funcOfTypeOfSubProj = genericFunc.MakeGenericType(typeOfSubProj);
 
-                var allMethodsOnEnumerableClass = typeof (Enumerable).GetMethods();
+                var allMethodsOnEnumerableClass = typeof(Enumerable).GetMethods();
                 var genericToListMethod = allMethodsOnEnumerableClass.Where(m => m.Name == "ToList").ToList()[0];
 
                 var toListOfTypeOfSubProj = genericToListMethod.MakeGenericMethod(typeOfSubProj);
@@ -338,7 +340,41 @@ namespace DataAccess
             return whereCallExpression;
         }
 
-        private static MemberExpression CreateMemberExpression(LambdaExpression projectionLambda)
+        #endregion Private
+
+        #region Obsolete
+
+        [Obsolete]
+        IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.IncludeOld<TProperty>(
+            Expression<Func<T, dynamic>> navigationPropery,
+            params Expression<Func<TProperty, dynamic>>[] properties)
+        {
+            var navigationPropertyProjection = navigationPropery as LambdaExpression;
+
+            var member = navigationPropertyProjection.Body as MemberExpression;
+
+            var propertyInfo = (PropertyInfo)member.Member;
+
+            var propertyNameOfReferer = propertyInfo.Name;
+
+            var navigationProperty = new NavigationProperty(
+                   propertyNameOfReferer,
+                   typeof(TProperty).Name,
+                   typeof(TProperty));
+
+            navigationProperty.Projections.AddRange(properties);
+
+            AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
+
+            return this;
+        }
+
+        #endregion Obsolete
+    }
+
+    internal static class ParameterHelper
+    {
+        internal static MemberExpression GetMemberExpression(LambdaExpression projectionLambda)
         {
             MemberExpression member;
             switch (projectionLambda.Body.NodeType)
@@ -357,4 +393,6 @@ namespace DataAccess
             return member;
         }
     }
+
+
 }

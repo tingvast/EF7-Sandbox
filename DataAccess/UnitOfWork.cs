@@ -1,6 +1,7 @@
 ﻿using DataAccess.Interaces;
 using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Framework.DependencyInjection;
+using System.Linq;
 
 namespace DataAccess
 {
@@ -30,7 +31,20 @@ namespace DataAccess
 
         public void Commit()
         {
+            foreach (var e in context.ChangeTracker.Entries())
+            {
+                var state = e.State;
+                var type = e.Entity.GetType();
+            }
+
             context.SaveChanges();
+
+            var allEntities = context.ChangeTracker.Entries().ToList();
+
+            //for (int i = 0; i < allEntities.Count; i++)
+            //{
+            //    allEntities[i].State = Microsoft.Data.Entity.EntityState.Detached;
+            //}
         }
 
         public void Dispose()

@@ -14,7 +14,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-
 namespace DataAccess
 {
     public class Repository : IRepository
@@ -24,6 +23,14 @@ namespace DataAccess
         public Repository(EF7BloggContext context)
         {
             this.context = context;
+            this.context.ChangeTracker.AutoDetectChangesEnabled = false;
+        }
+
+        public IPropertyProjectorBuilder<T> CreatePropertyProjectorBuilder<T>(T entity) where T : class, IEntity
+        {
+            if (entity == null) return new PropertyProjectorBuilder<T>();
+
+            return new PropertyProjectorBuilder<T>(entity.Id, context);
         }
 
         #region Create
@@ -44,8 +51,10 @@ namespace DataAccess
 
         public T CreateGraph<T>(T entityWithRelations) where T : class, IEntity
         {
+            //context.ChangeTracker.AutoDetectChangesEnabled = true;
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) => e.State = EntityState.Added);
 
+            //context.ChangeTracker.AutoDetectChangesEnabled = false;
             return entityWithRelations;
         }
 
@@ -53,128 +62,7 @@ namespace DataAccess
 
         #region Retrieve
 
-        public T RetrieveById<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
-        {
-            // The query will be projected onto an anonymous type.
-            List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
-            List<Expression> anonymousTypePropertiesValues = new List<Expression>();
-            ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
-            foreach (var projection in selectedProperties.AllProjections.Projection)
-            {
-                var projectionLambda = projection as LambdaExpression;
-
-                MemberExpression member = CreateMemberExpression(projectionLambda);
-
-                var propertyInfo = (PropertyInfo)member.Member;
-                var propertyName = propertyInfo.Name;
-                var propertyType = propertyInfo.PropertyType;
-
-                var memberAccess = Expression.Property(lambdaParameter, propertyName);
-
-                anonymousTypeProperties.Add(new KeyValuePair<string, Type>(propertyName, propertyType));
-                anonymousTypePropertiesValues.Add(memberAccess);
-            }
-
-            foreach (var navigationProperty in selectedProperties.AllProjections.NavigationPropertiesProjections)
-            {
-                var navigationProperyType = navigationProperty.Type;
-
-                // Creates the <T>.where(p => p.id == id) part of the expression
-                MethodCallExpression whereCallExpression = CreateWhereCall<T>(id, navigationProperyType);
-
-                ParameterExpression p1 = Expression.Parameter(navigationProperyType, "p1");
-                var navigationPropertyAnoymousTypeProperties = new List<KeyValuePair<string, Type>>();
-                List<MemberExpression> navigationPropertyAnoymousTypePropertiesValues = new List<MemberExpression>();
-                foreach (var projection in navigationProperty.Projections)
-                {
-                    var navigationPropertyProjection = projection as LambdaExpression;
-
-                    MemberExpression member = CreateMemberExpression(navigationPropertyProjection);
-
-                    var propertyInfo = (PropertyInfo)member.Member;
-                    var propertyName = propertyInfo.Name;
-                    var propertyType = propertyInfo.PropertyType;
-
-                    var memberAccess = Expression.Property(p1, propertyName);
-
-                    navigationPropertyAnoymousTypeProperties.Add(new KeyValuePair<string, Type>(propertyName, propertyType));
-                    navigationPropertyAnoymousTypePropertiesValues.Add(memberAccess);
-                }
-
-                var anonymousTypeOfNavigationPropertyProjection = AnonymousTypeUtils.CreateType(navigationPropertyAnoymousTypeProperties);
-                Type typeOfSubProj = null;
-                var anonymousTypeOfNavigationPropertyProjectionConstructor = anonymousTypeOfNavigationPropertyProjection
-                    .GetConstructor(navigationPropertyAnoymousTypeProperties.Select(kv => kv.Value).ToArray());
-                typeOfSubProj = anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType;
-
-                var selectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
-                var genericSelectMethod = selectMethod.MakeGenericMethod(navigationProperyType, typeOfSubProj);
-
-                var newInstanceOfTheGenericType = Expression.New(anonymousTypeOfNavigationPropertyProjectionConstructor, navigationPropertyAnoymousTypePropertiesValues);
-
-                var projectionLamdba = Expression.Lambda(newInstanceOfTheGenericType, p1);
-
-                MethodCallExpression selctCallExpression = Expression.Call(
-                      genericSelectMethod,
-                      whereCallExpression,
-                      projectionLamdba);
-
-                var provider = ((IQueryable)context.Set<T>()).Provider; // TODO, Is it ok to assube navigation properties has the same provider?
-                var theMethods = typeof(IQueryProvider).GetMethods();
-                var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
-                var speciifMethod = createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
-                var navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] { selctCallExpression });
-
-                Type genericFunc = typeof(IEnumerable<>);
-                Type funcOfTypeOfSubProj = genericFunc.MakeGenericType(typeOfSubProj);
-
-                var allMethodsOnEnumerableClass = typeof(Enumerable).GetMethods();
-                var genericToListMethod = allMethodsOnEnumerableClass.Where(m => m.Name == "ToList").ToList()[0];
-
-                var toListOfTypeOfSubProj = genericToListMethod.MakeGenericMethod(typeOfSubProj);
-
-                MethodCallExpression toListExpression11 = Expression.Call(
-                    toListOfTypeOfSubProj,
-                    Expression.Constant(navigationProppertyQueryWithProjection1));
-
-                anonymousTypeProperties.Add(new KeyValuePair<string, Type>(navigationProperty.Name, funcOfTypeOfSubProj));
-                anonymousTypePropertiesValues.Add(toListExpression11);
-            }
-
-            Type projectedEntityAnonymousType = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
-
-            var constructor = projectedEntityAnonymousType.GetConstructor(anonymousTypeProperties.Select(p => p.Value).ToArray());
-
-            var anonymousTypeInstance = Expression.New(constructor, anonymousTypePropertiesValues);
-
-            Expression<Func<T, dynamic>> lambd11a1 = Expression.Lambda<Func<T, dynamic>>(anonymousTypeInstance, lambdaParameter);
-
-            var projectedEntity = context.Set<T>()
-                .AsNoTracking()
-                .Where(e => e.Id == id)
-                .Select(lambd11a1)
-                .Single();
-
-            var mainEntity = Mapper.DynamicMap<T>(projectedEntity);
-            mainEntity.Id = id;
-
-            if (selectedProperties.AllProjections.NavigationPropertiesProjections.Count() > 0)
-            {
-                MaterializeNavigationProperties<T>(mainEntity, projectedEntity, projectedEntityAnonymousType, selectedProperties);
-            }
-
-            var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
-
-            if (alreadytrackedentity != null)
-            {
-                // Remove it from tracking
-                alreadytrackedentity.State = EntityState.Detached;
-            }
-            context.Attach(mainEntity);
-            return mainEntity;
-        }
-
-        public T RetrieveByIdNew<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity
+        public T RetrieveById<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity
         {
             var projectedEntity = context.Set<T>()
                 .AsNoTracking()
@@ -187,10 +75,10 @@ namespace DataAccess
 
             if (projection.AllProjections.NavigationPropertiesProjections.Any())
             {
-                MaterializeNavigationPropertiesNew<T>(
-                    projection.AllProjections, 
-                    mainEntity, 
-                    projectedEntity, 
+                MaterializeNavigationProperties<T>(
+                    projection.AllProjections,
+                    mainEntity,
+                    projectedEntity,
                     projection.ProjectedEntityAnonymousType);
             }
 
@@ -234,26 +122,21 @@ namespace DataAccess
             return entity;
         }
 
-        public T Update<T, TResult>(T entity, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity
+        public T Update<T, TResult>(T entity, params Expression<Func<T, TResult>>[] selectedProperties) where T : class, IEntity
         {
-            context.ChangeTracker.AutoDetectChangesEnabled = true;
-            context.Entry(entity).State = EntityState.Modified;
-            string prop = ResolvePropertyName(selectedProperties);
-
-            var allProperties = context.Entry(entity).Metadata.GetProperties().ToList();
-            var toRenove = allProperties.Find(p => p.Name == prop);
-            allProperties.Remove(toRenove);
-
-            var entity1 = context.Entry(entity);
-            allProperties.ForEach(p =>
+            foreach (var s in selectedProperties)
             {
-                entity1.Property(p.Name).IsModified = false;
-                int i = 0;
-            });
+                var projectionLambda = s as LambdaExpression;
 
-            context.Entry(entity).Property(prop).IsModified = true;
+                MemberExpression member = ParameterHelper.GetMemberExpression(projectionLambda);
 
-            context.ChangeTracker.AutoDetectChangesEnabled = false;
+                var propertyInfo = (PropertyInfo)member.Member;
+                var propertyName = propertyInfo.Name;
+                var propertyType = propertyInfo.PropertyType;
+
+                context.Entry(entity).Property(propertyName).IsModified = true;
+            }
+
             return entity;
         }
 
@@ -315,43 +198,12 @@ namespace DataAccess
         }
 
         private static void MaterializeNavigationProperties<T>(
-        dynamic mainEntity,
-        dynamic projectedEntity,
-        Type projectedEntityAnonymousType,
-        IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
-        {
-            Type genericListType = typeof(List<>);
-            var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];
-
-            foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
-            {
-                var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
-                var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);
-
-                var propertValues = (IEnumerable)navigationPropertyOnProjectedAnonymousType.GetValue(projectedEntity);
-
-                Type listOfTypeProjectionType = genericListType.MakeGenericType(new[] { projection.Type });
-
-                var mapperOfProjectionType = genericDynamicMapper.MakeGenericMethod(projection.Type);
-                IList navigationPropertyList = (IList)Activator.CreateInstance(listOfTypeProjectionType);
-                foreach (var value in propertValues)
-                {
-                    var valueOfNavigationPropertyProjection = mapperOfProjectionType.Invoke(null, new object[] { value });
-
-                    navigationPropertyList.Add(valueOfNavigationPropertyProjection);
-                }
-
-                navigationPropertyOnMainEntity.SetValue(mainEntity, navigationPropertyList);
-            }
-        }
-
-
-        private static void MaterializeNavigationPropertiesNew<T>(
-            IProjections projections, 
-            dynamic mainEntity, 
-            dynamic projectedEntity, 
+            IProjections projections,
+            dynamic mainEntity,
+            dynamic projectedEntity,
             Type projectedEntityAnonymousType) where T : class, IEntity
         {
+            // TODO: Cache this!
             Type genericListType = typeof(List<>);
             var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];
 
@@ -521,14 +373,30 @@ namespace DataAccess
             return retEntity;
         }
 
-        public IPropertyProjectorBuilder<T> CreatePropertyProjectorBuilder<T>(T entity) where T : class, IEntity
+        public Blog UpdateNonGeneric(Blog entity, Expression<Func<Blog, dynamic>> selectedProperties)
         {
-            if (entity == null) return new PropertyProjectorBuilder<T>();
+            //context.ChangeTracker.AutoDetectChangesEnabled = true;
+            //context.Entry(entity).State = EntityState.Modified;
+            string prop = ResolvePropertyName(selectedProperties);
 
-            return new PropertyProjectorBuilder<T>(entity.Id, context);
+            var allProperties = context.Entry(entity).Metadata.GetProperties().ToList();
+            var toRenove = allProperties.Find(p => p.Name == prop);
+            allProperties.Remove(toRenove);
+
+            var entity1 = context.Entry(entity);
+            allProperties.ForEach(p =>
+            {
+                entity1.Property(p.Name).IsModified = false;
+                int i = 0;
+            });
+
+            context.Entry(entity).Property(prop).IsModified = true;
+
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
+            return entity;
         }
-    
 
+        [Obsolete]
         public T RetrieveObsolete<T, TResult>(int id, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity
         {
             //var arguments = selectedProperties.P.Body.
@@ -697,6 +565,160 @@ namespace DataAccess
             }
             context.Attach(retEntity);
             return retEntity;
+        }
+
+        [Obsolete]
+        public T RetrieveByIdOld<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
+        {
+            // The query will be projected onto an anonymous type.
+            List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
+            List<Expression> anonymousTypePropertiesValues = new List<Expression>();
+            ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
+            foreach (var projection in selectedProperties.AllProjections.Projection)
+            {
+                var projectionLambda = projection as LambdaExpression;
+
+                MemberExpression member = CreateMemberExpression(projectionLambda);
+
+                var propertyInfo = (PropertyInfo)member.Member;
+                var propertyName = propertyInfo.Name;
+                var propertyType = propertyInfo.PropertyType;
+
+                var memberAccess = Expression.Property(lambdaParameter, propertyName);
+
+                anonymousTypeProperties.Add(new KeyValuePair<string, Type>(propertyName, propertyType));
+                anonymousTypePropertiesValues.Add(memberAccess);
+            }
+
+            foreach (var navigationProperty in selectedProperties.AllProjections.NavigationPropertiesProjections)
+            {
+                var navigationProperyType = navigationProperty.Type;
+
+                // Creates the <T>.where(p => p.id == id) part of the expression
+                MethodCallExpression whereCallExpression = CreateWhereCall<T>(id, navigationProperyType);
+
+                ParameterExpression p1 = Expression.Parameter(navigationProperyType, "p1");
+                var navigationPropertyAnoymousTypeProperties = new List<KeyValuePair<string, Type>>();
+                List<MemberExpression> navigationPropertyAnoymousTypePropertiesValues = new List<MemberExpression>();
+                foreach (var projection in navigationProperty.Projections)
+                {
+                    var navigationPropertyProjection = projection as LambdaExpression;
+
+                    MemberExpression member = CreateMemberExpression(navigationPropertyProjection);
+
+                    var propertyInfo = (PropertyInfo)member.Member;
+                    var propertyName = propertyInfo.Name;
+                    var propertyType = propertyInfo.PropertyType;
+
+                    var memberAccess = Expression.Property(p1, propertyName);
+
+                    navigationPropertyAnoymousTypeProperties.Add(new KeyValuePair<string, Type>(propertyName, propertyType));
+                    navigationPropertyAnoymousTypePropertiesValues.Add(memberAccess);
+                }
+
+                var anonymousTypeOfNavigationPropertyProjection = AnonymousTypeUtils.CreateType(navigationPropertyAnoymousTypeProperties);
+                Type typeOfSubProj = null;
+                var anonymousTypeOfNavigationPropertyProjectionConstructor = anonymousTypeOfNavigationPropertyProjection
+                    .GetConstructor(navigationPropertyAnoymousTypeProperties.Select(kv => kv.Value).ToArray());
+                typeOfSubProj = anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType;
+
+                var selectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
+                var genericSelectMethod = selectMethod.MakeGenericMethod(navigationProperyType, typeOfSubProj);
+
+                var newInstanceOfTheGenericType = Expression.New(anonymousTypeOfNavigationPropertyProjectionConstructor, navigationPropertyAnoymousTypePropertiesValues);
+
+                var projectionLamdba = Expression.Lambda(newInstanceOfTheGenericType, p1);
+
+                MethodCallExpression selctCallExpression = Expression.Call(
+                      genericSelectMethod,
+                      whereCallExpression,
+                      projectionLamdba);
+
+                var provider = ((IQueryable)context.Set<T>()).Provider; // TODO, Is it ok to assube navigation properties has the same provider?
+                var theMethods = typeof(IQueryProvider).GetMethods();
+                var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
+                var speciifMethod = createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
+                var navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] { selctCallExpression });
+
+                Type genericFunc = typeof(IEnumerable<>);
+                Type funcOfTypeOfSubProj = genericFunc.MakeGenericType(typeOfSubProj);
+
+                var allMethodsOnEnumerableClass = typeof(Enumerable).GetMethods();
+                var genericToListMethod = allMethodsOnEnumerableClass.Where(m => m.Name == "ToList").ToList()[0];
+
+                var toListOfTypeOfSubProj = genericToListMethod.MakeGenericMethod(typeOfSubProj);
+
+                MethodCallExpression toListExpression11 = Expression.Call(
+                    toListOfTypeOfSubProj,
+                    Expression.Constant(navigationProppertyQueryWithProjection1));
+
+                anonymousTypeProperties.Add(new KeyValuePair<string, Type>(navigationProperty.Name, funcOfTypeOfSubProj));
+                anonymousTypePropertiesValues.Add(toListExpression11);
+            }
+
+            Type projectedEntityAnonymousType = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
+
+            var constructor = projectedEntityAnonymousType.GetConstructor(anonymousTypeProperties.Select(p => p.Value).ToArray());
+
+            var anonymousTypeInstance = Expression.New(constructor, anonymousTypePropertiesValues);
+
+            Expression<Func<T, dynamic>> lambd11a1 = Expression.Lambda<Func<T, dynamic>>(anonymousTypeInstance, lambdaParameter);
+
+            var projectedEntity = context.Set<T>()
+                .AsNoTracking()
+                .Where(e => e.Id == id)
+                .Select(lambd11a1)
+                .Single();
+
+            var mainEntity = Mapper.DynamicMap<T>(projectedEntity);
+            mainEntity.Id = id;
+
+            if (selectedProperties.AllProjections.NavigationPropertiesProjections.Count() > 0)
+            {
+                MaterializeNavigationPropertiesObsolete<T>(mainEntity, projectedEntity, projectedEntityAnonymousType, selectedProperties);
+            }
+
+            var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
+
+            if (alreadytrackedentity != null)
+            {
+                // Remove it from tracking
+                alreadytrackedentity.State = EntityState.Detached;
+            }
+            context.Attach(mainEntity);
+            return mainEntity;
+        }
+
+        [Obsolete]
+        private static void MaterializeNavigationPropertiesObsolete<T>(
+            dynamic mainEntity,
+            dynamic projectedEntity,
+            Type projectedEntityAnonymousType,
+            IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
+        {
+            Type genericListType = typeof(List<>);
+            var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];
+
+            foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
+            {
+                var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
+                var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);
+
+                var propertValues = (IEnumerable)navigationPropertyOnProjectedAnonymousType.GetValue(projectedEntity);
+
+                Type listOfTypeProjectionType = genericListType.MakeGenericType(new[] { projection.Type });
+
+                var mapperOfProjectionType = genericDynamicMapper.MakeGenericMethod(projection.Type);
+                IList navigationPropertyList = (IList)Activator.CreateInstance(listOfTypeProjectionType);
+                foreach (var value in propertValues)
+                {
+                    var valueOfNavigationPropertyProjection = mapperOfProjectionType.Invoke(null, new object[] { value });
+
+                    navigationPropertyList.Add(valueOfNavigationPropertyProjection);
+                }
+
+                navigationPropertyOnMainEntity.SetValue(mainEntity, navigationPropertyList);
+            }
         }
 
         #endregion Obsolete
