@@ -8,9 +8,11 @@ using System.Reflection;
 using LatticeUtils;
 using Microsoft.Data.Entity.Query;
 using System.Linq;
+using System.Text;
 using DataAccess;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Data.Entity.Infrastructure;
+using System.Runtime.Caching;
 
 namespace DataAccess
 {
@@ -46,6 +48,15 @@ namespace DataAccess
 
         public List<INavigationProperty> NavigationPropertiesProjections { get; set; }
 
+        public string CreateCacheKey
+        {
+            get
+            {
+                string value = "42";
+                return value;
+            }
+        }
+
         public List<Expression> Projection { get; set; }
     }
 
@@ -63,15 +74,15 @@ namespace DataAccess
     {
         public Expression<Func<T, dynamic>> Expression { get; set; }
         public IProjections AllProjections { get; set; }
-        public Type ProjectedEntityAnonymousType { get; set; }
+        public Type ProjectedEntityAnonymousType { get; set; }       
     }
 
 
     public class PropertyProjectorBuilder<T> : IPropertyProjectorBuilder<T>, IIncludePropertySelector<T> where T : class, IEntity
     {
         private int _id;
-        public Expression<Func<T, dynamic>> _lambd11a1;
-        private Type _projectedEntityAnonymousType;
+        //public Expression<Func<T, dynamic>> _lambd11a1;
+        //private Type _projectedEntityAnonymousType;
         private EF7BloggContext _context;
 
         public PropertyProjectorBuilder()
@@ -147,19 +158,46 @@ namespace DataAccess
 
             navigationProperty11.Projections.AddRange(selectedProperties);
 
-            AllProjections.NavigationPropertiesProjections.Add(navigationProperty11);
+            AllProjections.NavigationPropertiesProjections.Add(navigationProperty11);          
+            return this;
+        }
 
 
+        public IPropertyProjector<T> Build()
+        {
+            Expression<Func<T, dynamic>> lambd11a1;
+            var cacheKey = AllProjections.CreateCacheKey;
+            var cacheValue = MemoryCache.Default[cacheKey];
+
+            if (cacheValue == null)
+            { 
+                var projectedEntityAnonymousType = CreateLampbda(out lambd11a1);
+                cacheValue = new PropertyProjector<T>
+                {
+                    Expression = lambd11a1,
+                    AllProjections = AllProjections,
+                    ProjectedEntityAnonymousType = projectedEntityAnonymousType
+                };
+
+                MemoryCache.Default[cacheKey] = cacheValue;
+            }
+
+            return (PropertyProjector < T > ) cacheValue;
+        }
+
+        private Type CreateLampbda
+            (out Expression<Func<T, dynamic>> lambd11a1)
+        {
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
             List<Expression> anonymousTypePropertiesValues = new List<Expression>();
-            ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
+            ParameterExpression lambdaParameter = Expression.Parameter(typeof (T), "p");
             foreach (var projection in AllProjections.Projection)
             {
                 var projectionLambda = projection as LambdaExpression;
 
                 MemberExpression member = CreateMemberExpression(projectionLambda);
 
-                var propertyInfo = (PropertyInfo)member.Member;
+                var propertyInfo = (PropertyInfo) member.Member;
                 var propertyName = propertyInfo.Name;
                 var propertyType = propertyInfo.PropertyType;
 
@@ -185,7 +223,7 @@ namespace DataAccess
 
                     MemberExpression member = CreateMemberExpression(navigationPropertyProjection);
 
-                    var propertyInfo = (PropertyInfo)member.Member;
+                    var propertyInfo = (PropertyInfo) member.Member;
                     var propertyName = propertyInfo.Name;
                     var propertyType = propertyInfo.PropertyType;
 
@@ -195,34 +233,38 @@ namespace DataAccess
                     navigationPropertyAnoymousTypePropertiesValues.Add(memberAccess);
                 }
 
-                var anonymousTypeOfNavigationPropertyProjection = AnonymousTypeUtils.CreateType(navigationPropertyAnoymousTypeProperties);
+                var anonymousTypeOfNavigationPropertyProjection =
+                    AnonymousTypeUtils.CreateType(navigationPropertyAnoymousTypeProperties);
                 Type typeOfSubProj = null;
                 var anonymousTypeOfNavigationPropertyProjectionConstructor = anonymousTypeOfNavigationPropertyProjection
                     .GetConstructor(navigationPropertyAnoymousTypeProperties.Select(kv => kv.Value).ToArray());
                 typeOfSubProj = anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType;
 
-                var selectMethod = typeof(Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
+                var selectMethod = typeof (Queryable).GetMethods().Where(m => m.Name == "Select").ToList()[0];
                 var genericSelectMethod = selectMethod.MakeGenericMethod(navigationProperyType, typeOfSubProj);
 
-                var newInstanceOfTheGenericType = Expression.New(anonymousTypeOfNavigationPropertyProjectionConstructor, navigationPropertyAnoymousTypePropertiesValues);
+                var newInstanceOfTheGenericType = Expression.New(anonymousTypeOfNavigationPropertyProjectionConstructor,
+                    navigationPropertyAnoymousTypePropertiesValues);
 
                 var projectionLamdba = Expression.Lambda(newInstanceOfTheGenericType, p1);
 
                 MethodCallExpression selctCallExpression = Expression.Call(
-                      genericSelectMethod,
-                      whereCallExpression,
-                      projectionLamdba);
+                    genericSelectMethod,
+                    whereCallExpression,
+                    projectionLamdba);
 
-                var provider = ((IQueryable)_context.Set<T>()).Provider; // TODO, Is it ok to assube navigation properties has the same provider?
-                var theMethods = typeof(IQueryProvider).GetMethods();
+                var provider = ((IQueryable) _context.Set<T>()).Provider;
+                    // TODO, Is it ok to assube navigation properties has the same provider?
+                var theMethods = typeof (IQueryProvider).GetMethods();
                 var createQMethd = theMethods.Where(name => name.Name == "CreateQuery").ToList()[1];
-                var speciifMethod = createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
-                var navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] { selctCallExpression });
+                var speciifMethod =
+                    createQMethd.MakeGenericMethod(anonymousTypeOfNavigationPropertyProjectionConstructor.ReflectedType);
+                var navigationProppertyQueryWithProjection1 = speciifMethod.Invoke(provider, new object[] {selctCallExpression});
 
-                Type genericFunc = typeof(IEnumerable<>);
+                Type genericFunc = typeof (IEnumerable<>);
                 Type funcOfTypeOfSubProj = genericFunc.MakeGenericType(typeOfSubProj);
 
-                var allMethodsOnEnumerableClass = typeof(Enumerable).GetMethods();
+                var allMethodsOnEnumerableClass = typeof (Enumerable).GetMethods();
                 var genericToListMethod = allMethodsOnEnumerableClass.Where(m => m.Name == "ToList").ToList()[0];
 
                 var toListOfTypeOfSubProj = genericToListMethod.MakeGenericMethod(typeOfSubProj);
@@ -235,28 +277,14 @@ namespace DataAccess
                 anonymousTypePropertiesValues.Add(toListExpression11);
             }
 
-            _projectedEntityAnonymousType = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
+            var projectedEntityAnonymousType = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
 
-            var constructor = _projectedEntityAnonymousType.GetConstructor(anonymousTypeProperties.Select(p => p.Value).ToArray());
+            var constructor = projectedEntityAnonymousType.GetConstructor(anonymousTypeProperties.Select(p => p.Value).ToArray());
 
             var anonymousTypeInstance = Expression.New(constructor, anonymousTypePropertiesValues);
 
-            _lambd11a1 = Expression.Lambda<Func<T, dynamic>>(anonymousTypeInstance, lambdaParameter);
-
-
-
-            return this;
-        }
-
-
-        public IPropertyProjector<T> Build()
-        { 
-            return new PropertyProjector<T>
-            {
-                Expression = _lambd11a1,
-                AllProjections = AllProjections,
-                ProjectedEntityAnonymousType = _projectedEntityAnonymousType
-            };
+            lambd11a1 = Expression.Lambda<Func<T, dynamic>>(anonymousTypeInstance, lambdaParameter);
+            return projectedEntityAnonymousType;
         }
 
         private static MethodInfo GetGenericMethod(Type declaringType, string methodName, Type[] typeArgs, params Type[] argTypes)

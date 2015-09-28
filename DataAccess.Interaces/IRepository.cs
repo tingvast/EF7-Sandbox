@@ -20,6 +20,8 @@ namespace DataAccess.Interaces
         List<Expression> Projection { get; set; }
 
         List<INavigationProperty> NavigationPropertiesProjections { get; set; }
+
+        string CreateCacheKey { get; }
     }
 
     public interface IPropertyProjectorBuilder<TEntity> where TEntity : class, IEntity

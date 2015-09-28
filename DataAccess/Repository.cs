@@ -187,13 +187,17 @@ namespace DataAccess
 
             if (projection.AllProjections.NavigationPropertiesProjections.Any())
             {
-                MaterializeNavigationPropertiesNew<T>(mainEntity, projectedEntity, projection.ProjectedEntityAnonymousType, projection.AllProjections);
+                MaterializeNavigationPropertiesNew<T>(
+                    projection.AllProjections, 
+                    mainEntity, 
+                    projectedEntity, 
+                    projection.ProjectedEntityAnonymousType);
             }
 
             var alreadytrackedentity = context
-                .ChangeTracker.Entries<T>()
-                .Where(e => e.Entity.Id == id)
-                .SingleOrDefault();
+                .ChangeTracker
+                .Entries<T>()
+                .SingleOrDefault(e => e.Entity.Id == id);
 
             if (alreadytrackedentity != null)
             {
@@ -343,10 +347,10 @@ namespace DataAccess
 
 
         private static void MaterializeNavigationPropertiesNew<T>(
-            dynamic mainEntity,
-            dynamic projectedEntity,
-            Type projectedEntityAnonymousType,
-            IProjections projections) where T : class, IEntity
+            IProjections projections, 
+            dynamic mainEntity, 
+            dynamic projectedEntity, 
+            Type projectedEntityAnonymousType) where T : class, IEntity
         {
             Type genericListType = typeof(List<>);
             var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];

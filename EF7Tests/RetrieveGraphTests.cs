@@ -194,6 +194,21 @@ namespace EF7Tests
                     var retrievedBlogWithPosts = repository.RetrieveByIdNew(blog.Id, pp);
                 }
 
+                using (var uow = UoWFactory.Create())
+                {
+                    var repository = uow.Create();
+
+                    IPropertyProjectorBuilder<Blog> builder
+                        = repository.CreatePropertyProjectorBuilder<Blog>(blog);
+
+                    var pp = builder
+                        .Select(p => p.Name)
+                        .IncludeNew<Post>(m => m.Posts, p => p.Date, p => p.Text)
+                        .Build();
+
+                    var retrievedBlogWithPosts = repository.RetrieveByIdNew(blog.Id, pp);
+                }
+
                 #endregion Assert
             }
         }
