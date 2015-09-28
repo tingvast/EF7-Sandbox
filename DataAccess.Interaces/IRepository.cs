@@ -22,24 +22,40 @@ namespace DataAccess.Interaces
         List<INavigationProperty> NavigationPropertiesProjections { get; set; }
     }
 
-    public interface IPropertyProjector<TEntity> where TEntity : class, IEntity
+    public interface IPropertyProjectorBuilder<TEntity> where TEntity : class, IEntity
     {
         IProjections AllProjections { get; }
 
-        IPropertyProjector<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
+        IPropertyProjectorBuilder<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
 
-        IIncludePropertySelector<TEntity> Include<TProperty>(
+        IPropertyProjectorBuilder<TEntity> Include<TProperty>(
             Expression<Func<TEntity, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
+
+
+        IPropertyProjectorBuilder<TEntity> IncludeNew<TProperty>(
+            Expression<Func<TEntity, dynamic>> navigationPropery,
+            params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
+
+        IPropertyProjector<TEntity> Build();
     }
 
-    public interface IIncludePropertySelector<TEntity> : IPropertyProjector<TEntity> where TEntity : class, IEntity
+    public interface IPropertyProjector<T>
+    {
+        Expression<Func<T, dynamic>> Expression { get; set; }
+        IProjections AllProjections { get; set; }
+        Type ProjectedEntityAnonymousType { get; set; }
+    }
+
+    public interface IIncludePropertySelector<TEntity> : IPropertyProjectorBuilder<TEntity> where TEntity : class, IEntity
     {
         //IIncludePropertySelector<TEntity> ThenInclude<TProperty>(params Expression<Func<TProperty, dynamic>>[] p);
     }
 
     public interface IRepository
     {
+        IPropertyProjectorBuilder<T> CreatePropertyProjectorBuilder<T>(T blog) where T : class, IEntity;
+
         #region Create
 
         T Create<T>(T entity) where T : class, IEntity;
@@ -52,7 +68,9 @@ namespace DataAccess.Interaces
 
         #region Retrieve
 
-        T RetrieveById<T>(int id, IPropertyProjector<T> selectedProperties) where T : class, IEntity;
+        T RetrieveById<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity;
+
+        T RetrieveByIdNew<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity;
 
         IEnumerable<T> Retrieve<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderBy = null) where T : class, IEntity;
 

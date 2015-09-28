@@ -14,6 +14,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
+
 namespace DataAccess
 {
     public class Repository : IRepository
@@ -52,7 +53,7 @@ namespace DataAccess
 
         #region Retrieve
 
-        public T RetrieveById<T>(int id, IPropertyProjector<T> selectedProperties) where T : class, IEntity
+        public T RetrieveById<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
         {
             // The query will be projected onto an anonymous type.
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
@@ -140,7 +141,7 @@ namespace DataAccess
                 anonymousTypePropertiesValues.Add(toListExpression11);
             }
 
-            var projectedEntityAnonymousType = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
+            Type projectedEntityAnonymousType = AnonymousTypeUtils.CreateType(anonymousTypeProperties);
 
             var constructor = projectedEntityAnonymousType.GetConstructor(anonymousTypeProperties.Select(p => p.Value).ToArray());
 
@@ -163,6 +164,36 @@ namespace DataAccess
             }
 
             var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
+
+            if (alreadytrackedentity != null)
+            {
+                // Remove it from tracking
+                alreadytrackedentity.State = EntityState.Detached;
+            }
+            context.Attach(mainEntity);
+            return mainEntity;
+        }
+
+        public T RetrieveByIdNew<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity
+        {
+            var projectedEntity = context.Set<T>()
+                .AsNoTracking()
+                .Where(e => e.Id == id)
+                .Select(projection.Expression)
+                .Single();
+
+            var mainEntity = Mapper.DynamicMap<T>(projectedEntity);
+            mainEntity.Id = id;
+
+            if (projection.AllProjections.NavigationPropertiesProjections.Any())
+            {
+                MaterializeNavigationPropertiesNew<T>(mainEntity, projectedEntity, projection.ProjectedEntityAnonymousType, projection.AllProjections);
+            }
+
+            var alreadytrackedentity = context
+                .ChangeTracker.Entries<T>()
+                .Where(e => e.Entity.Id == id)
+                .SingleOrDefault();
 
             if (alreadytrackedentity != null)
             {
@@ -283,12 +314,44 @@ namespace DataAccess
         dynamic mainEntity,
         dynamic projectedEntity,
         Type projectedEntityAnonymousType,
-        IPropertyProjector<T> selectedProperties) where T : class, IEntity
+        IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
         {
             Type genericListType = typeof(List<>);
             var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];
 
             foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
+            {
+                var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
+                var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);
+
+                var propertValues = (IEnumerable)navigationPropertyOnProjectedAnonymousType.GetValue(projectedEntity);
+
+                Type listOfTypeProjectionType = genericListType.MakeGenericType(new[] { projection.Type });
+
+                var mapperOfProjectionType = genericDynamicMapper.MakeGenericMethod(projection.Type);
+                IList navigationPropertyList = (IList)Activator.CreateInstance(listOfTypeProjectionType);
+                foreach (var value in propertValues)
+                {
+                    var valueOfNavigationPropertyProjection = mapperOfProjectionType.Invoke(null, new object[] { value });
+
+                    navigationPropertyList.Add(valueOfNavigationPropertyProjection);
+                }
+
+                navigationPropertyOnMainEntity.SetValue(mainEntity, navigationPropertyList);
+            }
+        }
+
+
+        private static void MaterializeNavigationPropertiesNew<T>(
+            dynamic mainEntity,
+            dynamic projectedEntity,
+            Type projectedEntityAnonymousType,
+            IProjections projections) where T : class, IEntity
+        {
+            Type genericListType = typeof(List<>);
+            var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];
+
+            foreach (var projection in projections.NavigationPropertiesProjections)
             {
                 var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
                 var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);
@@ -453,6 +516,14 @@ namespace DataAccess
             //var retEntity = Mapper.Map<Meeting>(entiry);
             return retEntity;
         }
+
+        public IPropertyProjectorBuilder<T> CreatePropertyProjectorBuilder<T>(T entity) where T : class, IEntity
+        {
+            if (entity == null) return new PropertyProjectorBuilder<T>();
+
+            return new PropertyProjectorBuilder<T>(entity.Id, context);
+        }
+    
 
         public T RetrieveObsolete<T, TResult>(int id, Expression<Func<T, TResult>> selectedProperties) where T : class, IEntity
         {
