@@ -143,23 +143,19 @@ namespace DataAccess
         IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.Include<TProperty>(
             Expression<Func<T, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties)
-        {
-            var navigationPropertyProjection11 = navigationPropery as LambdaExpression;
+        {            
+            var propertyInfo = (PropertyInfo)ParameterHelper.GetMemberExpression(navigationPropery as LambdaExpression).Member;
 
-            var member11 = navigationPropertyProjection11.Body as MemberExpression;
+            var propertyNameOfReferer = propertyInfo.Name;
 
-            var propertyInfo11 = (PropertyInfo)member11.Member;
-
-            var propertyNameOfReferer = propertyInfo11.Name;
-
-            var navigationProperty11 = new NavigationProperty(
+            var navigationProperty = new NavigationProperty(
                    propertyNameOfReferer,
                    typeof(TProperty).Name,
                    typeof(TProperty));
 
-            navigationProperty11.Projections.AddRange(selectedProperties);
+            navigationProperty.Projections.AddRange(selectedProperties);
 
-            AllProjections.NavigationPropertiesProjections.Add(navigationProperty11);
+            AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
             return this;
         }
 
