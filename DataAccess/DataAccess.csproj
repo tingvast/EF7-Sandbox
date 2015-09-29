@@ -148,12 +148,18 @@
       <DependentUpon>20150927145053_v3.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\EF7BloggContextModelSnapshot.cs" />
-    <Compile Include="Parameters.cs" />
+    <Compile Include="Retrieve\NavigationProperty.cs" />
+    <Compile Include="Retrieve\Parameters.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Retrieve\Projections.cs" />
+    <Compile Include="Retrieve\PropertyProjector.cs" />
+    <Compile Include="Retrieve\PropertyProjectorBuilder.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="UnitOfWork.cs" />
     <Compile Include="UoWFactory.cs" />
+    <Compile Include="Update\PropertyUpdater.cs" />
+    <Compile Include="Update\UpdatePropertyBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

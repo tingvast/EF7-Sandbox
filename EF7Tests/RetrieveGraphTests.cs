@@ -7,7 +7,6 @@ namespace EF7Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
     using System.Diagnostics;
-    using System.Linq;
 
     namespace EF7Tests
     {
@@ -21,6 +20,7 @@ namespace EF7Tests
                 _fixture = new Fixture();
 
                 _fixture.Register(() => TestDataBuilders.BuildAnyBlog(_fixture));
+                _fixture.Register(() => TestDataBuilders.BuildAnyFollower(_fixture));
             }
 
             [TestMethod]
@@ -43,12 +43,19 @@ namespace EF7Tests
                         p.Text = "New Text";
                     }
 
-                    repository.UpdateGraph(blog);
+                    var pp1 = repository.CreateUpdatePropertyBuilder<Blog>(blog)
+                       .PropertiesToUpdate(m => m.Name, m => m.Description)
+                       .IncludeNavigationProperyUpdate<Post>(
+                            blog.Posts[0].Id,
+                            p => p.Posts, p => p.Text)
+                        .IncludeNavigationProperyUpdate<Post>(
+                            blog.Posts[1].Id,
+                            p => p.Posts, p => p.Text)
+                       .Build();
 
-                    //repository.Update(blog, p => p.Name, p => p.Description);
+                    repository.UpdateGraph(blog, pp1);
 
                     uow.Commit();
-
 
                     var pp = repository.CreatePropertyProjectorBuilder(blog)
                         .Select(p => p.Description, p => p.Name)
@@ -56,14 +63,28 @@ namespace EF7Tests
 
                     var retrieved = repository.RetrieveById(blog.Id, pp);
 
+                    var newFollower = _fixture.Create<Follower>();
+                    newFollower.Blog = retrieved;
+                    retrieved.Followers.Add(newFollower);
 
-
+                    repository.Create<Follower>(newFollower);
 
                     uow.Commit();
 
+                    newFollower.Name = "NewName";
 
+                    var pp2 = repository.CreateUpdatePropertyBuilder<Blog>(blog)
+                       .IncludeNavigationProperyUpdate<Follower>(
+                            newFollower.Id,
+                            p => p.Followers, p => p.Name)
+                       .Build();
+
+                    repository.UpdateGraph<Blog>(retrieved, pp2);
+
+                    uow.Commit();
                 }
             }
+
             [TestMethod]
             public void CanRetrieveById()
             {

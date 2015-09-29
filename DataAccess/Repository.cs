@@ -4,6 +4,7 @@ using DataAccess.Interaces;
 using EF7;
 using LatticeUtils;
 using Microsoft.Data.Entity;
+using Microsoft.Data.Entity.ChangeTracking;
 using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Data.Entity.Query;
 using Microsoft.Framework.DependencyInjection;
@@ -31,6 +32,11 @@ namespace DataAccess
             if (entity == null) return new PropertyProjectorBuilder<T>();
 
             return new PropertyProjectorBuilder<T>(entity.Id, context);
+        }
+
+        public IUpdatePropertyBuilder<T> CreateUpdatePropertyBuilder<T>(T entity) where T : class, IEntity
+        {
+            return new UpdatePropertyBuilder<T>();
         }
 
         #region Create
@@ -161,6 +167,84 @@ namespace DataAccess
             //context.Update<T>(entityWithRelations);
 
             return entityWithRelations;
+        }
+
+        public T UpdateGraph<T>(T entity, IPropertyUpdater<T> projection) where T : class, IEntity
+        {
+            var allTrackedEntries = new List<EntityEntry>(context.ChangeTracker.Entries());
+
+            var allProperties = context.Entry(entity).Metadata.GetProperties().Select(p => p.Name);
+            var propertiesToBeUpdated = new List<string>();
+            foreach (var p in projection.AllProjections.Projection)
+            {
+                var projectionLambda = p as LambdaExpression;
+
+                MemberExpression member = ParameterHelper.GetMemberExpression(projectionLambda);
+
+                var propertyInfo = (PropertyInfo)member.Member;
+                var propertyName = propertyInfo.Name;
+                var propertyType = propertyInfo.PropertyType;
+
+                context.Entry(entity).Property(propertyName).IsModified = true;
+
+                propertiesToBeUpdated.Add(propertyName);
+            }
+
+            var propertiesToBeResetSinveTheyAreNotRequestedToBeUpdated = allProperties.Except(propertiesToBeUpdated);
+            foreach (var propName in propertiesToBeResetSinveTheyAreNotRequestedToBeUpdated)
+            {
+                context.Entry(entity).Property(propName).CurrentValue = context.Entry(entity).Property(propName).OriginalValue;
+            }
+
+            foreach (var p in projection.AllProjections.NavigationPropertiesProjections)
+            {
+                var subentity = context.ChangeTracker
+                    .Entries()
+                    .Single(e => e.Metadata.ClrType.Name == p.Name && p.Id == (int)e.Property("Id").CurrentValue);
+
+                var ahag = allTrackedEntries.Find(e => e.Metadata.ClrType.Name == p.Name && p.Id == (int)e.Property("Id").CurrentValue);
+
+                allTrackedEntries.Remove(ahag);
+
+                var allPropertieOfNavigationPropertys = subentity.Metadata.GetProperties().Select(p1 => p1.Name);
+                var navigationPropertiesToBeUpdated = new List<string>();
+                foreach (var pp in p.Projections)
+                {
+                    var projectionLambda = pp as LambdaExpression;
+
+                    MemberExpression member = ParameterHelper.GetMemberExpression(projectionLambda);
+
+                    var propertyInfo = (PropertyInfo)member.Member;
+                    var propertyName = propertyInfo.Name;
+                    var propertyType = propertyInfo.PropertyType;
+
+                    subentity.Property(propertyName).IsModified = true;
+                    navigationPropertiesToBeUpdated.Add(propertyName);
+                }
+
+                var navigationPropertiesToBeResetSinveTheyAreNotRequestedToBeUpdated = allPropertieOfNavigationPropertys.Except(navigationPropertiesToBeUpdated);
+                foreach (var propName in navigationPropertiesToBeResetSinveTheyAreNotRequestedToBeUpdated)
+                {
+                    subentity.Property(propName).CurrentValue = subentity.Property(propName).OriginalValue;
+                }
+            }
+
+            var ahag11 = allTrackedEntries.Find(e => e.Metadata.ClrType.Name == context.Entry(entity).Metadata.ClrType.Name && entity.Id == (int)e.Property("Id").CurrentValue);
+
+            allTrackedEntries.Remove(ahag11);
+
+            foreach (var e in allTrackedEntries)
+            {
+                var allPropertieOfNavigationPropertys = e.Metadata.GetProperties().Select(p1 => p1.Name);
+                foreach (var eey in allPropertieOfNavigationPropertys)
+                {
+                    e.Property(eey).CurrentValue = e.Property(eey).OriginalValue;
+                }
+
+                e.State = EntityState.Unchanged;
+            }
+
+            return entity;
         }
 
         #endregion Update

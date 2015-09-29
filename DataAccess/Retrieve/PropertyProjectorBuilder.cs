@@ -1,7 +1,6 @@
 ﻿using DataAccess.Interaces;
 using EF7;
 using LatticeUtils;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Data.Entity.Query;
 using System;
@@ -10,99 +9,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Caching;
-using System.Text;
 
 namespace DataAccess
 {
-    public class NavigationProperty : INavigationProperty
-    {
-        public NavigationProperty()
-        {
-            Projections = new List<Expression>();
-        }
-
-        public NavigationProperty(
-            string referingPropertName,
-            string name,
-            Type type)
-            : this()
-        {
-            ReferingPropertyName = referingPropertName;
-            Name = name;
-            Type = type;
-        }
-
-        public string ReferingPropertyName { get; set; }
-        public string Name { get; set; }
-        public Type Type { get; set; }
-        public List<Expression> Projections { get; set; }
-    }
-
-    public class Projections : IProjections
-    {
-        public Projections()
-        {
-            Projection = new List<Expression>();
-            NavigationPropertiesProjections = new List<INavigationProperty>();
-        }
-
-        public List<INavigationProperty> NavigationPropertiesProjections { get; set; }
-
-        public string CacheKey
-        {
-            get
-            {
-                return CreateCacheKey();
-            }
-        }
-
-        public List<Expression> Projection { get; set; }
-
-        #region Private
-
-        private string CreateCacheKey()
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (LambdaExpression le in Projection)
-            {
-                MemberExpression member = ParameterHelper.GetMemberExpression(le);
-
-                var propertyInfo = (PropertyInfo)member.Member;
-                var propertyName = propertyInfo.Name;
-                var propertyType = propertyInfo.PropertyType;
-
-                sb.Append(propertyName + ":" + propertyType);
-            }
-
-            sb.Append(":");
-            foreach (INavigationProperty np in NavigationPropertiesProjections)
-            {
-                sb.Append(np.Name + ":" + np.Type);
-            }            
-
-            return sb.ToString();
-        }
-
-        #endregion Private
-    }
-
-    public static class PropertyProjectorFactory<T> where T : class, IEntity
-    {
-        public static IPropertyProjectorBuilder<T> Create(T entity = null)
-        {
-            if (entity == null) return new PropertyProjectorBuilder<T>();
-
-            return new PropertyProjectorBuilder<T>(entity.Id);
-        }
-    }
-
-    public class PropertyProjector<T> : IPropertyProjector<T>
-    {
-        public Expression<Func<T, dynamic>> Expression { get; set; }
-        public IProjections AllProjections { get; set; }
-        public Type ProjectedEntityAnonymousType { get; set; }
-    }
-
     public class PropertyProjectorBuilder<T> : IPropertyProjectorBuilder<T>, IIncludePropertySelector<T> where T : class, IEntity
     {
         private int _id;
@@ -143,7 +52,7 @@ namespace DataAccess
         IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.Include<TProperty>(
             Expression<Func<T, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties)
-        {            
+        {
             var propertyInfo = (PropertyInfo)ParameterHelper.GetMemberExpression(navigationPropery as LambdaExpression).Member;
 
             var propertyNameOfReferer = propertyInfo.Name;
@@ -367,28 +276,4 @@ namespace DataAccess
 
         #endregion Obsolete
     }
-
-    internal static class ParameterHelper
-    {
-        internal static MemberExpression GetMemberExpression(LambdaExpression projectionLambda)
-        {
-            MemberExpression member;
-            switch (projectionLambda.Body.NodeType)
-            {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                    var ue = projectionLambda.Body as UnaryExpression;
-                    member = ((ue != null) ? ue.Operand : null) as MemberExpression;
-                    break;
-
-                default:
-                    member = projectionLambda.Body as MemberExpression;
-                    break;
-            }
-
-            return member;
-        }
-    }
-
-
 }

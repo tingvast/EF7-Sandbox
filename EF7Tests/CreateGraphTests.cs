@@ -1,5 +1,4 @@
 ﻿using Core;
-using DataAccess;
 using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
@@ -113,7 +112,6 @@ namespace EF7Tests
                     .Include<Post>(p => p.Posts, p => p.Text, p => post.Date)
                     .Include<Follower>(m => m.Followers, p => p.Id, p => p.Name)
                     .Build();
-
 
                 var retrievedBlog = rep.RetrieveById(createdBlog.Id, pp);
             }

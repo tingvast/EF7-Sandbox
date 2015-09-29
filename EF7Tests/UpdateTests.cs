@@ -1,5 +1,4 @@
 ﻿using Core;
-using DataAccess;
 using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;

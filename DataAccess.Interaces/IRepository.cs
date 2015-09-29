@@ -6,60 +6,11 @@ using System.Linq.Expressions;
 
 namespace DataAccess.Interaces
 {
-    public interface INavigationProperty
-    {
-        string ReferingPropertyName { get; set; }
-        string Name { get; set; }
-        Type Type { get; set; }
-
-        List<Expression> Projections { get; set; }
-    }
-
-    public interface IProjections
-    {
-        List<Expression> Projection { get; set; }
-
-        List<INavigationProperty> NavigationPropertiesProjections { get; set; }
-
-        string CacheKey { get; }
-    }
-
-    public interface IPropertyProjectorBuilder<TEntity> where TEntity : class, IEntity
-    {
-        IProjections AllProjections { get; }
-
-        IPropertyProjectorBuilder<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
-
-        IPropertyProjectorBuilder<TEntity> Include<TProperty>(
-            Expression<Func<TEntity, dynamic>> navigationPropery,
-            params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
-
-        IPropertyProjector<TEntity> Build();
-
-        #region Obsolete
-
-        IPropertyProjectorBuilder<TEntity> IncludeOld<TProperty>(
-         Expression<Func<TEntity, dynamic>> navigationPropery,
-         params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
-
-        #endregion Obsolete
-    }
-
-    public interface IPropertyProjector<T>
-    {
-        Expression<Func<T, dynamic>> Expression { get; set; }
-        IProjections AllProjections { get; set; }
-        Type ProjectedEntityAnonymousType { get; set; }
-    }
-
-    public interface IIncludePropertySelector<TEntity> : IPropertyProjectorBuilder<TEntity> where TEntity : class, IEntity
-    {
-        //IIncludePropertySelector<TEntity> ThenInclude<TProperty>(params Expression<Func<TProperty, dynamic>>[] p);
-    }
-
     public interface IRepository
     {
         IPropertyProjectorBuilder<T> CreatePropertyProjectorBuilder<T>(T blog) where T : class, IEntity;
+
+        IUpdatePropertyBuilder<T> CreateUpdatePropertyBuilder<T>(T blog) where T : class, IEntity;
 
         #region Create
 
@@ -88,6 +39,8 @@ namespace DataAccess.Interaces
         T Update<T, TResult>(T entity, params Expression<Func<T, TResult>>[] selectedProperties) where T : class, IEntity;
 
         T UpdateGraph<T>(T entityWithRelations) where T : class, IEntity;
+
+        T UpdateGraph<T>(T entity, IPropertyUpdater<T> projection) where T : class, IEntity;
 
         #endregion Update
 

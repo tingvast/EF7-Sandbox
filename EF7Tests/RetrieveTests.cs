@@ -1,5 +1,4 @@
 ﻿using Core;
-using DataAccess;
 using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
@@ -127,9 +126,9 @@ namespace EF7Tests
                 var rep = uow.Create();
 
                 var projector = rep.CreatePropertyProjectorBuilder(blog)
-                    .Select(p => p.Id)    
+                    .Select(p => p.Id)
                     .Build();
-                
+
                 var retrievedBlog = rep.RetrieveById(createdBlog.Id, projector);
             }
 

@@ -21,7 +21,7 @@ namespace DataAccess
 
             this.context = new EF7BloggContext(serviceProvider);
 
-            this.context.ChangeTracker.AutoDetectChangesEnabled = false;
+            //this.context.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
         public IRepository Create()

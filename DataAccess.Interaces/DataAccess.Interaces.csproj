@@ -40,8 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="INavigationProperty.cs" />
+    <Compile Include="Retrieve\IIncludePropertySelector.cs" />
+    <Compile Include="Retrieve\IPropertyProjector.cs" />
+    <Compile Include="IProjections.cs" />
+    <Compile Include="Retrieve\IPropertyProjectorBuilder.cs" />
+    <Compile Include="IPropertyUpdater.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IUnitOfWork.cs" />
+    <Compile Include="IUpdatePropertyBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
