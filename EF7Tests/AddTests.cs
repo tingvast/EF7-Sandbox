@@ -9,23 +9,16 @@ namespace EF7Tests
     /// Summary description for CreateTests
     /// </summary>
     [TestClass]
-    public class CreateTests
-    {
-        private Fixture _fixture;
-
-        public CreateTests()
-        {
-            _fixture = new Fixture();
-        }
-
+    public class AddTests : TestBase
+    {        
         [TestMethod]
-        public void CanCreateBusinessObject()
+        public void CanAddBusinessObject()
         {
             #region Arrange
 
             var blog = new Blog
             {
-                Name = _fixture.Create<string>()
+                Name = Fixture.Create<string>()
             };
 
             #endregion Arrange
@@ -36,7 +29,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                var persistedBlog = rep.Create<Blog>(blog);
+                var persistedBlog = rep.Add<Blog>(blog);
 
                 uow.Commit();
             }
@@ -51,13 +44,13 @@ namespace EF7Tests
         }
 
         [TestMethod]
-        public void CanCreateManyBusinessObjectWithoutRoundtrips()
+        public void CanAddManyBusinessObjectWithoutRoundtrips()
         {
             #region Arrange
 
-            var blog1 = new Blog() { Name = _fixture.Create<string>() };
-            var blog2 = new Blog() { Name = _fixture.Create<string>() };
-            var blog3 = new Blog() { Name = _fixture.Create<string>() };
+            var blog1 = new Blog() { Name = Fixture.Create<string>() };
+            var blog2 = new Blog() { Name = Fixture.Create<string>() };
+            var blog3 = new Blog() { Name = Fixture.Create<string>() };
 
             #endregion Arrange
 
@@ -68,7 +61,7 @@ namespace EF7Tests
                 var rep = uow.Create();
 
                 // This will generate one batch sql command to the database.
-                var persistedBlog = rep.CreateMany<Blog>(new[] { blog1, blog2, blog3 });
+                var persistedBlog = rep.Add<Blog>(new[] { blog1, blog2, blog3 });
 
                 uow.Commit();
             }
@@ -83,15 +76,15 @@ namespace EF7Tests
         }
 
         [TestMethod]
-        public void CanCreateAnotherBusinessObject()
+        public void CanAddAnotherBusinessObject()
         {
             #region Arrange
 
             Post post;
 
             post = new Post();
-            post.BlogText = _fixture.Create<string>();
-            post.Date = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
+            post.Date = Fixture.Create<string>();
 
             #endregion Arrange
 
@@ -100,7 +93,7 @@ namespace EF7Tests
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var persitedPost = rep.Create<Post>(post);
+                var persitedPost = rep.Add<Post>(post);
 
                 uow.Commit();
             }
@@ -115,21 +108,20 @@ namespace EF7Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Microsoft.Data.Entity.DbUpdateException))]
-        public void CanNotCreateTheSameBusinessObjectExpectedException()
+        public void CanAddTheSameBusinessObjectExpectedException()
         {
             #region Arrange
 
             Post post;
 
             post = new Post();
-            post.BlogText = _fixture.Create<string>();
-            post.Date = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
+            post.Date = Fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var persitedPost = rep.Create<Post>(post);
+                var persitedPost = rep.Add<Post>(post);
 
                 uow.Commit();
 
@@ -137,7 +129,7 @@ namespace EF7Tests
 
                 #region Act
 
-                persitedPost = rep.Create<Post>(post);
+                persitedPost = rep.Add<Post>(post);
 
                 uow.Commit();
 
@@ -152,21 +144,20 @@ namespace EF7Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Microsoft.Data.Entity.DbUpdateException))]
-        public void CanNotCreateTheSameBusinessObjectUsingDisconnectedScenarioExpectedException()
+        public void CanAddTheSameBusinessObjectUsingDisconnectedScenarioExpectedException()
         {
             #region Arrange
 
             Post post;
 
             post = new Post();
-            post.BlogText = _fixture.Create<string>();
-            post.Date = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
+            post.Date = Fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var persitedPreRegistration = rep.Create<Post>(post);
+                var persitedPreRegistration = rep.Add<Post>(post);
 
                 uow.Commit();
             }
@@ -178,7 +169,7 @@ namespace EF7Tests
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                var persitedPost = rep.Create<Post>(post);
+                var persitedPost = rep.Add<Post>(post);
 
                 uow.Commit();
             }

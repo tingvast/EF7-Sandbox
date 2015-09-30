@@ -10,15 +10,8 @@ namespace EF7Tests
     /// Summary description for UpdateGraphTests
     /// </summary>
     [TestClass]
-    public class UpdateGraphTests
+    public class UpdateGraphTests : TestBase
     {
-        private Fixture _fixture;
-
-        public UpdateGraphTests()
-        {
-            _fixture = new Fixture();
-        }
-
         [TestMethod]
         public void CanCreate3()
         {
@@ -27,22 +20,22 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
                 post = new Post();
-                post.BlogText = _fixture.Create<string>();
-                post.Date = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
+                post.Date = Fixture.Create<string>();
 
-                var k = rep.Create<Post>(post);
+                var k = rep.Add<Post>(post);
 
                 uow.Commit();
             }
 
             var blog = new Blog();
-            blog.Name = _fixture.Create<string>();
-            post.BlogText = _fixture.Create<string>();
+            blog.Name = Fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
             post.Blog = blog;
             blog.Posts.Add(post);
 
             post = new Post();
-            post.BlogText = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
             post.Blog = blog;
             blog.Posts.Add(post);
 
@@ -59,7 +52,7 @@ namespace EF7Tests
         public void CanCreate5()
         {
             var blog = new Blog();
-            blog.Name = _fixture.Create<string>();
+            blog.Name = Fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -70,7 +63,7 @@ namespace EF7Tests
             }
 
             var post = new Post();
-            post.BlogText = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
@@ -97,30 +90,30 @@ namespace EF7Tests
         public void CanCreate6()
         {
             var blog = new Blog();
-            blog.Name = _fixture.Create<string>();
+            blog.Name = Fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var persistedBlog = repository.Create(blog);
+                var persistedBlog = repository.Add(blog);
 
                 uow.Commit();
             }
 
             var post = new Post();
-            post.BlogText = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
 
-                var persistedPost = repository.Create(post);
+                var persistedPost = repository.Add(post);
 
                 uow.Commit();
             }
 
             var post1 = new Post();
-            post1.BlogText = _fixture.Create<string>();
+            post1.Text = Fixture.Create<string>();
             blog.Posts.AddRange(new List<Post>() { post, post1 });
 
             using (var uow = UoWFactory.Create())
@@ -137,7 +130,7 @@ namespace EF7Tests
         public void CanCreate7()
         {
             var blog = new Blog();
-            blog.Name = _fixture.Create<string>();
+            blog.Name = Fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -148,7 +141,7 @@ namespace EF7Tests
             }
 
             var post = new Post();
-            post.BlogText = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
@@ -160,7 +153,7 @@ namespace EF7Tests
             }
 
             var newPost = new Post();
-            newPost.BlogText = _fixture.Create<string>();
+            newPost.Text = Fixture.Create<string>();
             blog.Posts.AddRange(new List<Post>() { newPost, post });
 
             using (var uow = UoWFactory.Create())

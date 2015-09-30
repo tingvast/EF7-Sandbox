@@ -23,17 +23,6 @@ namespace LatticeUtils
             moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
         }
 
-        // This version of the static constructor can be used temporarily to save the dynamic DLL to get a copy of the generated IL.
-        //public static readonly AssemblyBuilder assemblyBuilder;
-        //static AnonymousTypeUtils()
-        //{
-        //    var assemblyName = new AssemblyName { FirstName = "LatticeUtilsAnonymousTypes" };
-        //    assemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave, @"C:\Temp\");
-        //    moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.FirstName, "anonymousTypes.dll");
-
-        //    // This would need to be called from somewhere else after a dynamic anonymous type is created
-        //    // AnonymousTypeUtils.assemblyBuilder.Save("anonymousTypes.dll");
-        //}
 
         /// <summary>
         /// Creates an anonymous object for the specified name/value pairs.

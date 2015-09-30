@@ -9,15 +9,8 @@ namespace EF7Tests
     /// Summary description for UpdateTests
     /// </summary>
     [TestClass]
-    public class UpdateTests
+    public class UpdateTests : TestBase
     {
-        private Fixture _fixture;
-
-        public UpdateTests()
-        {
-            _fixture = new Fixture();
-        }
-
         [TestMethod]
         public void CanUpdateBusinessObject()
         {
@@ -29,15 +22,15 @@ namespace EF7Tests
                 Post post;
                 var rep = uow.Create();
                 post = new Post();
-                post.BlogText = _fixture.Create<string>();
-                post.Date = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
+                post.Date = Fixture.Create<string>();
 
-                var persistedPost = rep.Create<Post>(post);
+                var persistedPost = rep.Add<Post>(post);
 
                 uow.Commit();
 
-                var projector = rep.CreatePropertyProjectorBuilder(post)
-                    .Select(p => p.BlogText, p => p.Date)
+                var projector = rep.PropertySelectBuilder(post)
+                    .Select(p => p.Text, p => p.Date)
                     .Build();
 
                 retrievedPost = rep.RetrieveById(persistedPost.Id, projector);
@@ -50,10 +43,10 @@ namespace EF7Tests
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                retrievedPost.BlogText = _fixture.Create<string>();
-                retrievedPost.Date = _fixture.Create<string>();
+                retrievedPost.Text = Fixture.Create<string>();
+                retrievedPost.Date = Fixture.Create<string>();
 
-                rep.Update(retrievedPost, p => p.BlogText);
+                rep.Update(retrievedPost, p => p.Text);
 
                 uow.Commit();
             }
@@ -67,7 +60,7 @@ namespace EF7Tests
             #region Arrange
 
             var blog = new Blog();
-            blog.Name = _fixture.Create<string>();
+            blog.Name = Fixture.Create<string>();
             using (var uow = UoWFactory.Create())
             {
                 var repository = uow.Create();
@@ -81,8 +74,8 @@ namespace EF7Tests
 
             #region Act
 
-            blog.Name = _fixture.Create<string>();
-            blog.Author = _fixture.Create<string>();
+            blog.Name = Fixture.Create<string>();
+            blog.Author = Fixture.Create<string>();
 
             using (var uow1 = UoWFactory.Create())
             {

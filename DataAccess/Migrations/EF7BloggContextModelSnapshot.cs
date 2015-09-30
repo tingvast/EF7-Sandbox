@@ -38,9 +38,7 @@ namespace DataAccess.Migrations
 
                     b.Property<int?>("BlogId");
 
-                    b.Property<string>("FirstName");
-
-                    b.Property<string>("LastName");
+                    b.Property<string>("Name");
 
                     b.Key("Id");
                 });
@@ -52,9 +50,9 @@ namespace DataAccess.Migrations
 
                     b.Property<int?>("BlogId");
 
-                    b.Property<string>("BlogText");
-
                     b.Property<string>("Date");
+
+                    b.Property<string>("Text");
 
                     b.Key("Id");
                 });

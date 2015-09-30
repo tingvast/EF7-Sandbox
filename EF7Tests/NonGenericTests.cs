@@ -9,15 +9,8 @@ namespace EF7Tests
     /// Summary description for NonGenericTests
     /// </summary>
     [TestClass]
-    public class NonGenericTests
+    public class NonGenericTests : TestBase
     {
-        private Fixture _fixture;
-
-        public NonGenericTests()
-        {
-            _fixture = new Fixture();
-        }
-
         [TestMethod]
         public void CanRetrieveBlogNonGeneric()
         {
@@ -30,17 +23,17 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var blog = new Blog
                 {
-                    Name = _fixture.Create<string>()
+                    Name = Fixture.Create<string>()
                 };
 
                 post = new Post();
-                post.BlogText = _fixture.Create<string>();
-                post.Date = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
+                post.Date = Fixture.Create<string>();
                 post.Blog = blog;
 
                 blog.Posts.Add(post);
 
-                createdBlog = rep.CreateGraph(blog);
+                createdBlog = rep.AddWithRelations(blog);
 
                 uow.Commit();
             }

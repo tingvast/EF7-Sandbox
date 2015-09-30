@@ -7,25 +7,18 @@ using System.Linq;
 namespace EF7Tests
 {
     [TestClass]
-    public class CreateGraphTests
+    public class AddWithRelationsTests : TestBase
     {
-        private Fixture _fixture;
-
-        public CreateGraphTests()
-        {
-            _fixture = new Fixture();
-        }
-
         [TestMethod]
-        public void CanCreateGraph()
+        public void CanAddWithRelations()
         {
             #region Arrange
 
             var blog = new Blog();
-            blog.Name = _fixture.Create<string>();
+            blog.Name = Fixture.Create<string>();
 
             var post = new Post();
-            post.BlogText = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
             blog.Posts.Add(post);
 
             #endregion Arrange
@@ -36,7 +29,7 @@ namespace EF7Tests
             {
                 var repository = uow.Create();
 
-                var updatedBlog = repository.CreateGraph(blog);
+                var updatedBlog = repository.AddWithRelations(blog);
                 uow.Commit();
             }
 
@@ -50,7 +43,7 @@ namespace EF7Tests
         }
 
         [TestMethod]
-        public void CanCreateGraph2()
+        public void CanAddWithRelations2()
         {
             #region Arrange
 
@@ -59,20 +52,20 @@ namespace EF7Tests
 
             var blog = new Blog
             {
-                Name = _fixture.Create<string>(),
-                Description = _fixture.Create<string>()
+                Name = Fixture.Create<string>(),
+                Description = Fixture.Create<string>()
             };
 
             post = new Post()
             {
-                BlogText = _fixture.Create<string>(),
-                Date = _fixture.Create<string>(),
+                Text = Fixture.Create<string>(),
+                Date = Fixture.Create<string>(),
                 Blog = blog,
             };
 
             var follower = new Follower()
             {
-                FirstName = _fixture.Create<string>(),
+                Name = Fixture.Create<string>(),
                 Blog = blog
             };
 
@@ -80,8 +73,8 @@ namespace EF7Tests
             blog.Followers.Add(follower);
 
             post = new Post();
-            post.BlogText = _fixture.Create<string>();
-            post.Date = _fixture.Create<string>();
+            post.Text = Fixture.Create<string>();
+            post.Date = Fixture.Create<string>();
             post.Blog = blog;
 
             blog.Posts.Add(post);
@@ -94,7 +87,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                createdBlog = rep.CreateGraph(blog);
+                createdBlog = rep.AddWithRelations(blog);
 
                 uow.Commit();
             }
@@ -107,10 +100,10 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                var pp = rep.CreatePropertyProjectorBuilder(blog)
+                var pp = rep.PropertySelectBuilder(blog)
                     .Select(m => m.Id, m => m.Name, m => m.Description)
-                    .Include<Post>(p => p.Posts, p => p.BlogText, p => post.Date)
-                    .Include<Follower>(m => m.Followers, p => p.Id, p => p.FirstName)
+                    .Include<Post>(p => p.Posts, p => p.Text, p => post.Date)
+                    .Include<Follower>(m => m.Followers, p => p.Id, p => p.Name)
                     .Build();
 
                 var retrievedBlog = rep.RetrieveById(createdBlog.Id, pp);
@@ -120,7 +113,7 @@ namespace EF7Tests
         }
 
         [TestMethod]
-        public void CanCreateGraph_Inconclusive()
+        public void CanAddWithRelations_Inconclusive()
         {
             Assert.Inconclusive("This implementation of retrieve is not going to be used");
             Post post;
@@ -130,24 +123,24 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var blog = new Blog
                 {
-                    Name = _fixture.Create<string>()
+                    Name = Fixture.Create<string>()
                 };
 
                 post = new Post();
-                post.BlogText = _fixture.Create<string>();
-                post.Date = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
+                post.Date = Fixture.Create<string>();
                 post.Blog = blog;
 
                 blog.Posts.Add(post);
 
                 post = new Post();
-                post.BlogText = _fixture.Create<string>();
-                post.Date = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
+                post.Date = Fixture.Create<string>();
                 post.Blog = blog;
 
                 blog.Posts.Add(post);
 
-                createdBlog = rep.CreateGraph(blog);
+                createdBlog = rep.AddWithRelations(blog);
 
                 uow.Commit();
             }
@@ -157,7 +150,7 @@ namespace EF7Tests
                 var rep = uow.Create();
 
                 var retrievedBlogWithPosts = rep.RetrieveObsolete<Blog, dynamic>(
-                      createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.BlogText) });
+                      createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.Text) });
             }
         }
     }

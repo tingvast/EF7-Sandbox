@@ -8,15 +8,8 @@ using System.Linq;
 namespace EF7Tests
 {
     [TestClass]
-    public class EF7BloggContextTests
+    public class EF7BloggContextTests : TestBase
     {
-        private Fixture _fixture;
-
-        public EF7BloggContextTests()
-        {
-            _fixture = new Fixture();
-        }
-
         [TestMethod]
         public void CanRetriveUsingTableValuesFunction()
         {
@@ -41,22 +34,23 @@ namespace EF7Tests
 			(
 				Id int,
 				Author nvarchar(200),
-				Location nvarchar(200)
+				Name nvarchar(200),
+                Description nvarchar(200)
 			)
 			AS
 			BEGIN
 				INSERT @returntable
-				SELECT blogs.Id, blogs.Author, blogs.Location from dbo.Blog blogs where blogs.Author like @param2
+				SELECT blogs.Id, blogs.Name, blogs.Author, blogs.Description from dbo.Blog blogs where blogs.Author like @param2
 				RETURN
 			END
 			*/
 
             using (var db = new EF7BloggContext())
             {
-                var nameToSerachFor = _fixture.Create<string>();
-                var blog1 = new Blog() { Name = _fixture.Create<string>() };
+                var nameToSerachFor = Fixture.Create<string>();
+                var blog1 = new Blog() { Name = Fixture.Create<string>() };
                 var blog2 = new Blog() { Name = nameToSerachFor };
-                var blog3 = new Blog() { Name = _fixture.Create<string>() };
+                var blog3 = new Blog() { Name = Fixture.Create<string>() };
 
                 db.AddRange(new[] { blog1, blog2, blog3 });
 
@@ -83,12 +77,12 @@ namespace EF7Tests
         {
             var blog = new Blog()
             {
-                Author = _fixture.Create<string>(),
-                Name = _fixture.Create<string>(),
+                Author = Fixture.Create<string>(),
+                Name = Fixture.Create<string>(),
                 Posts = new System.Collections.Generic.List<Post>()
                 {
-                    new Post() { Date = "20150909", BlogText = _fixture.Create<string>() },
-                    new Post() { Date = "20150909", BlogText = _fixture.Create<string>() }
+                    new Post() { Date = "20150909", Text = Fixture.Create<string>() },
+                    new Post() { Date = "20150909", Text = Fixture.Create<string>() }
                 }
             };
 
@@ -112,8 +106,8 @@ namespace EF7Tests
         {
             using (var db = new EF7BloggContext())
             {
-                var authorToSerachFor = _fixture.Create<string>();
-                var blog = new Blog() { Name = _fixture.Create<string>(), Description = _fixture.Create<string>() };
+                var authorToSerachFor = Fixture.Create<string>();
+                var blog = new Blog() { Name = Fixture.Create<string>(), Description = Fixture.Create<string>() };
 
                 db.AddRange(new[] { blog });
 

@@ -11,15 +11,8 @@ namespace EF7Tests
     /// Summary description for Retrieve
     /// </summary>
     [TestClass]
-    public class RetrieveTests
+    public class RetrieveTests : TestBase
     {
-        private Fixture _fixture;
-
-        public RetrieveTests()
-        {
-            _fixture = new Fixture();
-        }
-
         [TestMethod]
         public void CanRetrieveBusinessObject()
         {
@@ -30,10 +23,10 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var blog = new Blog
                 {
-                    Name = _fixture.Create<string>()
+                    Name = Fixture.Create<string>()
                 };
 
-                var createdBlog = rep.Create<Blog>(blog);
+                var createdBlog = rep.Add<Blog>(blog);
 
                 uow.Commit();
 
@@ -63,10 +56,10 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var blog = new Blog
                 {
-                    Name = _fixture.Create<string>()
+                    Name = Fixture.Create<string>()
                 };
 
-                var createdBlog = rep.Create<Blog>(blog);
+                var createdBlog = rep.Add<Blog>(blog);
 
                 uow.Commit();
 
@@ -74,9 +67,9 @@ namespace EF7Tests
 
                 #region Act
 
-                var projector = rep.CreatePropertyProjectorBuilder(blog)
+                var projector = rep.PropertySelectBuilder(blog)
                     .Select(p => p.Name)
-                    .Include<Post>(m => m.Posts, p => p.BlogText)
+                    .Include<Post>(m => m.Posts, p => p.Text)
                     .Build();
 
                 var retrievedBlog = rep.RetrieveById<Blog>(createdBlog.Id, projector);
@@ -100,8 +93,8 @@ namespace EF7Tests
 
             var blog = new Blog
             {
-                Name = _fixture.Create<string>(),
-                Description = _fixture.Create<string>()
+                Name = Fixture.Create<string>(),
+                Description = Fixture.Create<string>()
             };
 
             #endregion Arrange
@@ -112,7 +105,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                createdBlog = rep.Create(blog);
+                createdBlog = rep.Add(blog);
 
                 uow.Commit();
             }
@@ -125,7 +118,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                var projector = rep.CreatePropertyProjectorBuilder(blog)
+                var projector = rep.PropertySelectBuilder(blog)
                     .Select(p => p.Id)
                     .Build();
 
@@ -147,10 +140,10 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var blog = new Blog
                 {
-                    Name = _fixture.Create<string>()
+                    Name = Fixture.Create<string>()
                 };
 
-                createdBlog = rep.Create<Blog>(blog);
+                createdBlog = rep.Add<Blog>(blog);
 
                 uow.Commit();
             }
@@ -173,25 +166,25 @@ namespace EF7Tests
         {
             #region Arrange
 
-            string name = _fixture.Create<string>();
+            string name = Fixture.Create<string>();
             List<Blog> blogs = new List<Blog>()
             {
                 new Blog()
                 {
                     Author = "Adam",
-                    Description = _fixture.Create<string>(),
+                    Description = Fixture.Create<string>(),
                     Name = name,
                 },
                 new Blog()
                 {
                     Author = "Bertil",
-                    Description = _fixture.Create<string>(),
+                    Description = Fixture.Create<string>(),
                     Name = name,
                 },
                 new Blog()
                 {
                     Author = "Cescar",
-                    Description = _fixture.Create<string>(),
+                    Description = Fixture.Create<string>(),
                     Name = name,
                 }
             };
@@ -200,7 +193,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
-                rep.CreateMany(blogs.ToArray());
+                rep.Add(blogs.ToArray());
 
                 uow.Commit();
             }

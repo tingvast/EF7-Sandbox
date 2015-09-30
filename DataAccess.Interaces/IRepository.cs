@@ -8,17 +8,17 @@ namespace DataAccess.Interaces
 {
     public interface IRepository
     {
-        IPropertyProjectorBuilder<T> CreatePropertyProjectorBuilder<T>(T blog) where T : class, IEntity;
+        IPropertyProjectorBuilder<T> PropertySelectBuilder<T>(T blog) where T : class, IEntity;
 
-        IUpdatePropertyBuilder<T> CreateUpdatePropertyBuilder<T>(T blog) where T : class, IEntity;
+        IUpdatePropertyBuilder<T> PropertyUpdateBuilder<T>(T blog) where T : class, IEntity;
 
         #region Create
 
-        T Create<T>(T entity) where T : class, IEntity;
+        T Add<T>(T entity) where T : class, IEntity;
 
-        List<T> CreateMany<T>(params T[] entities) where T : class, IEntity;
+        List<T> Add<T>(params T[] entities) where T : class, IEntity;
 
-        T CreateGraph<T>(T entityWithRelations) where T : class, IEntity;
+        T AddWithRelations<T>(T entityWithRelations) where T : class, IEntity;
 
         #endregion Create
 

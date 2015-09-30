@@ -27,40 +27,39 @@ namespace DataAccess
             this.context.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
-        public IPropertyProjectorBuilder<T> CreatePropertyProjectorBuilder<T>(T entity) where T : class, IEntity
+        public IPropertyProjectorBuilder<T> PropertySelectBuilder<T>(T entity) where T : class, IEntity
         {
             if (entity == null) return new PropertyProjectorBuilder<T>();
 
             return new PropertyProjectorBuilder<T>(entity.Id, context);
         }
 
-        public IUpdatePropertyBuilder<T> CreateUpdatePropertyBuilder<T>(T entity) where T : class, IEntity
+        public IUpdatePropertyBuilder<T> PropertyUpdateBuilder<T>(T entity) where T : class, IEntity
         {
             return new UpdatePropertyBuilder<T>();
         }
 
         #region Create
 
-        public T Create<T>(T entity) where T : class, IEntity
+        public T Add<T>(T entity) where T : class, IEntity
         {
             context.Set<T>().Add(entity);
 
             return entity;
         }
 
-        public List<T> CreateMany<T>(params T[] entities) where T : class, IEntity
+        public List<T> Add<T>(params T[] entities) where T : class, IEntity
         {
             context.Set<T>().AddRange(entities);
 
             return entities.ToList();
         }
 
-        public T CreateGraph<T>(T entityWithRelations) where T : class, IEntity
+        public T AddWithRelations<T>(T entityWithRelations) where T : class, IEntity
         {
-            //context.ChangeTracker.AutoDetectChangesEnabled = true;
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) => e.State = EntityState.Added);
 
-            //context.ChangeTracker.AutoDetectChangesEnabled = false;
+        
             return entityWithRelations;
         }
 
@@ -417,7 +416,7 @@ namespace DataAccess
                 Select(m => new { l = m.Name, p = m.Posts.Count }).
                 Single();
 
-            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { Text = pp.BlogText });
+            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { Text = pp.Text });
             var entiry44 = context.Set<Blog>().
                 //Include(m => m.PreRegistrations).
                 Where(m => m.Id == id).

@@ -1,6 +1,10 @@
 ﻿using DataAccess.Interaces;
+using DataAccess.Logging;
 using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.Logging;
+using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DataAccess
@@ -11,17 +15,17 @@ namespace DataAccess
 
         public UnitOfWork()
         {
-            //var loggingFactory = new TestSqlLoggerFactory();
             var serviceProvider = new ServiceCollection()
                    .AddEntityFramework()
                    .AddSqlServer()
                    .GetService()
-                   //.AddInstance<ILoggerFactory>(loggingFactory)
+                   //.AddLogging()
                    .BuildServiceProvider();
 
-            this.context = new EF7BloggContext(serviceProvider);
+            // Uncomment to activate logging to file.
+            serviceProvider.GetService<ILoggerFactory>().AddProvider(new SqlLoggerProvider());
 
-            //this.context.ChangeTracker.AutoDetectChangesEnabled = false;
+            this.context = new EF7BloggContext(serviceProvider);
         }
 
         public IRepository Create()
@@ -37,7 +41,14 @@ namespace DataAccess
                 var type = e.Entity.GetType();
             }
 
-            context.SaveChanges();
+            try
+            {
+                context.SaveChanges();
+            }
+            catch(Exception e)
+            {
+                //Debugger.Break();
+            }
 
             var allEntities = context.ChangeTracker.Entries().ToList();
 

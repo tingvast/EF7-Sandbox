@@ -114,11 +114,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable, Version=1.1.36.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Collections.Immutable.1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Collections.Immutable.1.1.37-beta-23109\lib\dotnet\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Interactive.Async, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Ix-Async.1.2.5\lib\net45\System.Interactive.Async.dll</HintPath>
@@ -132,20 +131,14 @@
     <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Anna.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="Logging\NullLogger.cs" />
+    <Compile Include="Logging\SqlLogger.cs" />
+    <Compile Include="Logging\SqlLoggerProvider.cs" />
+    <Compile Include="Utils\AnonymousTypeUtils.cs" />
     <Compile Include="EF7BloggContext.cs" />
-    <Compile Include="Migrations\20150926165638_v1.cs" />
-    <Compile Include="Migrations\20150926165638_v1.designer.cs">
-      <DependentUpon>20150926165638_v1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20150926184014_v2.cs" />
-    <Compile Include="Migrations\20150926184014_v2.designer.cs">
-      <DependentUpon>20150926184014_v2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20150927145053_v3.cs" />
-    <Compile Include="Migrations\20150927145053_v3.designer.cs">
-      <DependentUpon>20150927145053_v3.cs</DependentUpon>
+    <Compile Include="Migrations\20150930193510_v1.cs" />
+    <Compile Include="Migrations\20150930193510_v1.designer.cs">
+      <DependentUpon>20150930193510_v1.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\EF7BloggContextModelSnapshot.cs" />
     <Compile Include="Retrieve\NavigationProperty.cs" />
@@ -155,7 +148,6 @@
     <Compile Include="Retrieve\Projections.cs" />
     <Compile Include="Retrieve\PropertyProjector.cs" />
     <Compile Include="Retrieve\PropertyProjectorBuilder.cs" />
-    <Compile Include="TypeExtensions.cs" />
     <Compile Include="UnitOfWork.cs" />
     <Compile Include="UoWFactory.cs" />
     <Compile Include="Update\PropertyUpdater.cs" />
@@ -176,19 +168,12 @@
       <Project>{73948a3d-9e72-4bf9-a38f-8548dd6d843b}</Project>
       <Name>DataAccess.Interaces</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Logging\Logging.csproj">
-      <Project>{78e9ed04-9b7e-4faa-ba51-a22e9952cfc1}</Project>
-      <Name>Logging</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0-beta1-20150812-01\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0-beta1-20150812-01\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Analyzer Include="..\..\..\EntityFramework\src\EntityFramework.SqlServer\bin\Debug\Microsoft.Framework.Configuration.Abstractions.dll" />
-    <Analyzer Include="..\..\..\EntityFramework\src\EntityFramework.SqlServer\bin\Debug\Microsoft.Framework.Configuration.Binder.dll" />
-    <Analyzer Include="..\..\..\EntityFramework\src\EntityFramework.SqlServer\bin\Debug\Microsoft.Framework.Configuration.dll" />
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

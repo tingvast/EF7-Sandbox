@@ -13,7 +13,7 @@ namespace DataAccess.Migrations
     {
         public override string Id
         {
-            get { return "20150926165638_v1"; }
+            get { return "20150930193510_v1"; }
         }
 
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,56 +22,58 @@ namespace DataAccess.Migrations
                 .Annotation("ProductVersion", "7.0.0-beta7-15540")
                 .Annotation("SqlServer:ValueGenerationStrategy", SqlServerIdentityStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Core.Meeting", b =>
+            modelBuilder.Entity("Core.Blog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Location");
+                    b.Property<string>("Author");
 
-                    b.Property<string>("Location1");
+                    b.Property<string>("Description");
+
+                    b.Property<string>("Name");
 
                     b.Key("Id");
                 });
 
-            modelBuilder.Entity("Core.PreRegistration", b =>
+            modelBuilder.Entity("Core.Follower", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int?>("MeetingId");
+                    b.Property<int?>("BlogId");
+
+                    b.Property<string>("Name");
+
+                    b.Key("Id");
+                });
+
+            modelBuilder.Entity("Core.Post", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("BlogId");
+
+                    b.Property<string>("Date");
 
                     b.Property<string>("Text");
 
-                    b.Property<string>("Text1");
-
                     b.Key("Id");
                 });
 
-            modelBuilder.Entity("Core.PreRegistration2", b =>
+            modelBuilder.Entity("Core.Follower", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int?>("MeetingId");
-
-                    b.Property<string>("Value");
-
-                    b.Key("Id");
+                    b.Reference("Core.Blog")
+                        .InverseCollection()
+                        .ForeignKey("BlogId");
                 });
 
-            modelBuilder.Entity("Core.PreRegistration", b =>
+            modelBuilder.Entity("Core.Post", b =>
                 {
-                    b.Reference("Core.Meeting")
+                    b.Reference("Core.Blog")
                         .InverseCollection()
-                        .ForeignKey("MeetingId");
-                });
-
-            modelBuilder.Entity("Core.PreRegistration2", b =>
-                {
-                    b.Reference("Core.Meeting")
-                        .InverseCollection()
-                        .ForeignKey("MeetingId");
+                        .ForeignKey("BlogId");
                 });
         }
     }

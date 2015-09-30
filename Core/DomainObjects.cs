@@ -23,7 +23,7 @@ namespace Core
     public class Post : IEntity
     {
         public int Id { get; set; }
-        public string BlogText { get; set; }
+        public string Text { get; set; }
 
         public string Date { get; set; }
 
@@ -35,9 +35,7 @@ namespace Core
     {
         public int Id { get; set; }
 
-        public string FirstName { get; set; }
-
-        public string LastName { get; set; } 
+        public string Name { get; set; }
 
         public Blog Blog { get; set; }
         public int? BlogId { get; set; }

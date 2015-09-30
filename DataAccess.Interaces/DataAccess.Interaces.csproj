@@ -45,10 +45,10 @@
     <Compile Include="Retrieve\IPropertyProjector.cs" />
     <Compile Include="IProjections.cs" />
     <Compile Include="Retrieve\IPropertyProjectorBuilder.cs" />
-    <Compile Include="IPropertyUpdater.cs" />
+    <Compile Include="Update\IPropertyUpdater.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IUnitOfWork.cs" />
-    <Compile Include="IUpdatePropertyBuilder.cs" />
+    <Compile Include="Update\IUpdatePropertyBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

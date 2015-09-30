@@ -11,18 +11,8 @@ namespace EF7Tests
     namespace EF7Tests
     {
         [TestClass]
-        public class RetrieveGraphTests
+        public class RetrieveGraphTests : TestBase
         {
-            private Fixture _fixture;
-
-            public RetrieveGraphTests()
-            {
-                _fixture = new Fixture();
-
-                _fixture.Register(() => TestDataBuilders.BuildAnyBlog(_fixture));
-                _fixture.Register(() => TestDataBuilders.BuildAnyFollower(_fixture));
-            }
-
             [TestMethod]
             public void CanRetrieve()
             {
@@ -30,9 +20,9 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var blog = _fixture.Create<Blog>();
+                    var blog = Fixture.Create<Blog>();
 
-                    repository.CreateGraph(blog);
+                    repository.AddWithRelations(blog);
 
                     uow.Commit();
 
@@ -40,58 +30,58 @@ namespace EF7Tests
                     blog.Description = "New Description";
                     foreach (var p in blog.Posts)
                     {
-                        p.BlogText = "New Text";
+                        p.Text = "New Text";
                     }
                     var firstPostId = blog.Posts[0].Id;
                     var secondPostId = blog.Posts[1].Id;
-                    var pp1 = repository.CreateUpdatePropertyBuilder<Blog>(blog)
+                    var pp1 = repository.PropertyUpdateBuilder<Blog>(blog)
                        .PropertiesToUpdate(m => m.Name, m => m.Description)
                        .IncludeNavigationProperyUpdate<Post>(
                             firstPostId,
-                            p => p.Posts, p => p.BlogText)
+                            p => p.Posts, p => p.Text)
                         .IncludeNavigationProperyUpdate<Post>(
                             secondPostId,
-                            p => p.Posts, p => p.BlogText)
+                            p => p.Posts, p => p.Text)
                        .Build();
 
                     var updatedBlog = repository.UpdateGraph(blog, pp1);
 
                     uow.Commit();
 
-                    var pp = repository.CreatePropertyProjectorBuilder(blog)
+                    var pp = repository.PropertySelectBuilder(blog)
                         .Select(p => p.Description, p => p.Name)
                         .Build();
 
                     var retrievedBlog = repository.RetrieveById(blog.Id, pp);
 
-                    var newFollower = _fixture.Create<Follower>();
+                    var newFollower = Fixture.Create<Follower>();
                     newFollower.Blog = retrievedBlog;
                     retrievedBlog.Followers.Add(newFollower);
 
-                    repository.Create<Follower>(newFollower);
+                    repository.Add<Follower>(newFollower);
 
                     uow.Commit();
 
-                    newFollower.FirstName = "NewName";
+                    newFollower.Name = "NewName";
 
-                    var pp2 = repository.CreateUpdatePropertyBuilder<Blog>(blog)
+                    var pp2 = repository.PropertyUpdateBuilder<Blog>(blog)
                        .IncludeNavigationProperyUpdate<Follower>(
                             newFollower.Id,
-                            p => p.Followers, p => p.FirstName)
+                            p => p.Followers, p => p.Name)
                        .Build();
 
                     var retrievedBlogAgain = repository.UpdateGraph<Blog>(retrievedBlog, pp2);
 
                     uow.Commit();
-                    var pp3 = repository.CreatePropertyProjectorBuilder(newFollower)
-                        .Select(p => p.FirstName)
+                    var pp3 = repository.PropertySelectBuilder(newFollower)
+                        .Select(p => p.Name)
                         .Build();
 
                     var retrievedFollower = repository.RetrieveById<Follower>(newFollower.Id, pp3);
 
-                    var pp4 = repository.CreatePropertyProjectorBuilder<Blog>(blog)
+                    var pp4 = repository.PropertySelectBuilder<Blog>(blog)
                        .Select()
-                       .Include<Follower>(b => b.Followers, pp11 => pp11.Id, pp11 => pp11.FirstName)
+                       .Include<Follower>(b => b.Followers, pp11 => pp11.Id, pp11 => pp11.Name)
                        .Build();
 
                     var retrievedBlogAgainAgain = repository.RetrieveById(retrievedBlogAgain.Id, pp4);
@@ -107,23 +97,23 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    blog = _fixture.Create<Blog>();
+                    blog = Fixture.Create<Blog>();
 
-                    repository.CreateGraph(blog);
+                    repository.AddWithRelations(blog);
 
                     uow.Commit();
 
-                    var newFollower = _fixture.Create<Follower>();
+                    var newFollower = Fixture.Create<Follower>();
                     newFollower.Blog = blog;
                     blog.Followers.Add(newFollower);
 
-                    repository.Create<Follower>(newFollower);
+                    repository.Add<Follower>(newFollower);
 
                     uow.Commit();
 
-                    var pp4 = repository.CreatePropertyProjectorBuilder<Blog>(blog)
+                    var pp4 = repository.PropertySelectBuilder<Blog>(blog)
                        .Select()
-                       .Include<Follower>(b => b.Followers, pp11 => pp11.Id, pp11 => pp11.FirstName)
+                       .Include<Follower>(b => b.Followers, pp11 => pp11.Id, pp11 => pp11.Name)
                        .Build();
 
                     retrievedBlog = repository.RetrieveById(blog.Id, pp4);
@@ -148,18 +138,18 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    blog = _fixture.Create<Blog>();
+                    blog = Fixture.Create<Blog>();
 
-                    repository.CreateGraph(blog);
+                    repository.AddWithRelations(blog);
 
                     uow.Commit();
 
-                    var newFollower = _fixture.Create<Follower>();
-                    newFollower.FirstName = "NewName";
+                    var newFollower = Fixture.Create<Follower>();
+                    newFollower.Name = "NewName";
                     newFollower.Blog = blog;
                     blog.Followers.Add(newFollower);
 
-                    repository.Create<Follower>(newFollower);
+                    repository.Add<Follower>(newFollower);
                     uow.Commit();
                 }
                 using (var uow = UoWFactory.Create())
@@ -167,9 +157,9 @@ namespace EF7Tests
                     var repository = uow.Create();
                     
 
-                    var pp4 = repository.CreatePropertyProjectorBuilder<Blog>(blog)
+                    var pp4 = repository.PropertySelectBuilder<Blog>(blog)
                         .Select()
-                        .Include<Follower>(b => b.Followers, pp11 => pp11.Id, pp11 => pp11.FirstName)
+                        .Include<Follower>(b => b.Followers, b => b.Id, b => b.Name)
                         .Build();
 
                     retrievedBlog = repository.RetrieveById(blog.Id, pp4);
@@ -181,30 +171,30 @@ namespace EF7Tests
             public void CanRetrieveById()
             {
                 var blog = new Blog();
-                blog.Name = _fixture.Create<string>();
+                blog.Name = Fixture.Create<string>();
                 using (var uow = UoWFactory.Create())
                 {
                     var repository = uow.Create();
 
-                    var createdBlog = repository.Create(blog);
+                    var createdBlog = repository.Add(blog);
 
                     uow.Commit();
                 }
 
                 var post = new Post();
-                post.BlogText = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
 
                 using (var uow = UoWFactory.Create())
                 {
                     var repository = uow.Create();
 
-                    var updatedBlog = repository.Create(post);
+                    var updatedBlog = repository.Add(post);
 
                     uow.Commit();
                 }
 
                 var newPost = new Post();
-                newPost.BlogText = _fixture.Create<string>();
+                newPost.Text = Fixture.Create<string>();
                 blog.Posts.AddRange(new List<Post>() { newPost, post });
 
                 using (var uow = UoWFactory.Create())
@@ -220,9 +210,9 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var pp = repository.CreatePropertyProjectorBuilder(blog)
+                    var pp = repository.PropertySelectBuilder(blog)
                         .Select(m => m.Name)
-                        .Include<Post>(p => p.Posts, p => p.BlogText)
+                        .Include<Post>(p => p.Posts, p => p.Text)
                         .Build();
 
                     var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, pp);
@@ -237,9 +227,9 @@ namespace EF7Tests
                 #region Arrange
 
                 var blog = new Blog();
-                blog.Name = _fixture.Create<string>();
+                blog.Name = Fixture.Create<string>();
                 var post = new Post();
-                post.BlogText = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
 
                 blog.Posts.AddRange(new List<Post>() { post });
 
@@ -247,7 +237,7 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var createdPost = repository.Create(post);
+                    var createdPost = repository.Add(post);
 
                     uow.Commit();
                 }
@@ -257,7 +247,7 @@ namespace EF7Tests
                 #region Act
 
                 var newPost = new Post();
-                newPost.BlogText = _fixture.Create<string>();
+                newPost.Text = Fixture.Create<string>();
                 blog.Posts.AddRange(new List<Post>() { newPost, post });
 
                 using (var uow = UoWFactory.Create())
@@ -277,9 +267,9 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var projector = repository.CreatePropertyProjectorBuilder(blog)
+                    var projector = repository.PropertySelectBuilder(blog)
                         .Select(p => p.Name)
-                        .Include<Post>(m => m.Posts, p => p.Date, p => p.BlogText)
+                        .Include<Post>(m => m.Posts, p => p.Date, p => p.Text)
                         .Build();
 
                     var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, projector);
@@ -294,9 +284,9 @@ namespace EF7Tests
                 #region Arrange
 
                 var blog = new Blog();
-                blog.Name = _fixture.Create<string>();
+                blog.Name = Fixture.Create<string>();
                 var post = new Post();
-                post.BlogText = _fixture.Create<string>();
+                post.Text = Fixture.Create<string>();
 
                 blog.Posts.AddRange(new List<Post>() { post });
 
@@ -304,7 +294,7 @@ namespace EF7Tests
                 {
                     var repository = uow.Create();
 
-                    var createdPost = repository.Create(blog);
+                    var createdPost = repository.Add(blog);
 
                     uow.Commit();
                 }
@@ -321,11 +311,11 @@ namespace EF7Tests
 
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     IPropertyProjectorBuilder<Blog> builder
-                        = repository.CreatePropertyProjectorBuilder<Blog>(blog);
+                        = repository.PropertySelectBuilder<Blog>(blog);
 
                     var pp = builder
                         .Select(p => p.Name)
-                        .Include<Post>(m => m.Posts, p => p.Date, p => p.BlogText)
+                        .Include<Post>(m => m.Posts, p => p.Date, p => p.Text)
                         .Build();
 
                     stopwatch.Stop();
@@ -340,11 +330,11 @@ namespace EF7Tests
 
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     IPropertyProjectorBuilder<Blog> builder = repository
-                        .CreatePropertyProjectorBuilder<Blog>(blog);
+                        .PropertySelectBuilder<Blog>(blog);
 
                     var pp = builder
                         .Select(p => p.Name)
-                        .Include<Post>(m => m.Posts, p => p.Date, p => p.BlogText)
+                        .Include<Post>(m => m.Posts, p => p.Date, p => p.Text)
                         .Build();
 
                     second = stopwatch.ElapsedMilliseconds;
