@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Core;
+
 using DataAccess.Interaces;
 using EF7;
 using LatticeUtils;
@@ -59,7 +59,6 @@ namespace DataAccess
         {
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) => e.State = EntityState.Added);
 
-        
             return entityWithRelations;
         }
 
@@ -67,7 +66,7 @@ namespace DataAccess
 
         #region Retrieve
 
-        public T RetrieveById<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity
+        public T RetrieveById<T>(int id, IPropertySeletor<T> projection) where T : class, IEntity
         {
             var projectedEntity = context.Set<T>()
                 .AsNoTracking()

@@ -1,5 +1,5 @@
-﻿using Core;
-using DataAccess.Interaces;
+﻿using DataAccess.Interaces;
+using EF7;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 
@@ -10,7 +10,7 @@ namespace EF7Tests
     /// </summary>
     [TestClass]
     public class AddTests : TestBase
-    {        
+    {
         [TestMethod]
         public void CanAddBusinessObject()
         {
@@ -41,6 +41,45 @@ namespace EF7Tests
             // TODO.
 
             #endregion Assert
+        }
+
+        [TestMethod]
+        public void CanDoTest()
+        {
+            Assert.Inconclusive("This test fails due to invalid test key generation. Running thsi test together with all test, will make it fail due to same key wih different type in cache already");
+            // This test fails due to invalid test key generation. Running thsi test together with all test, will make it fail due to same key wih different type in cache already
+            Blog blog = Fixture.Create<Blog>();
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                rep.AddWithRelations(blog);
+
+                uow.Commit();
+            }
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                var retrievedBlog = rep.RetrieveById(blog.Id,
+                    rep.PropertySelectBuilder(blog)
+                    .Select(p => p.Name)
+                    .Build());
+            }
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                var retrievedBlog = rep.RetrieveById(
+                    blog.Id,
+                    rep.PropertySelectBuilder(blog)
+                    .Select(p => p.Name)
+                    .Include<Post>(p => p.Posts, p => p.Text)
+                    .Include<Follower>(p => p.Followers, prop => prop.Name)
+                    .Build());
+            }
         }
 
         [TestMethod]

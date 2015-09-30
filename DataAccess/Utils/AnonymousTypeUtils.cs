@@ -23,7 +23,6 @@ namespace LatticeUtils
             moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
         }
 
-
         /// <summary>
         /// Creates an anonymous object for the specified name/value pairs.
         /// </summary>

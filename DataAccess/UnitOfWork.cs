@@ -4,7 +4,6 @@ using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
 using System;
-using System.Diagnostics;
 using System.Linq;
 
 namespace DataAccess
@@ -45,7 +44,7 @@ namespace DataAccess
             {
                 context.SaveChanges();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 //Debugger.Break();
             }

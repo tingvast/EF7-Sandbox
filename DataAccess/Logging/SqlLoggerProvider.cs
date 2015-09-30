@@ -2,10 +2,7 @@
 using Microsoft.Data.Entity.Update;
 using Microsoft.Framework.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Logging
 {
@@ -19,7 +16,7 @@ namespace DataAccess.Logging
 
         public ILogger CreateLogger(string name)
         {
-           if(_sqlGenerationComponents.Contains(name))
+            if (_sqlGenerationComponents.Contains(name))
             {
                 return new SqlLogger();
             }

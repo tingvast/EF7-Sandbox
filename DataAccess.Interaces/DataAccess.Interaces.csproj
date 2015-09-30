@@ -42,9 +42,9 @@
   <ItemGroup>
     <Compile Include="INavigationProperty.cs" />
     <Compile Include="Retrieve\IIncludePropertySelector.cs" />
-    <Compile Include="Retrieve\IPropertyProjector.cs" />
+    <Compile Include="Retrieve\IPropertySelector.cs" />
     <Compile Include="IProjections.cs" />
-    <Compile Include="Retrieve\IPropertyProjectorBuilder.cs" />
+    <Compile Include="Retrieve\IPropertySelectorBuilder.cs" />
     <Compile Include="Update\IPropertyUpdater.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IUnitOfWork.cs" />

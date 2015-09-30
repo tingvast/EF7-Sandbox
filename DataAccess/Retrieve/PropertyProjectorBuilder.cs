@@ -5,6 +5,7 @@ using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Data.Entity.Query;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -70,7 +71,7 @@ namespace DataAccess
             return this;
         }
 
-        public IPropertyProjector<T> Build()
+        public IPropertySeletor<T> Build()
         {
             Expression<Func<T, dynamic>> fullProjectionLambda;
             var cacheKey = AllProjections.CacheKey;
@@ -87,7 +88,17 @@ namespace DataAccess
                 MemoryCache.Default[cacheKey] = cacheValue;
             }
 
-            return (PropertyProjector<T>)cacheValue;
+            PropertyProjector<T> ret = null;
+            try
+            {
+                ret = (PropertyProjector<T>)cacheValue;
+            }
+            catch (Exception e)
+            {
+                Debugger.Break();
+            }
+
+            return ret; ;
         }
 
         #region Private

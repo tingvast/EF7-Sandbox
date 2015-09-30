@@ -1,5 +1,5 @@
-﻿using Core;
-using DataAccess.Interaces;
+﻿using DataAccess.Interaces;
+using EF7;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 using System.Linq;

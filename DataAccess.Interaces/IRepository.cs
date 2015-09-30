@@ -1,5 +1,4 @@
-﻿using Core;
-using EF7;
+﻿using EF7;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -24,7 +23,7 @@ namespace DataAccess.Interaces
 
         #region Retrieve
 
-        T RetrieveById<T>(int id, IPropertyProjector<T> projection) where T : class, IEntity;
+        T RetrieveById<T>(int id, IPropertySeletor<T> projection) where T : class, IEntity;
 
         IEnumerable<T> Retrieve<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderBy = null) where T : class, IEntity;
 

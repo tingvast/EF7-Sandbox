@@ -11,13 +11,14 @@ namespace DataAccess.Logging
 
         private static NullLogger _instance = null;
         private static object syncRoot = new object();
+
         internal static NullLogger Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    lock(syncRoot)
+                    lock (syncRoot)
                     {
                         if (_instance == null)
                             _instance = new NullLogger();

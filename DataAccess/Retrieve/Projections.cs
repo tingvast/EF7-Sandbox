@@ -36,6 +36,7 @@ namespace DataAccess
                 MemberExpression member = ParameterHelper.GetMemberExpression(le);
 
                 var propertyInfo = (PropertyInfo)member.Member;
+
                 var propertyName = propertyInfo.Name;
                 var propertyType = propertyInfo.PropertyType;
 

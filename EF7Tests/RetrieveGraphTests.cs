@@ -2,8 +2,8 @@
 
 namespace EF7Tests
 {
-    using Core;
     using DataAccess.Interaces;
+    using EF7;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
     using System.Diagnostics;
@@ -155,7 +155,6 @@ namespace EF7Tests
                 using (var uow = UoWFactory.Create())
                 {
                     var repository = uow.Create();
-                    
 
                     var pp4 = repository.PropertySelectBuilder<Blog>(blog)
                         .Select()
@@ -164,7 +163,6 @@ namespace EF7Tests
 
                     retrievedBlog = repository.RetrieveById(blog.Id, pp4);
                 }
-
             }
 
             [TestMethod]
@@ -218,8 +216,6 @@ namespace EF7Tests
                     var retrievedBlogWithPosts = repository.RetrieveById(blog.Id, pp);
                 }
             }
-
-
 
             [TestMethod]
             public void CanRetrieveById1()

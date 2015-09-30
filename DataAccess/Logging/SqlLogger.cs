@@ -1,16 +1,13 @@
 ﻿using Microsoft.Framework.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Logging
 {
     internal class SqlLogger : ILogger
     {
         private static readonly string _logFilePath = @"E:\MyProjects\EF\EF7\Logs\DataAccessSql.log";
+
         public IDisposable BeginScopeImpl(object state)
         {
             //File.AppendAllText(_logFilePath, "=======================================================");
@@ -23,10 +20,10 @@ namespace DataAccess.Logging
             return true;
         }
 
-        public void Log(LogLevel logLevel, 
-            int eventId, 
-            object state, 
-            Exception exception, 
+        public void Log(LogLevel logLevel,
+            int eventId,
+            object state,
+            Exception exception,
             Func<object, Exception, string> formatter)
         {
             var message = string.Format(
@@ -35,7 +32,6 @@ namespace DataAccess.Logging
                 formatter(state, exception));
 
             File.AppendAllText(_logFilePath, message);
-
         }
     }
 }

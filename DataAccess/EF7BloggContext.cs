@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using EF7;
 using Microsoft.Data.Entity;
 using System;
 

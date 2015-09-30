@@ -1,5 +1,5 @@
-﻿using Core;
-using DataAccess;
+﻿using DataAccess;
+using EF7;
 using Microsoft.Data.Entity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;

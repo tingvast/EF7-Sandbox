@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using EF7;
 using Ploeh.AutoFixture;
 using System.Linq;
 
