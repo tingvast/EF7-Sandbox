@@ -87,8 +87,8 @@ namespace EF7Tests
                 Name = _fixture.Create<string>(),
                 Posts = new System.Collections.Generic.List<Post>()
                 {
-                    new Post() { Date = "20150909", Text = _fixture.Create<string>() },
-                    new Post() { Date = "20150909", Text = _fixture.Create<string>() }
+                    new Post() { Date = "20150909", BlogText = _fixture.Create<string>() },
+                    new Post() { Date = "20150909", BlogText = _fixture.Create<string>() }
                 }
             };
 

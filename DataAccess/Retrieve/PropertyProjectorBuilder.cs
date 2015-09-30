@@ -65,6 +65,8 @@ namespace DataAccess
             navigationProperty.Projections.AddRange(selectedProperties);
 
             AllProjections.NavigationPropertiesProjections.Add(navigationProperty);
+
+            // TODO: Maybe remove any tracked entities of the navigation property type (and id), when
             return this;
         }
 
@@ -77,12 +79,10 @@ namespace DataAccess
             if (cacheValue == null)
             {
                 var projectedEntityAnonymousType = CreateLampbda(out fullProjectionLambda);
-                cacheValue = new PropertyProjector<T>
-                {
-                    Expression = fullProjectionLambda,
-                    AllProjections = AllProjections,
-                    ProjectedEntityAnonymousType = projectedEntityAnonymousType
-                };
+                cacheValue = new PropertyProjector<T>(
+                    fullProjectionLambda,
+                    AllProjections,
+                    projectedEntityAnonymousType);
 
                 MemoryCache.Default[cacheKey] = cacheValue;
             }

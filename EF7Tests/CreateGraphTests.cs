@@ -25,7 +25,7 @@ namespace EF7Tests
             blog.Name = _fixture.Create<string>();
 
             var post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
             blog.Posts.Add(post);
 
             #endregion Arrange
@@ -65,14 +65,14 @@ namespace EF7Tests
 
             post = new Post()
             {
-                Text = _fixture.Create<string>(),
+                BlogText = _fixture.Create<string>(),
                 Date = _fixture.Create<string>(),
                 Blog = blog,
             };
 
             var follower = new Follower()
             {
-                Name = _fixture.Create<string>(),
+                FirstName = _fixture.Create<string>(),
                 Blog = blog
             };
 
@@ -80,7 +80,7 @@ namespace EF7Tests
             blog.Followers.Add(follower);
 
             post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
             post.Date = _fixture.Create<string>();
             post.Blog = blog;
 
@@ -109,8 +109,8 @@ namespace EF7Tests
 
                 var pp = rep.CreatePropertyProjectorBuilder(blog)
                     .Select(m => m.Id, m => m.Name, m => m.Description)
-                    .Include<Post>(p => p.Posts, p => p.Text, p => post.Date)
-                    .Include<Follower>(m => m.Followers, p => p.Id, p => p.Name)
+                    .Include<Post>(p => p.Posts, p => p.BlogText, p => post.Date)
+                    .Include<Follower>(m => m.Followers, p => p.Id, p => p.FirstName)
                     .Build();
 
                 var retrievedBlog = rep.RetrieveById(createdBlog.Id, pp);
@@ -134,14 +134,14 @@ namespace EF7Tests
                 };
 
                 post = new Post();
-                post.Text = _fixture.Create<string>();
+                post.BlogText = _fixture.Create<string>();
                 post.Date = _fixture.Create<string>();
                 post.Blog = blog;
 
                 blog.Posts.Add(post);
 
                 post = new Post();
-                post.Text = _fixture.Create<string>();
+                post.BlogText = _fixture.Create<string>();
                 post.Date = _fixture.Create<string>();
                 post.Blog = blog;
 
@@ -157,7 +157,7 @@ namespace EF7Tests
                 var rep = uow.Create();
 
                 var retrievedBlogWithPosts = rep.RetrieveObsolete<Blog, dynamic>(
-                      createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.Text) });
+                      createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.BlogText) });
             }
         }
     }

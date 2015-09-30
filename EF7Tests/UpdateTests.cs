@@ -29,7 +29,7 @@ namespace EF7Tests
                 Post post;
                 var rep = uow.Create();
                 post = new Post();
-                post.Text = _fixture.Create<string>();
+                post.BlogText = _fixture.Create<string>();
                 post.Date = _fixture.Create<string>();
 
                 var persistedPost = rep.Create<Post>(post);
@@ -37,7 +37,7 @@ namespace EF7Tests
                 uow.Commit();
 
                 var projector = rep.CreatePropertyProjectorBuilder(post)
-                    .Select(p => p.Text, p => p.Date)
+                    .Select(p => p.BlogText, p => p.Date)
                     .Build();
 
                 retrievedPost = rep.RetrieveById(persistedPost.Id, projector);
@@ -50,10 +50,10 @@ namespace EF7Tests
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                retrievedPost.Text = _fixture.Create<string>();
+                retrievedPost.BlogText = _fixture.Create<string>();
                 retrievedPost.Date = _fixture.Create<string>();
 
-                rep.Update(retrievedPost, p => p.Text);
+                rep.Update(retrievedPost, p => p.BlogText);
 
                 uow.Commit();
             }

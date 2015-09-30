@@ -200,7 +200,9 @@ namespace DataAccess
             {
                 var subentity = context.ChangeTracker
                     .Entries()
-                    .Single(e => e.Metadata.ClrType.Name == p.Name && p.Id == (int)e.Property("Id").CurrentValue);
+                    .SingleOrDefault(e => e.Metadata.ClrType.Name == p.Name && p.Id == (int)e.Property("Id").CurrentValue);
+                if (subentity == null)
+                    continue;
 
                 var ahag = allTrackedEntries.Find(e => e.Metadata.ClrType.Name == p.Name && p.Id == (int)e.Property("Id").CurrentValue);
 
@@ -407,7 +409,7 @@ namespace DataAccess
             //var m11 = (from e in context.Set<Meeting>()
             //    join p in context.Set<PreRegistration>() on e.Id equals p.MeetingId
             //    where e.Id == id
-            //    select new {e.Location, p.Text});
+            //    select new {e.Location, p.BlogText});
 
             var entiry = context.Set<Blog>().
                 Include(m => m.Posts).
@@ -415,7 +417,7 @@ namespace DataAccess
                 Select(m => new { l = m.Name, p = m.Posts.Count }).
                 Single();
 
-            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { pp.Text });
+            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { Text = pp.BlogText });
             var entiry44 = context.Set<Blog>().
                 //Include(m => m.PreRegistrations).
                 Where(m => m.Id == id).
@@ -425,25 +427,25 @@ namespace DataAccess
             var entiry11 = context.Set<Blog>().
                 Include(m => m.Posts).
                 Where(m => m.Id == id).
-                //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
+                //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.BlogText }) }).
                 Single();
 
             //var entiry12 = context.Set<Meeting>().
-            //    Include(m => m.PreRegistrations.Select(p => new { p.Text })).
+            //    Include(m => m.PreRegistrations.Select(p => new { p.BlogText })).
             //    Where(m => m.Id == id).
-            //    //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.Text }) }).
+            //    //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.BlogText }) }).
             //    Single();
 
             var retEntity = Mapper.DynamicMap<Blog>(entiry);
             //var entiry = context.Set<Meeting>().
             //    //Include(m => m.PreRegistrations).
             //    Where(m => m.ID == id).
-            //    Select(m => new { m = m.Location }).//, k = m.PreRegistrations.Select(p => new { p.Text }) }).
+            //    Select(m => new { m = m.Location }).//, k = m.PreRegistrations.Select(p => new { p.BlogText }) }).
             //    //Select(m => new { Meeting = new { m.Location }, PreRegs = m.PreRegistrations }).
             //    Single();
             //var kk = from m in context.Set<Meeting>()
             //         where m.ID == id
-            //         select new { kalle = m.PreRegistrations.Select(p => p.Text)};
+            //         select new { kalle = m.PreRegistrations.Select(p => p.BlogText)};
 
             //var ff = kk.ToList();
             //var retEntity = Mapper.DynamicMap<Meeting>(entiry);

@@ -90,7 +90,7 @@ namespace EF7Tests
             Post post;
 
             post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
             post.Date = _fixture.Create<string>();
 
             #endregion Arrange
@@ -123,7 +123,7 @@ namespace EF7Tests
             Post post;
 
             post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
             post.Date = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
@@ -160,7 +160,7 @@ namespace EF7Tests
             Post post;
 
             post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
             post.Date = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())

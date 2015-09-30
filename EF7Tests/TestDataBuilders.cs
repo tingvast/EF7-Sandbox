@@ -13,8 +13,8 @@ namespace EF7Tests
                 Author = f.Create<string>(),
                 Description = f.Create<string>(),
                 Name = f.Create<string>(),
-                Posts = f.Build<Post>().OmitAutoProperties().With(p => p.Date, f.Create<string>()).With(p => p.Text, f.Create<string>()).CreateMany().ToList(),
-                Followers = f.Build<Follower>().OmitAutoProperties().With(p => p.Name, f.Create<string>()).CreateMany().ToList(),
+                Posts = f.Build<Post>().OmitAutoProperties().With(p => p.Date, f.Create<string>()).With(p => p.BlogText, f.Create<string>()).CreateMany().ToList(),
+                Followers = f.Build<Follower>().OmitAutoProperties().With(p => p.FirstName, f.Create<string>()).CreateMany().ToList(),
             };
         }
 
@@ -22,7 +22,7 @@ namespace EF7Tests
         {
             return new Follower()
             {
-                Name = f.Create<string>()
+                FirstName = f.Create<string>()
             };
         }
     }

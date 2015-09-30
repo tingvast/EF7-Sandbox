@@ -76,7 +76,7 @@ namespace EF7Tests
 
                 var projector = rep.CreatePropertyProjectorBuilder(blog)
                     .Select(p => p.Name)
-                    .Include<Post>(m => m.Posts, p => p.Text)
+                    .Include<Post>(m => m.Posts, p => p.BlogText)
                     .Build();
 
                 var retrievedBlog = rep.RetrieveById<Blog>(createdBlog.Id, projector);

@@ -27,7 +27,7 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
                 post = new Post();
-                post.Text = _fixture.Create<string>();
+                post.BlogText = _fixture.Create<string>();
                 post.Date = _fixture.Create<string>();
 
                 var k = rep.Create<Post>(post);
@@ -37,12 +37,12 @@ namespace EF7Tests
 
             var blog = new Blog();
             blog.Name = _fixture.Create<string>();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
             post.Blog = blog;
             blog.Posts.Add(post);
 
             post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
             post.Blog = blog;
             blog.Posts.Add(post);
 
@@ -70,7 +70,7 @@ namespace EF7Tests
             }
 
             var post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
@@ -108,7 +108,7 @@ namespace EF7Tests
             }
 
             var post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
@@ -120,7 +120,7 @@ namespace EF7Tests
             }
 
             var post1 = new Post();
-            post1.Text = _fixture.Create<string>();
+            post1.BlogText = _fixture.Create<string>();
             blog.Posts.AddRange(new List<Post>() { post, post1 });
 
             using (var uow = UoWFactory.Create())
@@ -148,7 +148,7 @@ namespace EF7Tests
             }
 
             var post = new Post();
-            post.Text = _fixture.Create<string>();
+            post.BlogText = _fixture.Create<string>();
 
             using (var uow = UoWFactory.Create())
             {
@@ -160,7 +160,7 @@ namespace EF7Tests
             }
 
             var newPost = new Post();
-            newPost.Text = _fixture.Create<string>();
+            newPost.BlogText = _fixture.Create<string>();
             blog.Posts.AddRange(new List<Post>() { newPost, post });
 
             using (var uow = UoWFactory.Create())

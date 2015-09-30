@@ -9,9 +9,14 @@ using Microsoft.Data.Entity.SqlServer.Metadata;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(EF7BloggContext))]
-    partial class EF7BloggContextModelSnapshot : ModelSnapshot
+    partial class v4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        public override string Id
+        {
+            get { return "20150930135733_v4"; }
+        }
+
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .Annotation("ProductVersion", "7.0.0-beta7-15540")
@@ -40,8 +45,6 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("FirstName");
 
-                    b.Property<string>("LastName");
-
                     b.Key("Id");
                 });
 
@@ -52,9 +55,9 @@ namespace DataAccess.Migrations
 
                     b.Property<int?>("BlogId");
 
-                    b.Property<string>("BlogText");
-
                     b.Property<string>("Date");
+
+                    b.Property<string>("Text");
 
                     b.Key("Id");
                 });

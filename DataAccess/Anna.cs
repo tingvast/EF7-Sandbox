@@ -27,9 +27,9 @@ namespace LatticeUtils
         //public static readonly AssemblyBuilder assemblyBuilder;
         //static AnonymousTypeUtils()
         //{
-        //    var assemblyName = new AssemblyName { Name = "LatticeUtilsAnonymousTypes" };
+        //    var assemblyName = new AssemblyName { FirstName = "LatticeUtilsAnonymousTypes" };
         //    assemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave, @"C:\Temp\");
-        //    moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, "anonymousTypes.dll");
+        //    moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.FirstName, "anonymousTypes.dll");
 
         //    // This would need to be called from somewhere else after a dynamic anonymous type is created
         //    // AnonymousTypeUtils.assemblyBuilder.Save("anonymousTypes.dll");
