@@ -3,7 +3,6 @@ using DataAccess.Logging;
 using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
-using System;
 using System.Linq;
 
 namespace DataAccess
@@ -40,14 +39,7 @@ namespace DataAccess
                 var type = e.Entity.GetType();
             }
 
-            try
-            {
-                context.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                //Debugger.Break();
-            }
+            context.SaveChanges();
 
             var allEntities = context.ChangeTracker.Entries().ToList();
 

@@ -1,4 +1,4 @@
-﻿using EF7;
+﻿using Core;
 
 namespace DataAccess.Interaces
 {

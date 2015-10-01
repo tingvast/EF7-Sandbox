@@ -1,7 +1,8 @@
-﻿using DataAccess.Interaces;
-using EF7;
+﻿using Core;
+using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
+using System;
 using System.Collections.Generic;
 
 namespace EF7Tests
@@ -19,9 +20,8 @@ namespace EF7Tests
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
-                post = new Post();
-                post.Text = Fixture.Create<string>();
-                post.Date = Fixture.Create<string>();
+                var blogww = Fixture.Create<Blog>();
+                post = Fixture.Create<Post>();
 
                 var k = rep.Add<Post>(post);
 
@@ -36,6 +36,7 @@ namespace EF7Tests
 
             post = new Post();
             post.Text = Fixture.Create<string>();
+            post.Url = Guid.NewGuid().ToString();
             post.Blog = blog;
             blog.Posts.Add(post);
 
@@ -64,6 +65,7 @@ namespace EF7Tests
 
             var post = new Post();
             post.Text = Fixture.Create<string>();
+            post.Url = Guid.NewGuid().ToString();
 
             using (var uow = UoWFactory.Create())
             {
@@ -102,6 +104,7 @@ namespace EF7Tests
 
             var post = new Post();
             post.Text = Fixture.Create<string>();
+            post.Url = Guid.NewGuid().ToString();
 
             using (var uow = UoWFactory.Create())
             {
@@ -114,6 +117,7 @@ namespace EF7Tests
 
             var post1 = new Post();
             post1.Text = Fixture.Create<string>();
+            post1.Url = Guid.NewGuid().ToString();
             blog.Posts.AddRange(new List<Post>() { post, post1 });
 
             using (var uow = UoWFactory.Create())
@@ -142,6 +146,7 @@ namespace EF7Tests
 
             var post = new Post();
             post.Text = Fixture.Create<string>();
+            post.Url = Guid.NewGuid().ToString();
 
             using (var uow = UoWFactory.Create())
             {
@@ -154,6 +159,7 @@ namespace EF7Tests
 
             var newPost = new Post();
             newPost.Text = Fixture.Create<string>();
+            newPost.Url = Guid.NewGuid().ToString();
             blog.Posts.AddRange(new List<Post>() { newPost, post });
 
             using (var uow = UoWFactory.Create())

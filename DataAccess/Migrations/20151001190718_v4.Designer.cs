@@ -1,14 +1,22 @@
+using System;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Infrastructure;
+using Microsoft.Data.Entity.Metadata;
 using Microsoft.Data.Entity.Migrations;
+using DataAccess;
 using Microsoft.Data.Entity.SqlServer.Metadata;
 
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(EF7BloggContext))]
-    partial class EF7BloggContextModelSnapshot : ModelSnapshot
+    partial class v4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        public override string Id
+        {
+            get { return "20151001190718_v4"; }
+        }
+
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .Annotation("ProductVersion", "7.0.0-beta7-15540")
@@ -43,8 +51,7 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Core.Post", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerIdentityStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int?>("BlogId");
 
@@ -63,6 +70,8 @@ namespace DataAccess.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Content");
+
+                    b.Property<int?>("PostId");
 
                     b.Property<string>("PostUrl");
 
@@ -89,8 +98,7 @@ namespace DataAccess.Migrations
                 {
                     b.Reference("Core.Post")
                         .InverseCollection()
-                        .ForeignKey("PostUrl")
-                        .PrincipalKey("Url");
+                        .ForeignKey("PostId");
                 });
         }
     }

@@ -1,5 +1,5 @@
-﻿using DataAccess.Interaces;
-using EF7;
+﻿using Core;
+using DataAccess.Interaces;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;

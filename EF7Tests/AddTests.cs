@@ -1,7 +1,9 @@
-﻿using DataAccess.Interaces;
-using EF7;
+﻿using Core;
+using DataAccess.Interaces;
+using Microsoft.Data.Entity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
+using System;
 
 namespace EF7Tests
 {
@@ -46,7 +48,7 @@ namespace EF7Tests
         [TestMethod]
         public void CanDoTest()
         {
-            Assert.Inconclusive("This test fails due to invalid test key generation. Running thsi test together with all test, will make it fail due to same key wih different type in cache already");
+            //Assert.Inconclusive("This test fails due to invalid test key generation. Running thsi test together with all test, will make it fail due to same key wih different type in cache already");
             // This test fails due to invalid test key generation. Running thsi test together with all test, will make it fail due to same key wih different type in cache already
             Blog blog = Fixture.Create<Blog>();
             using (var uow = UoWFactory.Create())
@@ -124,6 +126,7 @@ namespace EF7Tests
             post = new Post();
             post.Text = Fixture.Create<string>();
             post.Date = Fixture.Create<string>();
+            post.Url = Guid.NewGuid().ToString();
 
             #endregion Arrange
 
@@ -147,8 +150,13 @@ namespace EF7Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(DbUpdateException))]
         public void CanAddTheSameBusinessObjectExpectedException()
         {
+            /*
+            This test should fail since the alternate key Url value is the same between the two insterts.
+            */
+
             #region Arrange
 
             Post post;
@@ -156,6 +164,7 @@ namespace EF7Tests
             post = new Post();
             post.Text = Fixture.Create<string>();
             post.Date = Fixture.Create<string>();
+            post.Url = Guid.NewGuid().ToString();
 
             using (var uow = UoWFactory.Create())
             {
@@ -183,6 +192,7 @@ namespace EF7Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(DbUpdateException))]
         public void CanAddTheSameBusinessObjectUsingDisconnectedScenarioExpectedException()
         {
             #region Arrange
@@ -192,6 +202,7 @@ namespace EF7Tests
             post = new Post();
             post.Text = Fixture.Create<string>();
             post.Date = Fixture.Create<string>();
+            post.Url = Guid.NewGuid().ToString();
 
             using (var uow = UoWFactory.Create())
             {

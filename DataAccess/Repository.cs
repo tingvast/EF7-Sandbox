@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-
+using Core;
 using DataAccess.Interaces;
-using EF7;
 using LatticeUtils;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.ChangeTracking;
@@ -207,6 +206,7 @@ namespace DataAccess
                 allTrackedEntries.Remove(ahag);
 
                 var allPropertieOfNavigationPropertys = subentity.Metadata.GetProperties().Select(p1 => p1.Name);
+                var keyProperties = subentity.Metadata.GetKeys().SelectMany(p2 => p2.Properties).Select(p3 => p3.Name);
                 var navigationPropertiesToBeUpdated = new List<string>();
                 foreach (var pp in p.Projections)
                 {
@@ -218,6 +218,8 @@ namespace DataAccess
                     var propertyName = propertyInfo.Name;
                     var propertyType = propertyInfo.PropertyType;
 
+                    if (keyProperties.Contains(propertyName))
+                        continue;
                     subentity.Property(propertyName).IsModified = true;
                     navigationPropertiesToBeUpdated.Add(propertyName);
                 }

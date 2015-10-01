@@ -1,8 +1,9 @@
-﻿using DataAccess;
-using EF7;
+﻿using Core;
+using DataAccess;
 using Microsoft.Data.Entity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
+using System;
 using System.Linq;
 
 namespace EF7Tests
@@ -81,8 +82,8 @@ namespace EF7Tests
                 Name = Fixture.Create<string>(),
                 Posts = new System.Collections.Generic.List<Post>()
                 {
-                    new Post() { Date = "20150909", Text = Fixture.Create<string>() },
-                    new Post() { Date = "20150909", Text = Fixture.Create<string>() }
+                    new Post() { Date = "20150909", Text = Fixture.Create<string>(), Url = Guid.NewGuid().ToString()},
+                    new Post() { Date = "20150909", Text = Fixture.Create<string>(), Url =  Guid.NewGuid().ToString()}
                 }
             };
 
@@ -98,6 +99,34 @@ namespace EF7Tests
                 var retrievedBlog = db
                     .Blogs.Include(b => b.Posts)
                     .Single(b => b.Id == blog.Id);
+            };
+        }
+
+        [TestMethod]
+        public void CanNotCrash()
+        {
+            //var blog = new Blog()
+            //{
+            //    Author = Fixture.Create<string>(),
+            //    Name = Fixture.Create<string>(),
+            //    Posts = new System.Collections.Generic.List<Post>()
+            //    {
+            //        new Post() { Date = "20150909", Text = Fixture.Create<string>() },
+            //        //new Post() { Date = "20150909", Text = Fixture.Create<string>() }
+            //    }
+            //};
+
+            var post = new Post()
+            {
+                Text = Fixture.Create<string>(),
+                Url = Fixture.Create<string>(),
+            };
+
+            using (var db = new EF7BloggContext())
+            {
+                db.ChangeTracker.TrackGraph(post, c => c.State = EntityState.Added);
+
+                db.SaveChanges();
             };
         }
 

@@ -1,4 +1,4 @@
-﻿namespace EF7
+﻿namespace Core
 {
     public interface IEntity
     {

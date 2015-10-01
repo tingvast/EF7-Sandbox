@@ -2,10 +2,11 @@
 
 namespace EF7Tests
 {
+    using Core;
     using DataAccess.Interaces;
-    using EF7;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
+    using System;
     using System.Diagnostics;
 
     namespace EF7Tests
@@ -13,6 +14,32 @@ namespace EF7Tests
         [TestClass]
         public class RetrieveGraphTests : TestBase
         {
+            [TestMethod]
+            public void MyTestMethod()
+            {
+                using (var uow = UoWFactory.Create())
+                {
+                    var repository = uow.Create();
+
+                    var blog = Fixture.Create<Blog>();
+
+                    repository.AddWithRelations(blog);
+
+                    uow.Commit();
+
+                    blog.Posts[0].Text = "New text";
+
+                    var pp1 = repository.PropertyUpdateBuilder<Blog>(blog)
+                       .IncludeNavigationProperyUpdate<Post>(
+                            blog.Posts[0].Id,
+                            p => p.Posts,
+                            p => p.Text)
+                       .Build();
+
+                    var updatedBlog = repository.UpdateGraph(blog, pp1);
+                };
+            }
+
             [TestMethod]
             public void CanRetrieve()
             {
@@ -38,10 +65,10 @@ namespace EF7Tests
                        .PropertiesToUpdate(m => m.Name, m => m.Description)
                        .IncludeNavigationProperyUpdate<Post>(
                             firstPostId,
-                            p => p.Posts, p => p.Text)
+                            p => p.Posts, p => p.Text, p => p.Url)
                         .IncludeNavigationProperyUpdate<Post>(
                             secondPostId,
-                            p => p.Posts, p => p.Text)
+                            p => p.Posts, p => p.Text, p => p.Url)
                        .Build();
 
                     var updatedBlog = repository.UpdateGraph(blog, pp1);
@@ -181,6 +208,7 @@ namespace EF7Tests
 
                 var post = new Post();
                 post.Text = Fixture.Create<string>();
+                post.Url = Guid.NewGuid().ToString();
 
                 using (var uow = UoWFactory.Create())
                 {
@@ -193,6 +221,7 @@ namespace EF7Tests
 
                 var newPost = new Post();
                 newPost.Text = Fixture.Create<string>();
+                newPost.Url = Guid.NewGuid().ToString();
                 blog.Posts.AddRange(new List<Post>() { newPost, post });
 
                 using (var uow = UoWFactory.Create())
@@ -226,6 +255,7 @@ namespace EF7Tests
                 blog.Name = Fixture.Create<string>();
                 var post = new Post();
                 post.Text = Fixture.Create<string>();
+                post.Url = Guid.NewGuid().ToString();
 
                 blog.Posts.AddRange(new List<Post>() { post });
 
@@ -244,6 +274,7 @@ namespace EF7Tests
 
                 var newPost = new Post();
                 newPost.Text = Fixture.Create<string>();
+                newPost.Url = Guid.NewGuid().ToString();
                 blog.Posts.AddRange(new List<Post>() { newPost, post });
 
                 using (var uow = UoWFactory.Create())
@@ -283,6 +314,7 @@ namespace EF7Tests
                 blog.Name = Fixture.Create<string>();
                 var post = new Post();
                 post.Text = Fixture.Create<string>();
+                post.Url = Guid.NewGuid().ToString();
 
                 blog.Posts.AddRange(new List<Post>() { post });
 

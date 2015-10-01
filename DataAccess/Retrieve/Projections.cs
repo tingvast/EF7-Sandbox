@@ -36,11 +36,11 @@ namespace DataAccess
                 MemberExpression member = ParameterHelper.GetMemberExpression(le);
 
                 var propertyInfo = (PropertyInfo)member.Member;
-
+                var declaringType = propertyInfo.DeclaringType;
                 var propertyName = propertyInfo.Name;
                 var propertyType = propertyInfo.PropertyType;
 
-                sb.Append(propertyName + ":" + propertyType);
+                sb.Append(":" + declaringType + ":" + propertyName + ":" + propertyType + ":");
             }
 
             sb.Append(":");
@@ -53,10 +53,11 @@ namespace DataAccess
                     MemberExpression member = ParameterHelper.GetMemberExpression(le);
 
                     var propertyInfo = (PropertyInfo)member.Member;
+                    var declaringType = propertyInfo.DeclaringType;
                     var propertyName = propertyInfo.Name;
                     var propertyType = propertyInfo.PropertyType;
 
-                    sb.Append(propertyName + ":" + propertyType);
+                    sb.Append(":" + declaringType + ":" + propertyName + ":" + propertyType + ":");
                 }
             }
 

@@ -1,7 +1,8 @@
-﻿using DataAccess.Interaces;
-using EF7;
+﻿using Core;
+using DataAccess.Interaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
+using System;
 
 namespace EF7Tests
 {
@@ -24,6 +25,7 @@ namespace EF7Tests
                 post = new Post();
                 post.Text = Fixture.Create<string>();
                 post.Date = Fixture.Create<string>();
+                post.Url = Guid.NewGuid().ToString();
 
                 var persistedPost = rep.Add<Post>(post);
 

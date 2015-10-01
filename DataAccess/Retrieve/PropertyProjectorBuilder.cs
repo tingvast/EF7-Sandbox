@@ -1,5 +1,5 @@
-﻿using DataAccess.Interaces;
-using EF7;
+﻿using Core;
+using DataAccess.Interaces;
 using LatticeUtils;
 using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Data.Entity.Query;
