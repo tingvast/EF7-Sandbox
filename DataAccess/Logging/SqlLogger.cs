@@ -6,7 +6,7 @@ namespace DataAccess.Logging
 {
     internal class SqlLogger : ILogger
     {
-        private static readonly string _logFilePath = @"C:\Temp\EFSandbox\EF7-Sandbox\DataAccessSql.log";
+        private static readonly string _logFilePath = @"E:\MyProjects\EF\EF7\Logs\DataAccessSql.log";
 
         public IDisposable BeginScopeImpl(object state)
         {

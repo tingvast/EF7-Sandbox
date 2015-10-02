@@ -73,13 +73,18 @@ namespace DataAccess
 
         public IPropertySeletor<T> Build()
         {
+            
             Expression<Func<T, dynamic>> fullProjectionLambda;
+
+            /*
+            The expression is costly to build (CreateLambda method below) and can be build once for each projection request and then cached.
+            */
             var cacheKey = AllProjections.CacheKey;
             var cacheValue = MemoryCache.Default[cacheKey];
 
             if (cacheValue == null)
             {
-                var projectedEntityAnonymousType = CreateLampbda(out fullProjectionLambda);
+                var projectedEntityAnonymousType = CreateLambbda(out fullProjectionLambda);
                 cacheValue = new PropertyProjector<T>(
                     fullProjectionLambda,
                     AllProjections,
@@ -93,9 +98,9 @@ namespace DataAccess
             {
                 ret = (PropertyProjector<T>)cacheValue;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Debugger.Break();
+                throw;
             }
 
             return ret; ;
@@ -103,8 +108,7 @@ namespace DataAccess
 
         #region Private
 
-        private Type CreateLampbda
-            (out Expression<Func<T, dynamic>> lambd11a1)
+        private Type CreateLambbda(out Expression<Func<T, dynamic>> lambda)
         {
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
             List<Expression> anonymousTypePropertiesValues = new List<Expression>();
@@ -201,7 +205,7 @@ namespace DataAccess
 
             var anonymousTypeInstance = Expression.New(constructor, anonymousTypePropertiesValues);
 
-            lambd11a1 = Expression.Lambda<Func<T, dynamic>>(anonymousTypeInstance, lambdaParameter);
+            lambda = Expression.Lambda<Func<T, dynamic>>(anonymousTypeInstance, lambdaParameter);
             return projectedEntityAnonymousType;
         }
 
@@ -226,31 +230,31 @@ namespace DataAccess
 
             var foreigKeys = _context.Model.GetEntityType(navigationProperyType).GetForeignKeys();
             var thePrincipalEntityKey = foreigKeys.Single(fk => fk.PrincipalEntityType.ClrType == typeof(T));
-            var thePrincipalEntityKeyName = thePrincipalEntityKey.Properties[0].Name;
+            var thePrincipalEntityKeyName = thePrincipalEntityKey.Properties[0].Name; // TODO: Is it safe to asume first property?
 
             Expression left = Expression.PropertyOrField(pe, thePrincipalEntityKeyName);
             Expression right = Expression.Constant(id, typeof(int?));
             Expression e1 = Expression.Equal(left, right);
 
-            var constructorinfo = typeof(EntityQueryable<>).MakeGenericType(navigationProperyType).GetConstructors()[0];
+            var constructorinfo = typeof(EntityQueryable<>).MakeGenericType(navigationProperyType).GetConstructors()[0]; // TODO: Is it safe to asume first constructor?
 
-            var newstsy = constructorinfo.Invoke(new[] { _context.GetService<IEntityQueryProvider>() });
-            Type func11 = typeof(EntityQueryable<>);
-            Type generic23233 = func11.MakeGenericType(navigationProperyType);
-            var nwtwDynamically = Expression.Constant(newstsy, generic23233);
+            var entityProviderConstructor = constructorinfo.Invoke(new[] { _context.GetService<IEntityQueryProvider>() });
+            Type entityQuerableType = typeof(EntityQueryable<>);
+            Type entityQuerableOfNavigationPropertyType = entityQuerableType.MakeGenericType(navigationProperyType);
+            var nwtwDynamically = Expression.Constant(entityProviderConstructor, entityQuerableOfNavigationPropertyType);
 
-            Type func1111 = typeof(IQueryable<>);
-            Type generic2323311 = func1111.MakeGenericType(navigationProperyType);
+            Type iQuerableType = typeof(IQueryable<>);
+            Type iQuerableOfNavigationPropertyType = iQuerableType.MakeGenericType(navigationProperyType);
 
-            Type func11111 = typeof(Func<,>);
-            Type generic232331123 = func11111.MakeGenericType(navigationProperyType, typeof(bool));
-            Type funxs = typeof(Expression<>);
-            Type skljslk = funxs.MakeGenericType(generic232331123);
+            Type func = typeof(Func<,>);
+            Type predicateFunc = func.MakeGenericType(navigationProperyType, typeof(bool));
+            Type expr = typeof(Expression<>);
+            Type expressionPredicate = expr.MakeGenericType(predicateFunc);
 
-            var m1 = GetGenericMethod(typeof(Queryable), "Where", new[] { navigationProperyType }, generic2323311, skljslk);
+            var whereMethod = GetGenericMethod(typeof(Queryable), "Where", new[] { navigationProperyType }, iQuerableOfNavigationPropertyType, expressionPredicate);
 
             MethodCallExpression whereCallExpression = Expression.Call(
-                        m1,
+                        whereMethod,
                         nwtwDynamically,//nwtw
                         Expression.Lambda(e1, new ParameterExpression[] { pe }));
             return whereCallExpression;

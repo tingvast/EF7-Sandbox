@@ -64,7 +64,7 @@ namespace DataAccess
                 }
                 else
                 {
-                    
+                    context.Attach(e.Entity);
                 }
             });
 
