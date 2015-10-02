@@ -18,6 +18,6 @@ namespace Core
             Followers = new List<Follower>();
         }
 
-        // TODO Adde behavior here!!
+        // TODO Add behavior here...
     }
 }

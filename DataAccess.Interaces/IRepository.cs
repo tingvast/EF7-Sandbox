@@ -7,11 +7,15 @@ namespace DataAccess.Interaces
 {
     public interface IRepository
     {
-        IPropertyProjectorBuilder<T> PropertySelectBuilder<T>(T blog) where T : class, IEntity;
+        #region Properties
+
+        ISelectPropertyBuilder<T> PropertySelectBuilder<T>(T blog) where T : class, IEntity;
 
         IUpdatePropertyBuilder<T> PropertyUpdateBuilder<T>(T blog) where T : class, IEntity;
 
-        #region Create
+        #endregion Properties
+
+        #region Add
 
         T Add<T>(T entity) where T : class, IEntity;
 
@@ -19,7 +23,7 @@ namespace DataAccess.Interaces
 
         T AddWithRelations<T>(T entityWithRelations) where T : class, IEntity;
 
-        #endregion Create
+        #endregion Add
 
         #region Retrieve
 
@@ -57,7 +61,7 @@ namespace DataAccess.Interaces
 
         Blog UpdateNonGeneric(Blog entity, Expression<Func<Blog, dynamic>> selectedProperties);
 
-        T RetrieveByIdOld<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity;
+        T RetrieveByIdOld<T>(int id, ISelectPropertyBuilder<T> selectedSelectProperties) where T : class, IEntity;
 
         #endregion Obsolete
     }

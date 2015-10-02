@@ -13,24 +13,24 @@ using System.Runtime.Caching;
 
 namespace DataAccess
 {
-    public class PropertyProjectorBuilder<T> : IPropertyProjectorBuilder<T>, IIncludePropertySelector<T> where T : class, IEntity
+    public class SelectPropertyBuilder<T> : ISelectPropertyBuilder<T>, IIncludeSelectPropertySelector<T> where T : class, IEntity
     {
         private int _id;
 
         private EF7BloggContext _context;
 
-        public PropertyProjectorBuilder()
+        public SelectPropertyBuilder()
         {
             AllProjections = new Projections();
         }
 
-        public PropertyProjectorBuilder(int id)
+        public SelectPropertyBuilder(int id)
             : this()
         {
             this._id = id;
         }
 
-        public PropertyProjectorBuilder(int id, EF7BloggContext context)
+        public SelectPropertyBuilder(int id, EF7BloggContext context)
             : this()
         {
             this._id = id;
@@ -42,7 +42,7 @@ namespace DataAccess
             get; private set;
         }
 
-        public IPropertyProjectorBuilder<T> Select(
+        public ISelectPropertyBuilder<T> Select(
             params Expression<Func<T, dynamic>>[] p1)
         {
             AllProjections.Projection.AddRange(p1);
@@ -50,7 +50,7 @@ namespace DataAccess
             return this;
         }
 
-        IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.Include<TProperty>(
+        ISelectPropertyBuilder<T> ISelectPropertyBuilder<T>.Include<TProperty>(
             Expression<Func<T, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties)
         {
@@ -261,7 +261,7 @@ namespace DataAccess
         #region Obsolete
 
         [Obsolete]
-        IPropertyProjectorBuilder<T> IPropertyProjectorBuilder<T>.IncludeOld<TProperty>(
+        ISelectPropertyBuilder<T> ISelectPropertyBuilder<T>.IncludeOld<TProperty>(
             Expression<Func<T, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] properties)
         {

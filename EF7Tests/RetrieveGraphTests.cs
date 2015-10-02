@@ -338,7 +338,7 @@ namespace EF7Tests
                     var repository = uow.Create();
 
                     Stopwatch stopwatch = Stopwatch.StartNew();
-                    IPropertyProjectorBuilder<Blog> builder
+                    ISelectPropertyBuilder<Blog> builder
                         = repository.PropertySelectBuilder<Blog>(blog);
 
                     var pp = builder
@@ -357,7 +357,7 @@ namespace EF7Tests
                     var repository = uow.Create();
 
                     Stopwatch stopwatch = Stopwatch.StartNew();
-                    IPropertyProjectorBuilder<Blog> builder = repository
+                    ISelectPropertyBuilder<Blog> builder = repository
                         .PropertySelectBuilder<Blog>(blog);
 
                     var pp = builder

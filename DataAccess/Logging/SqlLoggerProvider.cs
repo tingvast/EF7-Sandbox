@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace DataAccess.Logging
 {
-    internal class SqlLoggerProvider : ILoggerProvider
+    public class SqlLoggerProvider : ILoggerProvider
     {
         private static readonly string[] _sqlGenerationComponents = new string[]
         {

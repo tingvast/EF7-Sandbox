@@ -26,11 +26,11 @@ namespace DataAccess
             this.context.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
-        public IPropertyProjectorBuilder<T> PropertySelectBuilder<T>(T entity) where T : class, IEntity
+        public ISelectPropertyBuilder<T> PropertySelectBuilder<T>(T entity) where T : class, IEntity
         {
-            if (entity == null) return new PropertyProjectorBuilder<T>();
+            if (entity == null) return new SelectPropertyBuilder<T>();
 
-            return new PropertyProjectorBuilder<T>(entity.Id, context);
+            return new SelectPropertyBuilder<T>(entity.Id, context);
         }
 
         public IUpdatePropertyBuilder<T> PropertyUpdateBuilder<T>(T entity) where T : class, IEntity
@@ -56,7 +56,17 @@ namespace DataAccess
 
         public T AddWithRelations<T>(T entityWithRelations) where T : class, IEntity
         {
-            context.ChangeTracker.TrackGraph(entityWithRelations, (e) => e.State = EntityState.Added);
+            context.ChangeTracker.TrackGraph(entityWithRelations, (e) =>
+            {
+                if ((!e.IsKeySet))
+                {
+                    e.State = EntityState.Added;
+                }
+                else
+                {
+                    
+                }
+            });
 
             return entityWithRelations;
         }
@@ -654,13 +664,13 @@ namespace DataAccess
         }
 
         [Obsolete]
-        public T RetrieveByIdOld<T>(int id, IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
+        public T RetrieveByIdOld<T>(int id, ISelectPropertyBuilder<T> selectedSelectProperties) where T : class, IEntity
         {
             // The query will be projected onto an anonymous type.
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
             List<Expression> anonymousTypePropertiesValues = new List<Expression>();
             ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
-            foreach (var projection in selectedProperties.AllProjections.Projection)
+            foreach (var projection in selectedSelectProperties.AllProjections.Projection)
             {
                 var projectionLambda = projection as LambdaExpression;
 
@@ -676,7 +686,7 @@ namespace DataAccess
                 anonymousTypePropertiesValues.Add(memberAccess);
             }
 
-            foreach (var navigationProperty in selectedProperties.AllProjections.NavigationPropertiesProjections)
+            foreach (var navigationProperty in selectedSelectProperties.AllProjections.NavigationPropertiesProjections)
             {
                 var navigationProperyType = navigationProperty.Type;
 
@@ -759,9 +769,9 @@ namespace DataAccess
             var mainEntity = Mapper.DynamicMap<T>(projectedEntity);
             mainEntity.Id = id;
 
-            if (selectedProperties.AllProjections.NavigationPropertiesProjections.Count() > 0)
+            if (selectedSelectProperties.AllProjections.NavigationPropertiesProjections.Count() > 0)
             {
-                MaterializeNavigationPropertiesObsolete<T>(mainEntity, projectedEntity, projectedEntityAnonymousType, selectedProperties);
+                MaterializeNavigationPropertiesObsolete<T>(mainEntity, projectedEntity, projectedEntityAnonymousType, selectedSelectProperties);
             }
 
             var alreadytrackedentity = context.ChangeTracker.Entries<T>().Where(e => e.Entity.Id == id).SingleOrDefault();
@@ -780,12 +790,12 @@ namespace DataAccess
             dynamic mainEntity,
             dynamic projectedEntity,
             Type projectedEntityAnonymousType,
-            IPropertyProjectorBuilder<T> selectedProperties) where T : class, IEntity
+            ISelectPropertyBuilder<T> selectedSelectProperties) where T : class, IEntity
         {
             Type genericListType = typeof(List<>);
             var genericDynamicMapper = typeof(Mapper).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == "DynamicMap").ToList()[2];
 
-            foreach (var projection in selectedProperties.AllProjections.NavigationPropertiesProjections)
+            foreach (var projection in selectedSelectProperties.AllProjections.NavigationPropertiesProjections)
             {
                 var navigationPropertyOnMainEntity = typeof(T).GetProperty(projection.ReferingPropertyName);
                 var navigationPropertyOnProjectedAnonymousType = projectedEntityAnonymousType.GetProperty(projection.Name);

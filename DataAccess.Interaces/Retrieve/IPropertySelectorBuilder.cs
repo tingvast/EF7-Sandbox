@@ -4,13 +4,13 @@ using System.Linq.Expressions;
 
 namespace DataAccess.Interaces
 {
-    public interface IPropertyProjectorBuilder<TEntity> where TEntity : class, IEntity
+    public interface ISelectPropertyBuilder<TEntity> where TEntity : class, IEntity
     {
         IProjections AllProjections { get; }
 
-        IPropertyProjectorBuilder<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
+        ISelectPropertyBuilder<TEntity> Select(params Expression<Func<TEntity, dynamic>>[] p1);
 
-        IPropertyProjectorBuilder<TEntity> Include<TProperty>(
+        ISelectPropertyBuilder<TEntity> Include<TProperty>(
             Expression<Func<TEntity, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
 
@@ -18,7 +18,7 @@ namespace DataAccess.Interaces
 
         #region Obsolete
 
-        IPropertyProjectorBuilder<TEntity> IncludeOld<TProperty>(
+        ISelectPropertyBuilder<TEntity> IncludeOld<TProperty>(
          Expression<Func<TEntity, dynamic>> navigationPropery,
          params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
 

@@ -159,5 +159,78 @@ namespace EF7Tests
                       createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.Text) });
             }
         }
+
+        [TestMethod]
+        public void CanAddWithRelationsWhenSomePartsInGraphAlreadyAdded()
+        {
+            /*
+            1. Create a blog, and add it to the repository.
+            2. Using a different contect add a post to the blog anf add it to the repository
+            */
+            #region Arrange
+
+            Blog createdBlog;
+            Post post;
+
+            var blog = Fixture.Build<Blog>()
+                .OmitAutoProperties()
+                .With(p => p.Name, Fixture.Create<string>())
+                .Create();
+
+
+
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                createdBlog = rep.AddWithRelations(blog);
+
+                uow.Commit();
+            }
+
+
+            post = new Post()
+            {
+                Text = Fixture.Create<string>(),
+                Date = Fixture.Create<string>(),
+                Url = Guid.NewGuid().ToString(),
+            };
+
+            blog.Posts.Add(post);
+
+            #endregion Arrange
+
+            #region Act
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                createdBlog = rep.AddWithRelations(blog);
+
+                uow.Commit();
+            }
+
+            #endregion Act
+
+            #region Assert
+
+            //using (var uow = UoWFactory.Create())
+            //{
+            //    var rep = uow.Create();
+
+            //    var pp = rep.PropertySelectBuilder(blog)
+            //        .Select(m => m.Id, m => m.Name, m => m.Description)
+            //        .Include<Post>(p => p.Posts, p => p.Text, p => post.Date)
+            //        .Include<Follower>(m => m.Followers, p => p.Id, p => p.Name)
+            //        .Build();
+
+            //    var retrievedBlog = rep.RetrieveById(createdBlog.Id, pp);
+            //}
+
+            #endregion Assert
+        }
+
     }
 }
