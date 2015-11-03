@@ -143,6 +143,7 @@
       <DependentUpon>20151103185532_v1.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\EF7BloggContextModelSnapshot.cs" />
+    <Compile Include="Retrieve\NavigationPropertySelector.cs" />
     <Compile Include="Retrieve\NavigationPropertySelectorBuilder.cs" />
     <Compile Include="Utils\AnonymousTypeUtils.cs" />
     <Compile Include="EF7BloggContext.cs" />

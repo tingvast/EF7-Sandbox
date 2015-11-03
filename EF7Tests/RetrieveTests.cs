@@ -241,12 +241,13 @@ namespace EF7Tests
             {
                 var rep = uow.Create();
 
+                var retrievedTwo = rep.RetrieveById<Blog>(blogs[0].Id, b => b.Posts, b => b.Followers);
+
                 var builder = rep.NavigationPropertySelectorBuilder<Blog>()
                     .Include(b => b.Posts);
                     
-
                 var retrievedOne = rep.RetrieveById<Blog>(blogs[0].Id, builder.Build());
-                var retrievedTwo = rep.RetrieveById<Blog>(blogs[0].Id, b => b.Posts, b => b.Followers);
+                
             }
 
 

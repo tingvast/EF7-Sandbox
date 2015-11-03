@@ -124,7 +124,9 @@ namespace DataAccess
 
         T IRepository.RetrieveById<T>(int id, INavigationPropertySelector<T> projection)
         {
-            throw new NotImplementedException();
+            var entity = context.Set<T>().Include(projection.Navs).SingleOrDefault(p => p.Id == id);
+
+            return entity;
         }
 
 
