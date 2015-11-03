@@ -14,6 +14,6 @@ namespace Core
         public Blog Blog { get; set; }
         public int? BlogId { get; set; }
 
-        public List<TrackBack> TrackBacks { get; set; }
+        public List<TrackBack> TrackBacks { get; set; }        
     }
 }

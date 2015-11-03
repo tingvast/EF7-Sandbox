@@ -45,7 +45,7 @@ namespace DataAccess
         public ISelectPropertyBuilder<T> Select(
             params Expression<Func<T, dynamic>>[] p1)
         {
-            AllProjections.Projection.AddRange(p1);
+            AllProjections.BaseEntityProjections.AddRange(p1);
 
             return this;
         }
@@ -71,7 +71,7 @@ namespace DataAccess
             return this;
         }
 
-        public IPropertySeletor<T> Build()
+        public IPropertySecletor<T> Build()
         {
             
             Expression<Func<T, dynamic>> fullProjectionLambda;
@@ -85,6 +85,7 @@ namespace DataAccess
             if (cacheValue == null)
             {
                 var projectedEntityAnonymousType = CreateLambbda(out fullProjectionLambda);
+
                 cacheValue = new PropertyProjector<T>(
                     fullProjectionLambda,
                     AllProjections,
@@ -110,10 +111,42 @@ namespace DataAccess
 
         private Type CreateLambbda(out Expression<Func<T, dynamic>> lambda)
         {
+            /*
+            Based in the follwing:
+
+            var projector = rep.PropertySelectBuilder(blog)
+                    .Select(p => p.Name)
+                    .Include<Post>(m => m.Posts, p => p.Text)
+                    .Build();
+
+
+            Output lambda to be used as expression in: 
+
+            context.Set<T>().                
+                Where(p => p.Id == id).
+                Select(lamdba.Expression).
+                Single();
+
+
+            where lambda will look (using AllProjections in the builder), using example projector above
+
+            p = new 
+            {
+                p => p.Name,
+                Posts =     from post in context.Set<Post>() 
+                            where post.BlogId == _id 
+                            select new 
+                            { 
+                                Text = pp.Text 
+                            }
+            }
+            */
+
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
             List<Expression> anonymousTypePropertiesValues = new List<Expression>();
             ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
-            foreach (var projection in AllProjections.Projection)
+
+            foreach (var projection in AllProjections.BaseEntityProjections)
             {
                 var projectionLambda = projection as LambdaExpression;
 
@@ -236,7 +269,8 @@ namespace DataAccess
             Expression right = Expression.Constant(id, typeof(int?));
             Expression e1 = Expression.Equal(left, right);
 
-            var constructorinfo = typeof(EntityQueryable<>).MakeGenericType(navigationProperyType).GetConstructors()[0]; // TODO: Is it safe to asume first constructor?
+            // TODO: Is it safe to asume first constructor?
+            var constructorinfo = typeof(EntityQueryable<>).MakeGenericType(navigationProperyType).GetConstructors()[0]; 
 
             var entityProviderConstructor = constructorinfo.Invoke(new[] { _context.GetService<IEntityQueryProvider>() });
             Type entityQuerableType = typeof(EntityQueryable<>);
@@ -251,7 +285,10 @@ namespace DataAccess
             Type expr = typeof(Expression<>);
             Type expressionPredicate = expr.MakeGenericType(predicateFunc);
 
-            var whereMethod = GetGenericMethod(typeof(Queryable), "Where", new[] { navigationProperyType }, iQuerableOfNavigationPropertyType, expressionPredicate);
+            var whereMethod = GetGenericMethod(typeof(Queryable), "Where", 
+                new[] { navigationProperyType }, 
+                iQuerableOfNavigationPropertyType, 
+                expressionPredicate);
 
             MethodCallExpression whereCallExpression = Expression.Call(
                         whereMethod,

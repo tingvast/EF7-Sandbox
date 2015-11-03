@@ -41,6 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="INavigationProperty.cs" />
+    <Compile Include="Retrieve\INavigationPropertySelector.cs" />
+    <Compile Include="Retrieve\INavigationPropertySelectorBuilder.cs" />
     <Compile Include="Retrieve\IIncludePropertySelector.cs" />
     <Compile Include="Retrieve\IPropertySelector.cs" />
     <Compile Include="IProjections.cs" />

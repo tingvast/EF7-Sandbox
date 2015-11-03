@@ -5,7 +5,7 @@ namespace DataAccess.Interaces
 {
     public interface IProjections
     {
-        List<Expression> Projection { get; set; }
+        List<Expression> BaseEntityProjections { get; set; }
 
         List<INavigationProperty> NavigationPropertiesProjections { get; set; }
 

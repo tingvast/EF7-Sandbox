@@ -29,7 +29,7 @@ namespace DataAccess
 
         public IUpdatePropertyBuilder<T> PropertiesToUpdate(Expression<Func<T, dynamic>>[] p1)
         {
-            AllProjections.Projection.AddRange(p1);
+            AllProjections.BaseEntityProjections.AddRange(p1);
 
             return this;
         }

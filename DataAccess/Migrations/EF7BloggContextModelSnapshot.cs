@@ -1,7 +1,9 @@
+using System;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Infrastructure;
+using Microsoft.Data.Entity.Metadata;
 using Microsoft.Data.Entity.Migrations;
-using Microsoft.Data.Entity.SqlServer.Metadata;
+using DataAccess;
 
 namespace DataAccess.Migrations
 {
@@ -11,8 +13,8 @@ namespace DataAccess.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .Annotation("ProductVersion", "7.0.0-beta7-15540")
-                .Annotation("SqlServer:ValueGenerationStrategy", SqlServerIdentityStrategy.IdentityColumn);
+                .Annotation("ProductVersion", "7.0.0-beta8-15964")
+                .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Core.Blog", b =>
                 {
@@ -25,7 +27,7 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Key("Id");
+                    b.HasKey("Id");
                 });
 
             modelBuilder.Entity("Core.Follower", b =>
@@ -37,14 +39,14 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Key("Id");
+                    b.HasKey("Id");
                 });
 
             modelBuilder.Entity("Core.Post", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerIdentityStrategy.IdentityColumn);
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int?>("BlogId");
 
@@ -54,7 +56,7 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("Url");
 
-                    b.Key("Id");
+                    b.HasKey("Id");
                 });
 
             modelBuilder.Entity("Core.TrackBack", b =>
@@ -68,27 +70,27 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("ReferrerUrl");
 
-                    b.Key("Id");
+                    b.HasKey("Id");
                 });
 
             modelBuilder.Entity("Core.Follower", b =>
                 {
-                    b.Reference("Core.Blog")
-                        .InverseCollection()
+                    b.HasOne("Core.Blog")
+                        .WithMany()
                         .ForeignKey("BlogId");
                 });
 
             modelBuilder.Entity("Core.Post", b =>
                 {
-                    b.Reference("Core.Blog")
-                        .InverseCollection()
+                    b.HasOne("Core.Blog")
+                        .WithMany()
                         .ForeignKey("BlogId");
                 });
 
             modelBuilder.Entity("Core.TrackBack", b =>
                 {
-                    b.Reference("Core.Post")
-                        .InverseCollection()
+                    b.HasOne("Core.Post")
+                        .WithMany()
                         .ForeignKey("PostUrl")
                         .PrincipalKey("Url");
                 });

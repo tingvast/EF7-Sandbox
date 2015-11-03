@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace DataAccess
 {
-    public class PropertyProjector<T> : IPropertySeletor<T>
+    public class PropertyProjector<T> : IPropertySecletor<T>
     {
         private PropertyProjector()
         {

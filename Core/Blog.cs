@@ -17,6 +17,8 @@ namespace Core
             Posts = new List<Post>();
             Followers = new List<Follower>();
         }
+      
+
 
         // TODO Add behavior here...
     }
