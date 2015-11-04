@@ -156,17 +156,18 @@ namespace EF7Tests
                 var rep = uow.Create();
 
                 var retrievedBlogWithPosts = rep.RetrieveObsolete<Blog, dynamic>(
-                      createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.Text) });
+                    createdBlog.Id, p => new { ff = p.Name, ffff = p.Description, fff = p.Posts.Select(pp => pp.Text) });
             }
         }
 
         [TestMethod]
-        public void CanAddWithRelationsWhenSomePartsInGraphAlreadyAdded()
+        public void CanAddParentWithRelationsWhenSomePartsInGraphAlreadyAddedToRepository()
         {
             /*
-            1. Create a blog, and add it to the repository.
-            2. Using a different contect add a post to the blog anf add it to the repository
+            1. Create a blog, and add it to the repository. The parent object is added to repository (IsKeySet on entity will become true)
+            2. Using a different contect add a post (navigation property entity) to the blog and add it to the repository.
             */
+
             #region Arrange
 
             Blog createdBlog;
@@ -177,25 +178,16 @@ namespace EF7Tests
                 .With(p => p.Name, Fixture.Create<string>())
                 .Create();
 
-
-
-
             using (var uow = UoWFactory.Create())
             {
                 var rep = uow.Create();
 
-                createdBlog = rep.AddWithRelations(blog);
+                rep.AddWithRelations(blog);
 
                 uow.Commit();
             }
 
-
-            post = new Post()
-            {
-                Text = Fixture.Create<string>(),
-                Date = Fixture.Create<string>(),
-                Url = Guid.NewGuid().ToString(),
-            };
+            post = Fixture.Create<Post>();
 
             blog.Posts.Add(post);
 
@@ -216,21 +208,53 @@ namespace EF7Tests
 
             #region Assert
 
-            //using (var uow = UoWFactory.Create())
-            //{
-            //    var rep = uow.Create();
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
 
-            //    var pp = rep.PropertySelectBuilder(blog)
-            //        .Select(m => m.Id, m => m.Name, m => m.Description)
-            //        .Include<Post>(p => p.Posts, p => p.Text, p => post.Date)
-            //        .Include<Follower>(m => m.Followers, p => p.Id, p => p.Name)
-            //        .Build();
+                var pp = rep.PropertySelectBuilder(blog)
+                    .Select(m => m.Id, m => m.Name, m => m.Description)
+                    .Include<Post>(p => p.Posts, p => p.Text, p => post.Date)
+                    .Include<Follower>(m => m.Followers, p => p.Id, p => p.Name)
+                    .Build();
 
-            //    var retrievedBlog = rep.RetrieveById(createdBlog.Id, pp);
-            //}
+                var retrievedBlog = rep.RetrieveById(createdBlog.Id, pp);
+            }
 
             #endregion Assert
         }
 
+        [TestMethod]
+        public void CanPerformWhat()
+        {
+            //Assert.Inconclusive("This is unintuative!!");
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                var blog = Fixture.Build<Blog>()
+                    .OmitAutoProperties()
+                    .With(p => p.Name, Fixture.Create<string>())
+                    .Create();
+
+                rep.Add(blog);
+
+                var post = Fixture.Build<Post>()
+                    .OmitAutoProperties()
+                    .With(p => p.Url, Guid.NewGuid().ToString())
+                    .With(p => p.Text, Fixture.Create<string>())
+                    .Create();
+
+                blog.Posts.Add(post);
+
+                rep.AddWithRelations(blog);
+
+                // The post will not be added to repository here, since blog entity is tracked by the first add
+                // above. The AddWithRelations method used the TrackEntity method, which in turn stops traversing
+                // the graph.
+
+                uow.Commit();
+            }
+        }
     }
 }

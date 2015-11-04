@@ -17,7 +17,6 @@ namespace DataAccess
                    .AddEntityFramework()
                    .AddSqlServer()
                    .GetService()
-                   //.AddLogging()
                    .BuildServiceProvider();
 
             // Uncomment to activate logging to file.

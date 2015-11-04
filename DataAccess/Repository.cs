@@ -56,6 +56,10 @@ namespace DataAccess
 
         public T AddWithRelations<T>(T entityWithRelations) where T : class, IEntity
         {
+            /*
+                IsKeySet property on entity is used to represent that entity already exists (has previously added) in repository.
+                And id the entity has already been added, just attach it to the context (so that realations beteen objects are monitored)
+            */
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) =>
             {
                 if ((!e.IsKeySet))
@@ -64,7 +68,7 @@ namespace DataAccess
                 }
                 else
                 {
-                    
+                    context.Attach(e.Entity);
                 }
             });
 
@@ -75,7 +79,7 @@ namespace DataAccess
 
         #region Retrieve
 
-        public T RetrieveById<T>(int id, IPropertySeletor<T> projection) where T : class, IEntity
+        public T RetrieveById<T>(int id, IPropertySelector<T> projection) where T : class, IEntity
         {
             var projectedEntity = context.Set<T>()
                 .AsNoTracking()

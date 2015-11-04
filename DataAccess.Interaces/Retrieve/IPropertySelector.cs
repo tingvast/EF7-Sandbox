@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace DataAccess.Interaces
 {
-    public interface IPropertySeletor<T>
+    public interface IPropertySelector<T>
     {
         Expression<Func<T, dynamic>> Expression { get; set; }
         IProjections AllProjections { get; set; }

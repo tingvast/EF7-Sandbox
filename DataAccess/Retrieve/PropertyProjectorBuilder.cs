@@ -71,7 +71,7 @@ namespace DataAccess
             return this;
         }
 
-        public IPropertySeletor<T> Build()
+        public IPropertySelector<T> Build()
         {
             Expression<Func<T, dynamic>> fullProjectionLambda;
             var cacheKey = AllProjections.CacheKey;

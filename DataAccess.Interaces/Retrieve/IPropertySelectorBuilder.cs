@@ -14,7 +14,7 @@ namespace DataAccess.Interaces
             Expression<Func<TEntity, dynamic>> navigationPropery,
             params Expression<Func<TProperty, dynamic>>[] selectedProperties) where TProperty : class, IEntity;
 
-        IPropertySeletor<TEntity> Build();
+        IPropertySelector<TEntity> Build();
 
         #region Obsolete
 
