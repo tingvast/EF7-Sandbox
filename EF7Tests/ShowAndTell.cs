@@ -206,7 +206,7 @@ namespace EF7Tests
                     .With(p => p.Posts, Fixture.CreateMany<Post>().ToList())
                     .Create();
 
-                con.ChangeTracker.TrackGraph(blog, e => e.State = EntityState.Added);
+                con.ChangeTracker.TrackGraph(blog, e => e.Entry.State = EntityState.Added);
 
                 con.SaveChanges();
             }
@@ -229,7 +229,7 @@ namespace EF7Tests
                     .With(p => p.Followers, Fixture.CreateMany<Follower>().ToList())
                     .Create();
 
-                con.ChangeTracker.TrackGraph(blog, e => e.State = EntityState.Added);
+                con.ChangeTracker.TrackGraph(blog, e => e.Entry.State = EntityState.Added);
 
                 con.SaveChanges();
             }
@@ -253,7 +253,7 @@ namespace EF7Tests
                     .With(p => p.Description, Fixture.Create<string>())
                     .Create();
 
-                con.ChangeTracker.TrackGraph(blog, e => e.State = EntityState.Added);
+                con.ChangeTracker.TrackGraph(blog, e => e.Entry.State = EntityState.Added);
 
                 con.SaveChanges();
             }
@@ -270,13 +270,13 @@ namespace EF7Tests
 
                 con.ChangeTracker.TrackGraph(post, e =>
                 {
-                    if (e.IsKeySet)
+                    if (e.Entry.IsKeySet)
                     {
-                        e.State = EntityState.Modified;
+                        e.Entry.State = EntityState.Modified;
                     }
                     else
                     {
-                        e.State = EntityState.Added;
+                        e.Entry.State = EntityState.Added;
                     }
                 });
 

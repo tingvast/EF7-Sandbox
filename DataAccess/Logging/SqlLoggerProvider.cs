@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Entity.Query;
 using Microsoft.Data.Entity.Update;
+using Microsoft.Data.Entity.Update.Internal;
 using Microsoft.Framework.Logging;
 using System;
 using System.Linq;

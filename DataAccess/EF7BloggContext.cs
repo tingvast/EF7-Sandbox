@@ -43,13 +43,14 @@ namespace DataAccess
             //var seq = modelBuilder.Sequence("TestSeq").StartsAt(10).IncrementsBy(1).HasMax(100);
 
             modelBuilder.Entity<Blog>()
-                .Collection(b => b.Posts)
-                .InverseReference(b => b.Blog)
+                .HasMany(b => b.Posts)                
+                .WithOne(b => b.Blog)
                 .ForeignKey(k => k.BlogId);
 
             modelBuilder.Entity<TrackBack>()
-                .Reference<Post>(t => t.Post)
-                .InverseCollection(p => p.TrackBacks)
+                
+                .HasOne<Post>(t => t.Post)
+                .WithMany(p => p.TrackBacks)
                 .ForeignKey(t => t.PostUrl)
                 .PrincipalKey(p => p.Url);
 

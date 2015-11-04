@@ -38,6 +38,11 @@ namespace DataAccess
             return new UpdatePropertyBuilder<T>();
         }
 
+        public INavigationPropertySelectorBuilder<T> NavigationPropertySelectorBuilder<T>() where T : class, IEntity
+        {
+            return new NavigationPropertySelectorBuilder<T>();
+        }
+
         #region Create
 
         public T Add<T>(T entity) where T : class, IEntity
@@ -56,19 +61,15 @@ namespace DataAccess
 
         public T AddWithRelations<T>(T entityWithRelations) where T : class, IEntity
         {
-            /*
-                IsKeySet property on entity is used to represent that entity already exists (has previously added) in repository.
-                And id the entity has already been added, just attach it to the context (so that realations beteen objects are monitored)
-            */
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) =>
             {
-                if ((!e.IsKeySet))
+                if ((!e.Entry.IsKeySet))
                 {
-                    e.State = EntityState.Added;
+                    e.Entry.State = EntityState.Added;
                 }
                 else
                 {
-                    context.Attach(e.Entity);
+                    context.Attach(e.Entry);
                 }
             });
 
@@ -79,7 +80,7 @@ namespace DataAccess
 
         #region Retrieve
 
-        public T RetrieveById<T>(int id, IPropertySelector<T> projection) where T : class, IEntity
+        public T RetrieveById<T>(int id, IPropertySecletor<T> projection) where T : class, IEntity
         {
             var projectedEntity = context.Set<T>()
                 .AsNoTracking()
@@ -106,11 +107,32 @@ namespace DataAccess
 
             if (alreadytrackedentity != null)
             {
+                foreach(Type t in projection.AllProjections.NavigationPropertiesProjections)
+                {
+                    //var alreadytrackedsubentity = context
+                    //    .ChangeTracker
+                        
+                    //    .SingleOrDefault(e => e.Entity.Id == id);
+                }
                 // Remove it from tracking
                 alreadytrackedentity.State = EntityState.Detached;
+
             }
             context.Attach(mainEntity);
             return mainEntity;
+        }
+
+        T IRepository.RetrieveById<T>(int id, INavigationPropertySelector<T> projection)
+        {
+            var entity = context.Set<T>().Include(projection.Navs).SingleOrDefault(p => p.Id == id);
+
+            return entity;
+        }
+
+
+        T IRepository.RetrieveById<T>(int id, params Expression<Func<T, dynamic>>[] selectedNavigationProperties)
+        {
+            throw new NotImplementedException();
         }
 
         public IEnumerable<T> Retrieve<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderBy = null) where T : class, IEntity
@@ -163,15 +185,15 @@ namespace DataAccess
 
             context.ChangeTracker.TrackGraph(entityWithRelations, (e) =>
             {
-                if (((EntityState)e.State) == EntityState.Detached)
+                if (((EntityState)e.NodeState) == EntityState.Detached)
                 {
-                    if (e.IsKeySet)
+                    if (e.Entry.IsKeySet)
                     {
-                        e.State = EntityState.Modified;
+                        e.Entry.State = EntityState.Modified;
                     }
                     else
                     {
-                        e.State = EntityState.Added;
+                        e.Entry.State = EntityState.Added;
                     }
                 }
             });
@@ -186,7 +208,7 @@ namespace DataAccess
 
             var allProperties = context.Entry(entity).Metadata.GetProperties().Select(p => p.Name);
             var propertiesToBeUpdated = new List<string>();
-            foreach (var p in projection.AllProjections.Projection)
+            foreach (var p in projection.AllProjections.BaseEntityProjections)
             {
                 var projectionLambda = p as LambdaExpression;
 
@@ -278,25 +300,6 @@ namespace DataAccess
 
         #region Private Methods
 
-        private static MemberExpression CreateMemberExpression(LambdaExpression projectionLambda)
-        {
-            MemberExpression member;
-            switch (projectionLambda.Body.NodeType)
-            {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                    var ue = projectionLambda.Body as UnaryExpression;
-                    member = ((ue != null) ? ue.Operand : null) as MemberExpression;
-                    break;
-
-                default:
-                    member = projectionLambda.Body as MemberExpression;
-                    break;
-            }
-
-            return member;
-        }
-
         private static void MaterializeNavigationProperties<T>(
             IProjections projections,
             dynamic mainEntity,
@@ -329,6 +332,31 @@ namespace DataAccess
             }
         }
 
+        #endregion Private Methods
+
+        #region Obsolete
+
+        [Obsolete]
+        private static MemberExpression CreateMemberExpression(LambdaExpression projectionLambda)
+        {
+            MemberExpression member;
+            switch (projectionLambda.Body.NodeType)
+            {
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
+                    var ue = projectionLambda.Body as UnaryExpression;
+                    member = ((ue != null) ? ue.Operand : null) as MemberExpression;
+                    break;
+
+                default:
+                    member = projectionLambda.Body as MemberExpression;
+                    break;
+            }
+
+            return member;
+        }
+
+        [Obsolete]
         private static MethodInfo GetGenericMethod(Type declaringType, string methodName, Type[] typeArgs, params Type[] argTypes)
         {
             foreach (var m in from m in declaringType.GetMethods()
@@ -344,6 +372,7 @@ namespace DataAccess
             return null;
         }
 
+        [Obsolete]
         private string ResolvePropertyName<T, TResult>(Expression<Func<T, TResult>> expression)
         {
             try
@@ -378,6 +407,7 @@ namespace DataAccess
             }
         }
 
+        [Obsolete]
         private MethodCallExpression CreateWhereCall<T>(int id, Type navigationProperyType) where T : class, IEntity
         {
             ParameterExpression pe = Expression.Parameter(navigationProperyType, "nav");
@@ -414,10 +444,7 @@ namespace DataAccess
             return whereCallExpression;
         }
 
-        #endregion Private Methods
-
-        #region Obsolete
-
+        [Obsolete]
         public Blog RetrieveBlogNonGeneric(int id)
         {
             //var m11 = (from e in context.Set<Meeting>()
@@ -425,24 +452,29 @@ namespace DataAccess
             //    where e.Id == id
             //    select new {e.Location, p.BlogText});
 
-            var entiry = context.Set<Blog>().
-                Include(m => m.Posts).
+            //var entiry = context.Set<Blog>().
+            //    Include(m => m.Posts).
+            //    Where(m => m.Id == id).
+            //    Select(m => new { l = m.Name, p = m.Posts.Count }).
+            //    Single();
+
+            var posts = (from pp in context.Set<Post>() where pp.BlogId == id select new { Text = pp.Text }).ToList();
+            //var entiry44 = context.Set<Blog>().
+            //    //Include(m => m.PreRegistrations).
+            //    Where(m => m.Id == id).
+            //    Select(m => new { m.Name, yy = ddd.ToList() }).
+            //    Single();
+
+            var entiry44 = context.Set<Blog>().                
                 Where(m => m.Id == id).
-                Select(m => new { l = m.Name, p = m.Posts.Count }).
+                Select(m => new { m.Name, Posts = posts }).
                 Single();
 
-            var ddd = (from pp in context.Set<Post>() where pp.BlogId == id select new { Text = pp.Text });
-            var entiry44 = context.Set<Blog>().
-                //Include(m => m.PreRegistrations).
-                Where(m => m.Id == id).
-                Select(m => new { m.Name, yy = ddd.ToList() }).
-                Single();
-
-            var entiry11 = context.Set<Blog>().
-                Include(m => m.Posts).
-                Where(m => m.Id == id).
-                //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.BlogText }) }).
-                Single();
+            //var entiry11 = context.Set<Blog>().
+            //    Include(m => m.Posts).
+            //    Where(m => m.Id == id).
+            //    //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.BlogText }) }).
+            //    Single();
 
             //var entiry12 = context.Set<Meeting>().
             //    Include(m => m.PreRegistrations.Select(p => new { p.BlogText })).
@@ -450,7 +482,7 @@ namespace DataAccess
             //    //Select(m => new { m.Location, yy = m.PreRegistrations.Select(pre => new { pre.BlogText }) }).
             //    Single();
 
-            var retEntity = Mapper.DynamicMap<Blog>(entiry);
+            var retEntity = Mapper.DynamicMap<Blog>(entiry44);
             //var entiry = context.Set<Meeting>().
             //    //Include(m => m.PreRegistrations).
             //    Where(m => m.ID == id).
@@ -473,6 +505,7 @@ namespace DataAccess
             return retEntity;
         }
 
+        [Obsolete]
         public Blog UpdateNonGeneric(Blog entity, Expression<Func<Blog, dynamic>> selectedProperties)
         {
             //context.ChangeTracker.AutoDetectChangesEnabled = true;
@@ -674,7 +707,7 @@ namespace DataAccess
             List<KeyValuePair<string, Type>> anonymousTypeProperties = new List<KeyValuePair<string, Type>>();
             List<Expression> anonymousTypePropertiesValues = new List<Expression>();
             ParameterExpression lambdaParameter = Expression.Parameter(typeof(T), "p");
-            foreach (var projection in selectedSelectProperties.AllProjections.Projection)
+            foreach (var projection in selectedSelectProperties.AllProjections.BaseEntityProjections)
             {
                 var projectionLambda = projection as LambdaExpression;
 
@@ -820,6 +853,9 @@ namespace DataAccess
                 navigationPropertyOnMainEntity.SetValue(mainEntity, navigationPropertyList);
             }
         }
+
+
+
 
         #endregion Obsolete
     }

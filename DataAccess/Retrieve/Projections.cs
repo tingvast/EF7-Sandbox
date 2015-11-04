@@ -10,7 +10,7 @@ namespace DataAccess
     {
         public Projections()
         {
-            Projection = new List<Expression>();
+            BaseEntityProjections = new List<Expression>();
             NavigationPropertiesProjections = new List<INavigationProperty>();
         }
 
@@ -24,14 +24,14 @@ namespace DataAccess
             }
         }
 
-        public List<Expression> Projection { get; set; }
+        public List<Expression> BaseEntityProjections { get; set; }
 
         #region Private
 
         private string CreateCacheKey()
         {
             StringBuilder sb = new StringBuilder();
-            foreach (LambdaExpression le in Projection)
+            foreach (LambdaExpression le in BaseEntityProjections)
             {
                 MemberExpression member = ParameterHelper.GetMemberExpression(le);
 

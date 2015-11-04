@@ -56,10 +56,14 @@ namespace EF7Tests
                 var rep = uow.Create();
                 var blog = new Blog
                 {
-                    Name = Fixture.Create<string>()
+                    Name = Fixture.Create<string>(),
+                    Posts = new List<Post>()
+                    {
+                        new Post() { Text =  Fixture.Create<string>(), Url = Fixture.Create<string>()}
+                    }
                 };
 
-                var createdBlog = rep.Add<Blog>(blog);
+                var createdBlog = rep.AddWithRelations(blog);
 
                 uow.Commit();
 
@@ -69,7 +73,7 @@ namespace EF7Tests
 
                 var projector = rep.PropertySelectBuilder(blog)
                     .Select(p => p.Name)
-                    .Include<Post>(m => m.Posts, p => p.Text)
+                    .Include<Post>(m => m.Posts, p => p.Url)
                     .Build();
 
                 var retrievedBlog = rep.RetrieveById<Blog>(createdBlog.Id, projector);
@@ -210,6 +214,43 @@ namespace EF7Tests
             }
 
             #endregion Act
+        }
+
+        [TestMethod]
+        public void CanRetrieve()
+        {
+            List<Blog> blogs = new List<Blog>()
+            {
+                new Blog()
+                {
+                    Author = Fixture.Create<string>(),
+                    Description = Fixture.Create<string>(),
+                    Name = Fixture.Create<string>()
+                }
+            };
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                rep.Add(blogs.ToArray());
+
+                uow.Commit();
+            }
+
+            using (var uow = UoWFactory.Create())
+            {
+                var rep = uow.Create();
+
+                var retrievedTwo = rep.RetrieveById<Blog>(blogs[0].Id, b => b.Posts, b => b.Followers);
+
+                var builder = rep.NavigationPropertySelectorBuilder<Blog>()
+                    .Include(b => b.Posts);
+                    
+                var retrievedOne = rep.RetrieveById<Blog>(blogs[0].Id, builder.Build());
+                
+            }
+
+
         }
     }
 }

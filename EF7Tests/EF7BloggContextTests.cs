@@ -29,7 +29,7 @@ namespace EF7Tests
 
             using (var db = new EF7BloggContext())
             {
-                db.ChangeTracker.TrackGraph(blog, c => c.State = EntityState.Added);
+                db.ChangeTracker.TrackGraph(blog, c => c.Entry.State = EntityState.Added);
 
                 db.SaveChanges();
             };
@@ -64,7 +64,7 @@ namespace EF7Tests
 
             using (var db = new EF7BloggContext())
             {
-                db.ChangeTracker.TrackGraph(post, c => c.State = EntityState.Added);
+                db.ChangeTracker.TrackGraph(post, c => c.Entry.State = EntityState.Added);
 
                 db.SaveChanges();
             };

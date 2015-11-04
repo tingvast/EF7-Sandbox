@@ -13,6 +13,8 @@ namespace DataAccess.Interaces
 
         IUpdatePropertyBuilder<T> PropertyUpdateBuilder<T>(T blog) where T : class, IEntity;
 
+        INavigationPropertySelectorBuilder<T> NavigationPropertySelectorBuilder<T>() where T : class, IEntity;
+
         #endregion Properties
 
         #region Add
@@ -27,7 +29,11 @@ namespace DataAccess.Interaces
 
         #region Retrieve
 
-        T RetrieveById<T>(int id, IPropertySelector<T> projection) where T : class, IEntity;
+        
+        T RetrieveById<T>(int id, IPropertySecletor<T> projection) where T : class, IEntity;
+        T RetrieveById<T>(int id, INavigationPropertySelector<T> projection) where T : class, IEntity;
+
+        T RetrieveById<T>(int id, params Expression<Func<T, dynamic>>[] selectedNavigationProperties) where T : class, IEntity;
 
         IEnumerable<T> Retrieve<T>(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderBy = null) where T : class, IEntity;
 
@@ -62,6 +68,7 @@ namespace DataAccess.Interaces
         Blog UpdateNonGeneric(Blog entity, Expression<Func<Blog, dynamic>> selectedProperties);
 
         T RetrieveByIdOld<T>(int id, ISelectPropertyBuilder<T> selectedSelectProperties) where T : class, IEntity;
+        
 
         #endregion Obsolete
     }
